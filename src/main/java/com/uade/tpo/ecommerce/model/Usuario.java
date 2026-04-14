@@ -42,6 +42,9 @@ public class Usuario implements UserDetails {
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
     private List<Pedido> pedidos;
 
+    @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL)
+    private Carrito carrito;
+
     /**
      * getAuthorities() devuelve la colección de roles/permisos del usuario
      * - Cada autoridad debe implementar GrantedAuthority

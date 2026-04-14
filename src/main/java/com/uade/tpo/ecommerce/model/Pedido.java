@@ -2,6 +2,8 @@ package com.uade.tpo.ecommerce.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import java.util.List;
+import java.util.ArrayList;
 
 
 @Data
