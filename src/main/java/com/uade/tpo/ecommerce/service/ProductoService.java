@@ -17,30 +17,92 @@ public class ProductoService {
     @Autowired
     private ProductoRepository productoRepository;
 
+    // GET todos los productos
     public List<Producto> getAllProductos() {
+
         return productoRepository.findAll();
+
     }
 
+    // GET producto por ID
     public Producto getProductoById(Long id) {
-        return productoRepository.findById(id).orElse(null);
+
+        return productoRepository
+                .findById(id)
+                .orElse(null);
+
     }
 
+    // DELETE producto
     public void deleteProductoById(Long id) {
+
         productoRepository.deleteById(id);
-    }
-
-    public Producto saveProducto(Producto producto) {
-        return productoRepository.save(producto);
 
     }
 
-    public Producto updateProducto(Long id, Producto producto) {
-        Producto existingProducto = getProductoById(id);
+    // CREATE producto
+    public Producto saveProducto(
+            Producto producto) {
+
+        return productoRepository
+                .save(producto);
+
+    }
+
+    // UPDATE producto
+    public Producto updateProducto(
+            Long id,
+            Producto producto) {
+
+        Producto existingProducto =
+                getProductoById(id);
+
         if (existingProducto != null) {
-            existingProducto.setNombre(producto.getNombre());
-            existingProducto.setDescripcion(producto.getDescripcion());
-            return productoRepository.save(existingProducto);
+
+            existingProducto
+                    .setNombre(producto.getNombre());
+
+            existingProducto
+                    .setDescripcion(
+                            producto.getDescripcion());
+
+            existingProducto
+                    .setPrecio(producto.getPrecio());
+
+            existingProducto
+                    .setStock(producto.getStock());
+
+            existingProducto
+                    .setImagenes(
+                            producto.getImagenes());
+
+            existingProducto
+                    .setCategoria(
+                            producto.getCategoria());
+
+            return productoRepository
+                    .save(existingProducto);
         }
+
         return null;
     }
+
+    // 🧩 NUEVO — buscar por categoria
+    public List<Producto> getByCategoria(
+            Long categoriaId) {
+
+        return productoRepository
+                .findByCategoriaId(categoriaId);
+
+    }
+
+    // 🧩 NUEVO — buscar por nombre
+    public List<Producto> buscarPorNombre(
+            String nombre) {
+
+        return productoRepository
+                .findByNombreContaining(nombre);
+
+    }
+
 }
