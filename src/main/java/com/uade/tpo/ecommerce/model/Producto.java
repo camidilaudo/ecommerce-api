@@ -17,6 +17,8 @@ public class Producto {
     private double precio;
     private String descripcion;
     private int stock;
+    @ElementCollection
+    private List<String> imagenes;
 
 
     @ManyToMany(fetch = FetchType.LAZY)
