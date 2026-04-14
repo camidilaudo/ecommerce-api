@@ -9,51 +9,91 @@ import com.uade.tpo.ecommerce.service.ProductoService;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.*;
 
-// La api para productos con los endpoints para crear, editar, eliminar y listar productos
-// http://localhost:8080/api/productos Listar productos
-// http://localhost:8080/api/productos/1 Buscar productos por ID
-// http://localhost:8080/api/productosEditar producto
-// http://localhost:8080/api/productosEliminar producto
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/productos")
 public class ProductoController {
+
     @Autowired
     private ProductoService productoService;
 
-    // http://localhost:8080/api/productos -> devuelve la lista de productos
+    // GET todos los productos
+    // http://localhost:8080/api/productos
     @GetMapping
     public List<Producto> getAllProductos() {
+
         return productoService.getAllProductos();
+
     }
 
-    // http://localhost:8080/api/productos/1 -> devuelve el producto con id 1
+    // GET producto por ID
+    // http://localhost:8080/api/productos/1
     @GetMapping("/{id}")
-    public Producto getProductoById(@PathVariable Long id) {
-        return productoService.getProductoById(id);
+    public Producto getProductoById(
+            @PathVariable Long id) {
+
+        return productoService
+                .getProductoById(id);
+
     }
 
-    // del http://localhost:8080/api/productos/1 -> elimina el producto con id 1
+    // DELETE producto
+    // http://localhost:8080/api/productos/1
     @DeleteMapping("/{id}")
-    public void deleteProductoById(@PathVariable Long id) {
-        productoService.deleteProductoById(id);
+    public void deleteProductoById(
+            @PathVariable Long id) {
+
+        productoService
+                .deleteProductoById(id);
+
     }
 
+    // POST crear producto
+    // http://localhost:8080/api/productos
     @PostMapping
-    public Producto saveProducto(@RequestBody Producto producto) {
-        return productoService.saveProducto(producto);
+    public Producto saveProducto(
+            @Valid @RequestBody Producto producto) {
+
+        return productoService
+                .saveProducto(producto);
 
     }
 
+    // PUT actualizar producto
+    // http://localhost:8080/api/productos/1
     @PutMapping("/{id}")
-    public Producto udpateProducto(@PathVariable Long id, @RequestBody Producto producto) {
-        return productoService.updateProducto(id, producto);
+    public Producto udpateProducto(
+            @PathVariable Long id,
+            @Valid @RequestBody Producto producto) {
+
+        return productoService
+                .updateProducto(id, producto);
+
+    }
+
+    // 🧩 NUEVO — buscar productos por categoria
+    // http://localhost:8080/api/productos/categoria/1
+    @GetMapping("/categoria/{id}")
+    public List<Producto> getByCategoria(
+            @PathVariable Long id) {
+
+        return productoService
+                .getByCategoria(id);
+
+    }
+
+    // 🧩 NUEVO — buscar por nombre
+    // http://localhost:8080/api/productos/buscar?nombre=iphone
+    @GetMapping("/buscar")
+    public List<Producto> buscarPorNombre(
+            @RequestParam String nombre) {
+
+        return productoService
+                .buscarPorNombre(nombre);
+
     }
 
 }
