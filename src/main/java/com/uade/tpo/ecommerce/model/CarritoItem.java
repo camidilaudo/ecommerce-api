@@ -12,7 +12,7 @@ public class CarritoItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Producto
+    // Producto del item
     @ManyToOne
     @JoinColumn(name = "producto_id")
     private Producto producto;
