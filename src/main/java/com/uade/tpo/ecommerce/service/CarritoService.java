@@ -14,7 +14,6 @@ public class CarritoService {
     private final ProductoRepository productoRepository;
     private final UsuarioRepository usuarioRepository;
 
-    // TEMPORAL
     private Long usuarioId = 1L;
 
     public Carrito obtenerCarrito() {
@@ -26,6 +25,7 @@ public class CarritoService {
                 .orElseGet(() -> {
                     Carrito nuevo = new Carrito();
                     nuevo.setUsuario(usuario);
+                    usuario.setCarrito(nuevo);
                     return carritoRepository.save(nuevo);
                 });
     }
@@ -37,7 +37,6 @@ public class CarritoService {
         Producto producto = productoRepository.findById(productoId)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
-        // ASEGURAR LISTA
         if (carrito.getItems() == null) {
             carrito.setItems(new java.util.ArrayList<>());
         }
