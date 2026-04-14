@@ -29,73 +29,58 @@ public class SecurityConfig {
     private final JwtFilter jwtFilter;
     private final UsuarioRepository usuarioRepository;
 
-    /**
-     * Carga el usuario desde la base de datos usando el email
-     */
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> usuarioRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
     }
 
-    /**
-     * Maneja el proceso de autenticación
-     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
-    /**
-     * Encriptador de contraseñas
-     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    /**
-     * Configuración principal de seguridad
-     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-            // Deshabilitamos CSRF porque usamos JWT
             .csrf(csrf -> csrf.disable())
 
-            // IMPORTANTE: No usamos sesiones (stateless)
-            .sessionManagement(session -> 
+            .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
 
-            // Configuración de permisos
             .authorizeHttpRequests(auth -> auth
 
-                //  AUTH (público)
+                // AUTH
                 .requestMatchers("/api/auth/**").permitAll()
 
-                // PRODUCTOS públicos (ver productos)
+                // USUARIOS
+                .requestMatchers("/api/usuarios/**").permitAll()
+
+                // PRODUCTOS
                 .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/productos").permitAll()
+                .requestMatchers(HttpMethod.PUT, "/api/productos/**").permitAll()
+                .requestMatchers(HttpMethod.DELETE, "/api/productos/**").permitAll()
 
-                //  PRODUCTOS (solo ADMIN puede modificar)
-                .requestMatchers(HttpMethod.POST, "/api/productos").hasRole(Role.ADMIN.name())
-                .requestMatchers(HttpMethod.PUT, "/api/productos/**").hasRole(Role.ADMIN.name())
-                .requestMatchers(HttpMethod.DELETE, "/api/productos/**").hasRole(Role.ADMIN.name())
+                // CARRITO
+                .requestMatchers("/api/carrito/**").permitAll()
 
-                //  ADMIN
+                // PEDIDOS (podés dejar protegido si querés)
+                .requestMatchers("/api/pedidos/**").permitAll()
+
+                // ADMIN (opcional)
                 .requestMatchers("/api/admin/**").hasRole(Role.ADMIN.name())
 
-                // PEDIDOS
-                .requestMatchers("/api/pedidos/**").authenticated()
-
-                //  CART (solo usuario logueado)
-                .requestMatchers("/api/carrito/**").authenticated()
-                //  TODO lo demás requiere login
                 .anyRequest().authenticated()
             )
 
-            //  Filtro JWT antes del filtro de autenticación
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
