@@ -77,8 +77,8 @@ public class ProductoService {
                             producto.getImagenes());
 
             existingProducto
-                    .setCategoria(
-                            producto.getCategoria());
+                    .setCategorias(
+                            producto.getCategorias());
 
             return productoRepository
                     .save(existingProducto);

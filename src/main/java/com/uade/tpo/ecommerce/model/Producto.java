@@ -2,21 +2,36 @@ package com.uade.tpo.ecommerce.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@Entity(name = "productos")
+@Entity
+@Table(name = "productos")
 public class Producto {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Nombre del producto
     @Column(nullable = false, length = 100)
     private String nombre;
+
+    // Precio
+    @Column(nullable = false)
     private double precio;
+
+    // Descripción
+    @Column(length = 500)
     private String descripcion;
+
+    // Stock disponible
+    @Column(nullable = false)
     private int stock;
+
+    // Imágenes del producto
     @ElementCollection
     @CollectionTable(
             name = "producto_imagenes",
@@ -25,6 +40,7 @@ public class Producto {
     @Column(name = "imagen")
     private List<String> imagenes = new ArrayList<>();
 
+    // Categorías del producto (ManyToMany)
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "productos_categorias",
@@ -32,5 +48,10 @@ public class Producto {
             inverseJoinColumns = @JoinColumn(name = "categoria_id")
     )
     private List<Categoria> categorias = new ArrayList<>();
+
+    // Usuario creador del producto
+    @ManyToOne
+    @JoinColumn(name = "usuario_id")
+    private Usuario usuario;
 
 }
