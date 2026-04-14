@@ -3,13 +3,8 @@ package com.uade.tpo.ecommerce.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import com.uade.tpo.ecommerce.model.Carrito;
-import com.uade.tpo.ecommerce.model.CarritoItem;
-import com.uade.tpo.ecommerce.model.Producto;
-import com.uade.tpo.ecommerce.repository.CarritoRepository;
-import com.uade.tpo.ecommerce.repository.ProductoRepository;
-
-import java.util.Optional;
+import com.uade.tpo.ecommerce.model.*;
+import com.uade.tpo.ecommerce.repository.*;
 
 @Service
 @RequiredArgsConstructor
@@ -18,26 +13,38 @@ public class CarritoService {
     private final CarritoRepository carritoRepository;
     private final ProductoRepository productoRepository;
 
-    // Obtener carrito (ejemplo simple: id=1)
+    // ⚠️ Simulación usuario (para ahora)
+    private Long usuarioId = 1L;
+
     public Carrito obtenerCarrito() {
-
-        Optional<Carrito> carrito = carritoRepository.findById(1L);
-
-        return carrito.orElseGet(() -> {
-            Carrito nuevo = new Carrito();
-            return carritoRepository.save(nuevo);
-        });
+        return carritoRepository
+                .findByUsuarioId(usuarioId)
+                .orElseGet(() -> {
+                    Carrito nuevo = new Carrito();
+                    Usuario usuario = new Usuario();
+                    usuario.setId(usuarioId);
+                    nuevo.setUsuario(usuario);
+                    return carritoRepository.save(nuevo);
+                });
     }
 
-    // Agregar producto
+    // ✅ AGREGA o SUMA cantidad
     public Carrito agregarProducto(Long productoId) {
 
         Carrito carrito = obtenerCarrito();
 
-        Producto producto = productoRepository
-                .findById(productoId)
+        Producto producto = productoRepository.findById(productoId)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
+        // Buscar si ya existe
+        for (CarritoItem item : carrito.getItems()) {
+            if (item.getProducto().getId().equals(productoId)) {
+                item.setCantidad(item.getCantidad() + 1);
+                return carritoRepository.save(carrito);
+            }
+        }
+
+        // Si no existe → crear nuevo
         CarritoItem item = new CarritoItem();
         item.setProducto(producto);
         item.setCantidad(1);
@@ -48,7 +55,7 @@ public class CarritoService {
         return carritoRepository.save(carrito);
     }
 
-    // Eliminar producto
+    // ✅ ELIMINAR producto
     public Carrito eliminarProducto(Long productoId) {
 
         Carrito carrito = obtenerCarrito();
@@ -58,5 +65,29 @@ public class CarritoService {
         );
 
         return carritoRepository.save(carrito);
+    }
+
+    // ✅ VACIAR carrito
+    public Carrito vaciarCarrito() {
+
+        Carrito carrito = obtenerCarrito();
+        carrito.getItems().clear();
+
+        return carritoRepository.save(carrito);
+    }
+
+    // ✅ CHECKOUT simple
+    public String checkout() {
+
+        Carrito carrito = obtenerCarrito();
+
+        if (carrito.getItems().isEmpty()) {
+            throw new RuntimeException("El carrito está vacío");
+        }
+
+        carrito.getItems().clear();
+        carritoRepository.save(carrito);
+
+        return "Compra realizada con éxito";
     }
 }

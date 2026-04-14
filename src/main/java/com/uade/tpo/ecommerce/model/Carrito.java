@@ -16,8 +16,8 @@ public class Carrito {
     private Long id;
 
     // Usuario dueño del carrito
-    @OneToOne
-    @JoinColumn(name = "usuario_id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
     // Items del carrito
