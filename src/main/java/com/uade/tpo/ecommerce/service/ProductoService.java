@@ -88,13 +88,13 @@ public class ProductoService {
     }
 
     // 🧩 NUEVO — buscar por categoria
-    public List<Producto> getByCategoria(
-            Long categoriaId) {
+        public List<Producto> getByCategoria(
+                Long categoriaId) {
 
         return productoRepository
-                .findByCategoriaId(categoriaId);
+                .findByCategoriasId(categoriaId);
 
-    }
+        }
 
     // 🧩 NUEVO — buscar por nombre
     public List<Producto> buscarPorNombre(
