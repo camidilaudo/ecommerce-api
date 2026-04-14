@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Data
-@Entity(name = "carrito_items")
+@Entity
 public class CarritoItem {
 
     @Id

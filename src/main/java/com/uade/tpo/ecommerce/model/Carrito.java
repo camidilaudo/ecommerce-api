@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@Entity(name = "carritos")
+@Entity
 public class Carrito {
 
-     @Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -18,5 +18,4 @@ public class Carrito {
 
     @OneToMany(cascade = CascadeType.ALL)
     private List<CarritoItem> items = new ArrayList<>();
-
 }

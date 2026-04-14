@@ -63,6 +63,10 @@ public class AuthenticationService {
         return "User registered successfully";
     }
 
+        public String login(LoginRequest request) {
+        return authenticate(request);
+    }
+
     /**
      * AuthenticationManager:
      * - Se configura en SecurityConfig usando AuthenticationConfiguration
