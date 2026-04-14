@@ -18,8 +18,12 @@ public class Producto {
     private String descripcion;
     private int stock;
     @ElementCollection
-    private List<String> imagenes;
-
+    @CollectionTable(
+            name = "producto_imagenes",
+            joinColumns = @JoinColumn(name = "producto_id")
+    )
+    @Column(name = "imagen")
+    private List<String> imagenes = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
