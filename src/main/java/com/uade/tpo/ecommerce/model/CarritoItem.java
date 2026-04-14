@@ -13,8 +13,8 @@ public class CarritoItem {
     private Long id;
 
     // Producto
-    @ManyToOne
-    @JoinColumn(name = "producto_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "producto_id", nullable = false)
     private Producto producto;
 
     // Cantidad
@@ -22,8 +22,7 @@ public class CarritoItem {
     private int cantidad;
 
     // Relación con carrito
-    @ManyToOne
-    @JoinColumn(name = "carrito_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "carrito_id", nullable = false)
     private Carrito carrito;
-
 }

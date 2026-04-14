@@ -50,8 +50,7 @@ public class Producto {
     private List<Categoria> categorias = new ArrayList<>();
 
     // Usuario creador del producto
-    @ManyToOne
-    @JoinColumn(name = "usuario_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
-
 }
