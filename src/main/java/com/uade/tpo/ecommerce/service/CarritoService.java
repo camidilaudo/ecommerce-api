@@ -6,8 +6,11 @@ import org.springframework.stereotype.Service;
 import com.uade.tpo.ecommerce.model.*;
 import com.uade.tpo.ecommerce.repository.*;
 
+import jakarta.transaction.Transactional;
+
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CarritoService {
 
     private final CarritoRepository carritoRepository;
@@ -25,8 +28,13 @@ public class CarritoService {
                 .orElseGet(() -> {
                     Carrito nuevo = new Carrito();
                     nuevo.setUsuario(usuario);
+
                     usuario.setCarrito(nuevo);
-                    return carritoRepository.save(nuevo);
+
+                    carritoRepository.save(nuevo);     // 🔥 guardar carrito
+                    usuarioRepository.save(usuario);   // 🔥 guardar usuario
+
+                    return nuevo;
                 });
     }
 
@@ -36,10 +44,6 @@ public class CarritoService {
 
         Producto producto = productoRepository.findById(productoId)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
-
-        if (carrito.getItems() == null) {
-            carrito.setItems(new java.util.ArrayList<>());
-        }
 
         for (CarritoItem item : carrito.getItems()) {
             if (item.getProducto().getId().equals(productoId)) {
