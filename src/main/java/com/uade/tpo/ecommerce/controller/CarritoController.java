@@ -29,13 +29,11 @@ public class CarritoController {
         return ResponseEntity.ok(carritoService.eliminarProducto(productoId));
     }
 
-    // 🧩 NUEVO
     @DeleteMapping("/vaciar")
     public ResponseEntity<Carrito> vaciarCarrito() {
         return ResponseEntity.ok(carritoService.vaciarCarrito());
     }
 
-    // 🧩 NUEVO
     @PostMapping("/checkout")
     public ResponseEntity<String> checkout() {
         return ResponseEntity.ok(carritoService.checkout());

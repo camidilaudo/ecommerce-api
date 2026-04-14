@@ -12,17 +12,14 @@ public class CarritoItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Producto
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "producto_id", nullable = false)
+    @JoinColumn(name = "producto_id")
     private Producto producto;
 
-    // Cantidad
     @Column(nullable = false)
     private int cantidad;
 
-    // Relación con carrito
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "carrito_id", nullable = false)
+    @JoinColumn(name = "carrito_id")
     private Carrito carrito;
 }

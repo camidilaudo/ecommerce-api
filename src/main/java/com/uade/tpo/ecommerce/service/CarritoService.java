@@ -12,23 +12,24 @@ public class CarritoService {
 
     private final CarritoRepository carritoRepository;
     private final ProductoRepository productoRepository;
+    private final UsuarioRepository usuarioRepository;
 
-    // ⚠️ Simulación usuario (para ahora)
+    // TEMPORAL
     private Long usuarioId = 1L;
 
     public Carrito obtenerCarrito() {
-        return carritoRepository
-                .findByUsuarioId(usuarioId)
+
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        return carritoRepository.findByUsuarioId(usuarioId)
                 .orElseGet(() -> {
                     Carrito nuevo = new Carrito();
-                    Usuario usuario = new Usuario();
-                    usuario.setId(usuarioId);
                     nuevo.setUsuario(usuario);
                     return carritoRepository.save(nuevo);
                 });
     }
 
-    // ✅ AGREGA o SUMA cantidad
     public Carrito agregarProducto(Long productoId) {
 
         Carrito carrito = obtenerCarrito();
@@ -36,7 +37,11 @@ public class CarritoService {
         Producto producto = productoRepository.findById(productoId)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
-        // Buscar si ya existe
+        // ASEGURAR LISTA
+        if (carrito.getItems() == null) {
+            carrito.setItems(new java.util.ArrayList<>());
+        }
+
         for (CarritoItem item : carrito.getItems()) {
             if (item.getProducto().getId().equals(productoId)) {
                 item.setCantidad(item.getCantidad() + 1);
@@ -44,7 +49,6 @@ public class CarritoService {
             }
         }
 
-        // Si no existe → crear nuevo
         CarritoItem item = new CarritoItem();
         item.setProducto(producto);
         item.setCantidad(1);
@@ -55,7 +59,6 @@ public class CarritoService {
         return carritoRepository.save(carrito);
     }
 
-    // ✅ ELIMINAR producto
     public Carrito eliminarProducto(Long productoId) {
 
         Carrito carrito = obtenerCarrito();
@@ -67,7 +70,6 @@ public class CarritoService {
         return carritoRepository.save(carrito);
     }
 
-    // ✅ VACIAR carrito
     public Carrito vaciarCarrito() {
 
         Carrito carrito = obtenerCarrito();
@@ -76,7 +78,6 @@ public class CarritoService {
         return carritoRepository.save(carrito);
     }
 
-    // ✅ CHECKOUT simple
     public String checkout() {
 
         Carrito carrito = obtenerCarrito();

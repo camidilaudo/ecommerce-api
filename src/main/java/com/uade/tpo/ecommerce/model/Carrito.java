@@ -15,12 +15,11 @@ public class Carrito {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Usuario dueño del carrito
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "usuario_id", nullable = false)
+    @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
-    // Items del carrito
+    // inicializar SIEMPRE
     @OneToMany(
             mappedBy = "carrito",
             cascade = CascadeType.ALL,
