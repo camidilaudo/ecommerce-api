@@ -7,17 +7,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.uade.tpo.ecommerce.dto.LoginRequest;
 import com.uade.tpo.ecommerce.dto.RegisterRequest;
+import com.uade.tpo.ecommerce.dto.RegisterResponse;
 import com.uade.tpo.ecommerce.model.Role;
 import com.uade.tpo.ecommerce.model.Usuario;
 import com.uade.tpo.ecommerce.repository.UsuarioRepository;
 import com.uade.tpo.ecommerce.security.JwtUtil;
-
 import lombok.RequiredArgsConstructor;
-
-
 import java.util.stream.Collectors;
 
 @Service
@@ -30,37 +27,33 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
-    public String register(RegisterRequest request) {
-
+    public RegisterResponse register(RegisterRequest request) {
+        // Validaciones de duplicados para evitar errores de base de datos
         if (usuarioRepository.existsByEmail(request.getEmail())) {
-            //TODO: ssanchez - crear exception personalizada EmailException y manejar con @ControllerAdvice
-            throw new RuntimeException("Email already exists");
+            throw new RuntimeException("El email ya existe");
+        }
+        if (usuarioRepository.existsByNombreUsuario(request.getNombreUsuario())) {
+            throw new RuntimeException("El nombre de usuario ya existe");
         }
 
-        // Crear un nuevo usuario con los datos del request
-        // builder ayuda con esto, que es boiler plate código repeptitivo
-        // Usuario usuario = new Usuario();
-        // usuario.setNombre(request.getNombre());
-        // usuario.setApellido(request.getApellido());
-        // usuario.setEmail(request.getEmail());
-        // usuario.setPassword(passwordEncoder.encode(request.getPassword()));
-        // usuario.setRole(Role.USER);
-
-
-        //viene de Lombok (@Builder) y facilita la creación de objetos de manera más limpia y fluida
-        //builder me ahorra tener que usar el new Usuario() y los setters y getters
         Usuario usuario = Usuario.builder()
+                .nombreUsuario(request.getNombreUsuario())
                 .nombre(request.getNombre())
                 .apellido(request.getApellido())
                 .email(request.getEmail())
-                // encriptado la pass que envío el usuario
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.USER) // Por defecto, todos los usuarios nuevos son USER
+                .fechaNacimiento(request.getFechaNacimiento()) // Set fecha
+                .sexo(request.getSexo()) // Set sexo
+                .role(Role.USER)
                 .build();
 
-
         usuarioRepository.save(usuario);
-        return "User registered successfully";
+        // Devolvemos el objeto en lugar de un String plano
+        return RegisterResponse.builder()
+                .mensaje("Usuario registrado exitosamente")
+                .nombreUsuario(usuario.getNombreUsuario())
+                .email(usuario.getEmail())
+                .build();
     }
 
         public String login(LoginRequest request) {

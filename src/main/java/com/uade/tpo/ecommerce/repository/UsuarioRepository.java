@@ -19,4 +19,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     //automaticamente crea la consulta sql: SELECT * FROM usuario WHERE email = ? -> true o false
     Boolean existsByEmail(String email);
+
+    // Metodo para validar si el nombre de usuario ya está tomado
+    boolean existsByNombreUsuario(String nombreUsuario);
 }

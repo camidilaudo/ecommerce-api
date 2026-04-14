@@ -1,41 +1,48 @@
 package com.uade.tpo.ecommerce.model;
 
+import jakarta.persistence.*;
+import lombok.*;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
-
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(name = "usuarios")
-/**
- * UserDetails es una interfaz de Spring Security que proporciona información básica del usuario.
- * Esta interfaz es fundamental para la autenticación y autorización en Spring Security.
- * Implementa métodos esenciales para manejar:
- * - Credenciales del usuario (username y password)
- * - Roles y permisos (authorities)
- * - Estado de la cuenta (si está bloqueada, expirada, etc.)
- */
+@Entity
+@Table(name = "usuarios")
 public class Usuario implements UserDetails {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true, nullable = false)
+    private String nombreUsuario;
+
+    @Column(nullable = false)
     private String nombre;
+
+    @Column(nullable = false)
     private String apellido;
-    @Column(unique = true)
+
+    @Column(unique = true, nullable = false)
     private String email;
+
+    @Column(nullable = false)
     private String password;
+
+    // Fecha de nacimiento usando el tipo de dato de Java 8+
+    private LocalDate fechaNacimiento;
+
+    // Sexo usando enumeración
+    @Enumerated(EnumType.STRING)
+    private Sexo sexo;
+
     @Enumerated(EnumType.STRING)
     private Role role;
 
@@ -53,41 +60,34 @@ public class Usuario implements UserDetails {
      * - Si el rol es null, asigna por defecto "ROLE_USER"
      * ? extended GrantedAuthority cualquier clase que extienda de GrantedAuthority
      */
+    // Métodos obligatorios de UserDetails para Spring Security
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // resultado ROLE_USER o ROLE_ADMIN
-        return List.of(new SimpleGrantedAuthority("ROLE_" + (role != null ? role.name() : "USER")));
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
-    /**
-     * getUsername() retorna el identificador único del usuario para autenticación
-     * - En este caso usamos el email como username
-     * - Spring Security utiliza este método para identificar al usuario durante
-     *   el proceso de autenticación y en el contexto de seguridad
-     */
     @Override
     public String getUsername() {
         return email;
     }
 
-    //estado de la cuenta
     @Override
-    public boolean isAccountNonExpired() {
-        return true;
+    public boolean isAccountNonExpired() { 
+        return true; 
     }
 
     @Override
-    public boolean isAccountNonLocked() {
-        return true;
+    public boolean isAccountNonLocked() { 
+        return true; 
     }
 
     @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
+    public boolean isCredentialsNonExpired() { 
+        return true; 
     }
 
     @Override
-    public boolean isEnabled() {
-        return true;
+    public boolean isEnabled() { 
+        return true; 
     }
 }

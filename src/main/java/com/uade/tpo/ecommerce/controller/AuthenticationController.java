@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.uade.tpo.ecommerce.dto.LoginRequest;
 import com.uade.tpo.ecommerce.dto.RegisterRequest;
+import com.uade.tpo.ecommerce.dto.RegisterResponse;
 import com.uade.tpo.ecommerce.service.AuthenticationService;
 
 @RestController
@@ -20,7 +21,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public String register(@RequestBody RegisterRequest request) {
+    public RegisterResponse register(@RequestBody RegisterRequest request) {
         return authenticationService.register(request);
     }
 }
