@@ -27,5 +27,4 @@ public class Carrito {
             orphanRemoval = true
     )
     private List<CarritoItem> items = new ArrayList<>();
-
 }
