@@ -1,12 +1,20 @@
 package com.uade.tpo.ecommerce.service;
 
+import org.springframework.stereotype.Service;
 import com.uade.tpo.ecommerce.model.Carrito;
 
-public interface CarritoService {
+@Service
+public class CarritoService {
 
-    Carrito obtenerCarrito();
+    public Carrito obtenerCarrito() {
+        return new Carrito();
+    }
 
-    Carrito agregarProducto(Long productoId);
+    public Carrito agregarProducto(Long productoId) {
+        return new Carrito(); // lógica básica
+    }
 
-    Carrito eliminarProducto(Long productoId);
+    public Carrito eliminarProducto(Long productoId) {
+        return new Carrito(); // lógica básica
+    }
 }
