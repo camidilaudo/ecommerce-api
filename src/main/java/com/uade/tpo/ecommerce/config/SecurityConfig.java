@@ -3,9 +3,7 @@ package com.uade.tpo.ecommerce.config;
 import com.uade.tpo.ecommerce.model.Role;
 import com.uade.tpo.ecommerce.repository.UsuarioRepository;
 import com.uade.tpo.ecommerce.security.JwtFilter;
-
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -47,41 +45,45 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
         http
-            .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
 
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
+                        // 1. ENDPOINTS PUBLICOS
+                        .requestMatchers("/api/auth/**").permitAll() // Login y Registro
+                        .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll() // Ver catálogo y detalles
 
-            .authorizeHttpRequests(auth -> auth
+                        // 2. PRODUCTOS
+                        // Solo el ADMIN puede modificar los producs
+                        .requestMatchers(HttpMethod.POST, "/api/productos/**").hasRole(Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.PUT, "/api/productos/**").hasRole(Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.DELETE, "/api/productos/**").hasRole(Role.ADMIN.name())
 
-                // AUTH
-                .requestMatchers("/api/auth/**").permitAll()
+                        // 3. CATEGORIAS
+                        // Cualquier usuario logueado puede ver categorías para filtrar
+                        .requestMatchers(HttpMethod.GET, "/api/categorias/**").authenticated()
+                        // Solo ADMIN puede crear o borrar categorias
+                        .requestMatchers(HttpMethod.POST, "/api/categorias/**").hasRole(Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.DELETE, "/api/categorias/**").hasRole(Role.ADMIN.name())
 
-                // USUARIOS
-                .requestMatchers("/api/usuarios/**").permitAll()
+                        // 4. CARRITO Y PEDIDOS (Requieren Token)
+                        // Cualquier usuario "USER" o "ADMIN" puede operar su propio carrito/pedidos
+                        .requestMatchers("/api/carrito/**").authenticated()
+                        .requestMatchers("/api/pedidos/**").authenticated()
 
-                // PRODUCTOS
-                .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/productos").permitAll()
-                .requestMatchers(HttpMethod.PUT, "/api/productos/**").permitAll()
-                .requestMatchers(HttpMethod.DELETE, "/api/productos/**").permitAll()
+                        // 5. USUARIOS
+                        // Admin puede listar a todos o borrar usuarios
+                        .requestMatchers(HttpMethod.GET, "/api/usuarios").hasRole(Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.POST, "/api/usuarios").hasRole(Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.DELETE, "/api/usuarios/**").hasRole(Role.ADMIN.name())
+                        // Cualquier usuario logueado puede acceder a su GET/PUT individual
+                        .requestMatchers("/api/usuarios/**").authenticated()
 
-                // CARRITO
-                .requestMatchers("/api/carrito/**").permitAll()
-
-                // PEDIDOS (podés dejar protegido si querés)
-                .requestMatchers("/api/pedidos/**").permitAll()
-
-                // ADMIN (opcional)
-                .requestMatchers("/api/admin/**").hasRole(Role.ADMIN.name())
-
-                .anyRequest().authenticated()
-            )
-
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                        // CUALQUIER OTRO (Catch-all por seguridad)
+                        .anyRequest().authenticated()
+                )
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
