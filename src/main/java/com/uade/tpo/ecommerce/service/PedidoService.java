@@ -2,6 +2,7 @@ package com.uade.tpo.ecommerce.service;
 
 import java.util.List;
 
+import com.uade.tpo.ecommerce.exception.BadRequestException;
 import org.springframework.stereotype.Service;
 
 import com.uade.tpo.ecommerce.model.Pedido;
@@ -23,7 +24,7 @@ public class PedidoService {
 
     public Pedido getPedidoById(Long id) {
         return pedidoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
+                .orElseThrow(() -> new BadRequestException("Pedido no encontrado"));
     }
 
     public void deletePedidoById(Long id) {
@@ -37,7 +38,7 @@ public class PedidoService {
     public Pedido updatePedido(Long id, Pedido pedido) {
 
         Pedido existingPedido = pedidoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
+                .orElseThrow(() -> new BadRequestException("Pedido no encontrado"));
 
         existingPedido.setItems(pedido.getItems());
         existingPedido.setTotal(pedido.getTotal());

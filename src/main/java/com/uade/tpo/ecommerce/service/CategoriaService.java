@@ -3,6 +3,7 @@ package com.uade.tpo.ecommerce.service;
 import java.util.List;
 import java.util.Optional;
 
+import com.uade.tpo.ecommerce.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -52,8 +53,7 @@ public class CategoriaService {
         // Evita duplicados
         if (existente.isPresent()) {
 
-            throw new RuntimeException(
-                    "La categoria ya existe");
+            throw new BadRequestException("La categoria ya existe");
 
         }
 
@@ -82,7 +82,7 @@ public class CategoriaService {
         return null;
     }
 
-    // 🧩 NUEVO — buscar por nombre
+    //NUEVO — buscar por nombre
     public Categoria buscarPorNombre(
             String nombre) {
 
