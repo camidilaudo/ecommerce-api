@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.uade.tpo.ecommerce.model.*;
 import com.uade.tpo.ecommerce.repository.*;
-import com.uade.tpo.ecommerce.exception.BadRequestException;
+import com.uade.tpo.ecommerce.exception.*;
 
 import jakarta.transaction.Transactional;
 
@@ -44,7 +44,7 @@ public class CarritoService {
         Carrito carrito = obtenerCarrito();
 
         Producto producto = productoRepository.findById(productoId)
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
 
         // Validar si hay stock antes de agregar
         if (producto.getStock() <= 0) {

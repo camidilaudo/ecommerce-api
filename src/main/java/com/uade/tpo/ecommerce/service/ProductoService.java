@@ -9,98 +9,113 @@ import com.uade.tpo.ecommerce.model.Producto;
 import com.uade.tpo.ecommerce.repository.ProductoRepository;
 
 import jakarta.transaction.Transactional;
+import com.uade.tpo.ecommerce.exception.*;
 
 @Service
 @Transactional
 public class ProductoService {
 
-    @Autowired
-    private ProductoRepository productoRepository;
+        @Autowired
+        private ProductoRepository productoRepository;
 
-    // GET todos los productos (ordenados alfabéticamente)
-    public List<Producto> getAllProductos() {
-        return productoRepository.findAllByOrderByNombreAsc();
-    }
-
-    // GET producto por ID
-    public Producto getProductoById(Long id) {
-
-        return productoRepository
-                .findById(id)
-                .orElse(null);
-
-    }
-
-    // DELETE producto
-    public void deleteProductoById(Long id) {
-
-        productoRepository.deleteById(id);
-
-    }
-
-    // CREATE producto
-    public Producto saveProducto(
-            Producto producto) {
-
-        return productoRepository
-                .save(producto);
-
-    }
-
-    // UPDATE producto
-    public Producto updateProducto(
-            Long id,
-            Producto producto) {
-
-        Producto existingProducto =
-                getProductoById(id);
-
-        if (existingProducto != null) {
-
-            existingProducto
-                    .setNombre(producto.getNombre());
-
-            existingProducto
-                    .setDescripcion(
-                            producto.getDescripcion());
-
-            existingProducto
-                    .setPrecio(producto.getPrecio());
-
-            existingProducto
-                    .setStock(producto.getStock());
-
-            existingProducto
-                    .setImagenes(
-                            producto.getImagenes());
-
-            existingProducto
-                    .setCategorias(
-                            producto.getCategorias());
-
-            return productoRepository
-                    .save(existingProducto);
+        // GET todos los productos (ordenados alfabéticamente)
+        public List<Producto> getAllProductos() {
+                return productoRepository.findAllByOrderByNombreAsc();
         }
 
-        return null;
-    }
+        // GET producto por ID
+        public Producto getProductoById(Long id) {
 
-    // 🧩 NUEVO — buscar por categoria
+                return productoRepository
+                                .findById(id)
+                                .orElse(null);
+
+        }
+
+        // DELETE producto
+        public void deleteProductoById(Long id) {
+
+                productoRepository.deleteById(id);
+
+        }
+
+        // CREATE producto
+        public Producto saveProducto(
+                        Producto producto) {
+
+                return productoRepository
+                                .save(producto);
+
+        }
+
+        // UPDATE producto
+        public Producto updateProducto(
+                        Long id,
+                        Producto producto) {
+
+                Producto existingProducto = getProductoById(id);
+
+                if (existingProducto != null) {
+
+                        existingProducto
+                                        .setNombre(producto.getNombre());
+
+                        existingProducto
+                                        .setDescripcion(
+                                                        producto.getDescripcion());
+
+                        existingProducto
+                                        .setPrecio(producto.getPrecio());
+
+                        existingProducto
+                                        .setStock(producto.getStock());
+
+                        existingProducto
+                                        .setImagenes(
+                                                        producto.getImagenes());
+
+                        existingProducto
+                                        .setCategorias(
+                                                        producto.getCategorias());
+
+                        return productoRepository
+                                        .save(existingProducto);
+                }
+
+                return null;
+        }
+
+        // 🧩 NUEVO — buscar por categoria
         public List<Producto> getByCategoria(
-                Long categoriaId) {
+                        Long categoriaId) {
 
-        return productoRepository
-                .findByCategoriasId(categoriaId);
+                return productoRepository
+                                .findByCategoriasId(categoriaId);
 
         }
 
-    // 🧩 NUEVO — buscar por nombre
-    public List<Producto> buscarPorNombre(
-            String nombre) {
+        // 🧩 NUEVO — buscar por nombre
+        public List<Producto> buscarPorNombre(
+                        String nombre) {
 
-        return productoRepository
-                .findByNombreContaining(nombre);
+                return productoRepository
+                                .findByNombreContaining(nombre);
 
-    }
+        }
+
+        public Producto updateStockProducto(Long id, Integer stock) {
+                Producto existingProducto = getProductoById(id);
+
+                if (existingProducto == null) {
+                        throw new ResourceNotFoundException("No existe el producto");
+                }
+                if (stock < 0) {
+                        throw new BadRequestException("El stock no puede ser negativo");
+                }
+                existingProducto
+                                .setStock(stock);
+                return productoRepository
+                                .save(existingProducto);
+        }
 
 }
