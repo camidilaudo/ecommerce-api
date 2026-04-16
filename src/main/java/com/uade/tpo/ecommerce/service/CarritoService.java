@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.uade.tpo.ecommerce.model.*;
 import com.uade.tpo.ecommerce.repository.*;
+import com.uade.tpo.ecommerce.exception.BadRequestException;
 
 import jakarta.transaction.Transactional;
 
@@ -45,8 +46,17 @@ public class CarritoService {
         Producto producto = productoRepository.findById(productoId)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
+        // Validar si hay stock antes de agregar
+        if (producto.getStock() <= 0) {
+            throw new BadRequestException("No hay stock disponible para el producto: " + producto.getNombre());
+        }
+
         for (CarritoItem item : carrito.getItems()) {
             if (item.getProducto().getId().equals(productoId)) {
+                // Validar si la cantidad nueva excede el stock
+                if (item.getCantidad() + 1 > producto.getStock()) {
+                    throw new BadRequestException("No hay suficiente stock disponible");
+                }
                 item.setCantidad(item.getCantidad() + 1);
                 return carritoRepository.save(carrito);
             }
@@ -86,12 +96,30 @@ public class CarritoService {
         Carrito carrito = obtenerCarrito();
 
         if (carrito.getItems().isEmpty()) {
-            throw new RuntimeException("El carrito está vacío");
+            throw new BadRequestException("El carrito está vacío");
+        }
+
+        double totalCost = 0;
+
+        // Validar stock de todos los productos antes de procesar
+        for (CarritoItem item : carrito.getItems()) {
+            Producto producto = item.getProducto();
+            if (producto.getStock() < item.getCantidad()) {
+                throw new BadRequestException("Stock insuficiente para: " + producto.getNombre());
+            }
+            totalCost += producto.getPrecio() * item.getCantidad();
+        }
+
+        // Descontar stock y limpiar carrito
+        for (CarritoItem item : carrito.getItems()) {
+            Producto producto = item.getProducto();
+            producto.setStock(producto.getStock() - item.getCantidad());
+            productoRepository.save(producto);
         }
 
         carrito.getItems().clear();
         carritoRepository.save(carrito);
 
-        return "Compra realizada con éxito";
+        return String.format("Compra realizada con éxito. Total a pagar: $%.2f", totalCost);
     }
 }

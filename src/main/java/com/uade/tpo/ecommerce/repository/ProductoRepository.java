@@ -17,4 +17,7 @@ public interface ProductoRepository
     // Buscar productos por nombre
     List<Producto> findByNombreContaining(String nombre);
 
+    // Listado de productos ordenados alfabéticamente
+    List<Producto> findAllByOrderByNombreAsc();
+
 }

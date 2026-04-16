@@ -3,6 +3,7 @@ package com.uade.tpo.ecommerce.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import java.util.ArrayList;
 
 
@@ -18,6 +19,7 @@ public class Pedido {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id")
+    @JsonBackReference
     private Usuario usuario;
 
     @OneToMany(cascade = CascadeType.ALL)

@@ -17,11 +17,9 @@ public class ProductoService {
     @Autowired
     private ProductoRepository productoRepository;
 
-    // GET todos los productos
+    // GET todos los productos (ordenados alfabéticamente)
     public List<Producto> getAllProductos() {
-
-        return productoRepository.findAll();
-
+        return productoRepository.findAllByOrderByNombreAsc();
     }
 
     // GET producto por ID
