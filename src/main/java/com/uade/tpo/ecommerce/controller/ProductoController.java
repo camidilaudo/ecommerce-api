@@ -1,8 +1,5 @@
 package com.uade.tpo.ecommerce.controller;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.uade.tpo.ecommerce.model.Producto;
 import com.uade.tpo.ecommerce.service.ProductoService;
 
@@ -93,6 +90,19 @@ public class ProductoController {
 
         return productoService
                 .buscarPorNombre(nombre);
+
+    }
+
+    
+    // PUT actualizar stock de producto
+    // http://localhost:8080/api/productos/1/stock?stock=10
+    @PutMapping("/{id}/stock")
+    public Producto udpateStockProducto(
+            @PathVariable Long id,
+            @RequestParam Integer stock) {
+
+        return productoService
+                .updateStockProducto(id, stock);
 
     }
 
