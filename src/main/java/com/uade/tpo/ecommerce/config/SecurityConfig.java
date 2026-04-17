@@ -55,10 +55,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll() // Ver catálogo y detalles
 
                         // 2. PRODUCTOS
-                        // Solo el ADMIN puede modificar los producs
+                        // GET: Públicos
+                        // POST: Solo ADMIN puede crear productos
+                        // PUT/DELETE: Usuarios autenticados pueden modificar/eliminar sus propios productos
                         .requestMatchers(HttpMethod.POST, "/api/productos/**").hasRole(Role.ADMIN.name())
-                        .requestMatchers(HttpMethod.PUT, "/api/productos/**").hasRole(Role.ADMIN.name())
-                        .requestMatchers(HttpMethod.DELETE, "/api/productos/**").hasRole(Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.PUT, "/api/productos/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/productos/**").authenticated()
 
                         // 3. CATEGORIAS
                         // Cualquier usuario logueado puede ver categorías para filtrar
