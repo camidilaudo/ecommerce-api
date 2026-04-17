@@ -31,6 +31,15 @@ public class GlobalExceptionHandler {
         ));
     }
 
+    @ExceptionHandler(UnAuthorizedException.class)
+    public ResponseEntity<Map<String, Object>> handleUnauthorized(UnAuthorizedException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
+                "timestamp", LocalDateTime.now().toString(),
+                "status", 401,
+                "error", ex.getMessage()
+        ));
+    }
+
     // Captura cualquier otra excepción no prevista (500)
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {

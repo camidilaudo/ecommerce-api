@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.uade.tpo.ecommerce.model.Producto;
+import com.uade.tpo.ecommerce.model.Usuario;
 import com.uade.tpo.ecommerce.repository.ProductoRepository;
+import com.uade.tpo.ecommerce.repository.UsuarioRepository;
 
 import jakarta.transaction.Transactional;
 import com.uade.tpo.ecommerce.exception.*;
@@ -17,6 +19,16 @@ public class ProductoService {
 
         @Autowired
         private ProductoRepository productoRepository;
+
+        @Autowired
+        private UsuarioRepository usuarioRepository;
+
+        // Método auxiliar para validar que el usuario es el propietario del producto
+        private void validarPropietarioProducto(Producto producto, Long usuarioId) {
+                if (producto.getUsuario() == null || !producto.getUsuario().getId().equals(usuarioId)) {
+                        throw new UnAuthorizedException("No tienes permiso para modificar este producto. Solo el creador puede hacerlo.");
+                }
+        }
 
         // GET todos los productos (ordenados alfabéticamente)
         public List<Producto> getAllProductos() {
@@ -32,11 +44,14 @@ public class ProductoService {
 
         }
 
-        // DELETE producto
-        public void deleteProductoById(Long id) {
-
+        // DELETE producto (Solo el propietario o ADMIN)
+        public void deleteProductoById(Long id, Long usuarioId) {
+                Producto producto = getProductoById(id);
+                if (producto == null) {
+                        throw new ResourceNotFoundException("Producto no encontrado");
+                }
+                validarPropietarioProducto(producto, usuarioId);
                 productoRepository.deleteById(id);
-
         }
 
         // CREATE producto
@@ -48,14 +63,16 @@ public class ProductoService {
 
         }
 
-        // UPDATE producto
+        // UPDATE producto (Solo el propietario o ADMIN)
         public Producto updateProducto(
                         Long id,
-                        Producto producto) {
+                        Producto producto,
+                        Long usuarioId) {
 
                 Producto existingProducto = getProductoById(id);
 
                 if (existingProducto != null) {
+                        validarPropietarioProducto(existingProducto, usuarioId);
 
                         existingProducto
                                         .setNombre(producto.getNombre());
@@ -98,24 +115,24 @@ public class ProductoService {
         public List<Producto> buscarPorNombre(
                         String nombre) {
 
-                return productoRepository
-                                .findByNombreContaining(nombre);
+                return productoRepository.findByNombreContaining(nombre);
+                        }
 
-        }
-
-        public Producto updateStockProducto(Long id, Integer stock) {
+        // UPDATE stock del producto (Solo el propietario o ADMIN)
+        public Producto updateStockProducto(Long id, Integer stock, Long usuarioId) {
                 Producto existingProducto = getProductoById(id);
 
                 if (existingProducto == null) {
                         throw new ResourceNotFoundException("No existe el producto");
                 }
+                
+                validarPropietarioProducto(existingProducto, usuarioId);
+                
                 if (stock < 0) {
                         throw new BadRequestException("El stock no puede ser negativo");
                 }
-                existingProducto
-                                .setStock(stock);
-                return productoRepository
-                                .save(existingProducto);
+                existingProducto.setStock(stock);
+                return productoRepository.save(existingProducto);
         }
 
 }

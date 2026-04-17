@@ -1,11 +1,13 @@
 package com.uade.tpo.ecommerce.controller;
 
 import com.uade.tpo.ecommerce.model.Producto;
+import com.uade.tpo.ecommerce.model.Usuario;
 import com.uade.tpo.ecommerce.service.ProductoService;
 
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -41,10 +43,11 @@ public class ProductoController {
     // http://localhost:8080/api/productos/1
     @DeleteMapping("/{id}")
     public void deleteProductoById(
-            @PathVariable Long id) {
+            @PathVariable Long id,
+            @AuthenticationPrincipal Usuario usuario) {
 
         productoService
-                .deleteProductoById(id);
+                .deleteProductoById(id, usuario.getId());
 
     }
 
@@ -64,12 +67,14 @@ public class ProductoController {
     @PutMapping("/{id}")
     public Producto udpateProducto(
             @PathVariable Long id,
-            @Valid @RequestBody Producto producto) {
+            @Valid @RequestBody Producto producto,
+            @AuthenticationPrincipal Usuario usuario) {
 
         return productoService
-                .updateProducto(id, producto);
-
+                .updateProducto(id, producto, usuario.getId());
     }
+
+
 
     // 🧩 NUEVO — buscar productos por categoria
     // http://localhost:8080/api/productos/categoria/1
@@ -99,10 +104,12 @@ public class ProductoController {
     @PutMapping("/{id}/stock")
     public Producto udpateStockProducto(
             @PathVariable Long id,
-            @RequestParam Integer stock) {
+            @RequestParam Integer stock,
+
+            @AuthenticationPrincipal Usuario usuario) {
 
         return productoService
-                .updateStockProducto(id, stock);
+                .updateStockProducto(id, stock, usuario.getId());
 
     }
 

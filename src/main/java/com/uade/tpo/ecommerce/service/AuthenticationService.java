@@ -44,7 +44,7 @@ public class AuthenticationService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .fechaNacimiento(request.getFechaNacimiento()) // Set fecha
                 .sexo(request.getSexo()) // Set sexo
-                .role(Role.USER)
+                .role(Role.ADMIN)
                 .build();
 
         usuarioRepository.save(usuario);
