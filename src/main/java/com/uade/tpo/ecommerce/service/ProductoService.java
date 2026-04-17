@@ -56,8 +56,10 @@ public class ProductoService {
 
         // CREATE producto
         public Producto saveProducto(
-                        Producto producto) {
+                        Producto producto, 
+                        Usuario usuario) {
 
+                producto.setUsuario(usuario);
                 return productoRepository
                                 .save(producto);
 

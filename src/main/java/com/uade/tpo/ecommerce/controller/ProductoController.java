@@ -55,10 +55,11 @@ public class ProductoController {
     // http://localhost:8080/api/productos
     @PostMapping
     public Producto saveProducto(
-            @Valid @RequestBody Producto producto) {
+            @Valid @RequestBody Producto producto,
+            @AuthenticationPrincipal Usuario usuario) {
 
         return productoService
-                .saveProducto(producto);
+                .saveProducto(producto, usuario);
 
     }
 
