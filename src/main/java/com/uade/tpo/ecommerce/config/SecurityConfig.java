@@ -56,9 +56,9 @@ public class SecurityConfig {
 
                         // 2. PRODUCTOS
                         // GET: Públicos
-                        // POST: Solo ADMIN puede crear productos
+                        // POST: Cualquier usuario puede crear productos
                         // PUT/DELETE: Usuarios autenticados pueden modificar/eliminar sus propios productos
-                        .requestMatchers(HttpMethod.POST, "/api/productos/**").hasRole(Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.POST, "/api/productos/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/productos/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/productos/**").authenticated()
 

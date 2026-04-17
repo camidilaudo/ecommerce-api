@@ -18,9 +18,7 @@ public class CarritoService {
     private final ProductoRepository productoRepository;
     private final UsuarioRepository usuarioRepository;
 
-    private Long usuarioId = 1L;
-
-    public Carrito obtenerCarrito() {
+    public Carrito obtenerCarrito(Long usuarioId) {
 
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -39,9 +37,9 @@ public class CarritoService {
                 });
     }
 
-    public Carrito agregarProducto(Long productoId) {
+    public Carrito agregarProducto(Long productoId, Long usuarioId) {
 
-        Carrito carrito = obtenerCarrito();
+        Carrito carrito = obtenerCarrito(usuarioId);
 
         Producto producto = productoRepository.findById(productoId)
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
@@ -72,9 +70,9 @@ public class CarritoService {
         return carritoRepository.save(carrito);
     }
 
-    public Carrito eliminarProducto(Long productoId) {
+    public Carrito eliminarProducto(Long productoId, Long usuarioId) {
 
-        Carrito carrito = obtenerCarrito();
+        Carrito carrito = obtenerCarrito(usuarioId);
 
         carrito.getItems().removeIf(
                 item -> item.getProducto().getId().equals(productoId)
@@ -83,17 +81,17 @@ public class CarritoService {
         return carritoRepository.save(carrito);
     }
 
-    public Carrito vaciarCarrito() {
+    public Carrito vaciarCarrito(Long usuarioId) {
 
-        Carrito carrito = obtenerCarrito();
+        Carrito carrito = obtenerCarrito(usuarioId);
         carrito.getItems().clear();
 
         return carritoRepository.save(carrito);
     }
 
-    public String checkout() {
+    public String checkout(Long usuarioId) {
 
-        Carrito carrito = obtenerCarrito();
+        Carrito carrito = obtenerCarrito(usuarioId);
 
         if (carrito.getItems().isEmpty()) {
             throw new BadRequestException("El carrito está vacío");
