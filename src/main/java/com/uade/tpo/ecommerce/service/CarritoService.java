@@ -2,56 +2,51 @@ package com.uade.tpo.ecommerce.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import com.uade.tpo.ecommerce.model.*;
 import com.uade.tpo.ecommerce.repository.*;
 import com.uade.tpo.ecommerce.exception.*;
-
 import jakarta.transaction.Transactional;
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional // atomicidad
 public class CarritoService {
 
     private final CarritoRepository carritoRepository;
     private final ProductoRepository productoRepository;
     private final UsuarioRepository usuarioRepository;
+    private final PedidoRepository pedidoRepository;
 
+    // Metodo para obtener o crear el carrito del usuario
     public Carrito obtenerCarrito(Long usuarioId) {
+        if (usuarioId == null) {
+            throw new UnAuthorizedException("No se encontró un usuario autenticado para acceder al carrito.");
+        } //usuario no autenticado
 
         Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
         return carritoRepository.findByUsuarioId(usuarioId)
                 .orElseGet(() -> {
                     Carrito nuevo = new Carrito();
                     nuevo.setUsuario(usuario);
-
-                    usuario.setCarrito(nuevo);
-
-                    carritoRepository.save(nuevo);     // 🔥 guardar carrito
-                    usuarioRepository.save(usuario);   // 🔥 guardar usuario
-
-                    return nuevo;
+                    return carritoRepository.save(nuevo);
                 });
     }
 
+    // Metodo para agregar productos validando stock
     public Carrito agregarProducto(Long productoId, Long usuarioId) {
-
         Carrito carrito = obtenerCarrito(usuarioId);
-
         Producto producto = productoRepository.findById(productoId)
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
 
-        // Validar si hay stock antes de agregar
         if (producto.getStock() <= 0) {
             throw new BadRequestException("No hay stock disponible para el producto: " + producto.getNombre());
         }
 
         for (CarritoItem item : carrito.getItems()) {
             if (item.getProducto().getId().equals(productoId)) {
-                // Validar si la cantidad nueva excede el stock
                 if (item.getCantidad() + 1 > producto.getStock()) {
                     throw new BadRequestException("No hay suficiente stock disponible");
                 }
@@ -64,60 +59,75 @@ public class CarritoService {
         item.setProducto(producto);
         item.setCantidad(1);
         item.setCarrito(carrito);
-
         carrito.getItems().add(item);
-
         return carritoRepository.save(carrito);
     }
 
     public Carrito eliminarProducto(Long productoId, Long usuarioId) {
-
         Carrito carrito = obtenerCarrito(usuarioId);
-
-        carrito.getItems().removeIf(
-                item -> item.getProducto().getId().equals(productoId)
-        );
-
+        carrito.getItems().removeIf(item -> item.getProducto().getId().equals(productoId));
         return carritoRepository.save(carrito);
     }
 
     public Carrito vaciarCarrito(Long usuarioId) {
-
         Carrito carrito = obtenerCarrito(usuarioId);
         carrito.getItems().clear();
-
         return carritoRepository.save(carrito);
     }
 
+    /**
+     * LÓGICA DE CHECKOUT (Endpoint: POST /api/carrito/checkout)
+     * 1. Crea el Pedido asociado al usuario.
+     * 2. Descuenta stock de cada producto.
+     * 3. Calcula el total.
+     * 4. Vacía el carrito.
+     */
     public String checkout(Long usuarioId) {
-
         Carrito carrito = obtenerCarrito(usuarioId);
 
         if (carrito.getItems().isEmpty()) {
             throw new BadRequestException("El carrito está vacío");
         }
 
+        // creamos y asignamos pedido
+        Pedido pedido = new Pedido();
+        pedido.setUsuario(carrito.getUsuario());
+        pedido.setItems(new ArrayList<>());
         double totalCost = 0;
 
-        // Validar stock de todos los productos antes de procesar
-        for (CarritoItem item : carrito.getItems()) {
-            Producto producto = item.getProducto();
-            if (producto.getStock() < item.getCantidad()) {
+        // Procesamos cada ítem del carrito
+        for (CarritoItem itemCarrito : carrito.getItems()) {
+            Producto producto = itemCarrito.getProducto();
+
+            // Validación de stock final
+            if (producto.getStock() < itemCarrito.getCantidad()) {
                 throw new BadRequestException("Stock insuficiente para: " + producto.getNombre());
             }
-            totalCost += producto.getPrecio() * item.getCantidad();
-        }
 
-        // Descontar stock y limpiar carrito
-        for (CarritoItem item : carrito.getItems()) {
-            Producto producto = item.getProducto();
-            producto.setStock(producto.getStock() - item.getCantidad());
+            // Descontamos el stock
+            producto.setStock(producto.getStock() - itemCarrito.getCantidad());
             productoRepository.save(producto);
+
+            // Creamos el detalle del pedido
+            PedidoItem pedidoItem = PedidoItem.builder()
+                    .producto(producto)
+                    .cantidad(itemCarrito.getCantidad())
+                    .precioUnitario(producto.getPrecio()) // Capturamos el precio actual
+                    .build();
+
+            pedido.getItems().add(pedidoItem);
+            totalCost += producto.getPrecio() * itemCarrito.getCantidad();
         }
 
+        pedido.setTotal(totalCost);
+
+        // Guardamos el pedido en la base de datos
+        pedidoRepository.save(pedido);
+
+        // Limpiamos el carrito
         carrito.getItems().clear();
         carritoRepository.save(carrito);
 
-        return String.format("Compra realizada con éxito. Total a pagar: $%.2f", totalCost);
+        return String.format("Compra realizada con éxito. Pedido #%d generado. Total a pagar: $%.2f", pedido.getId(), totalCost);
     }
 }
