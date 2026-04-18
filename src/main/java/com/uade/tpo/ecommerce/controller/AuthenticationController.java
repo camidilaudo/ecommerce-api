@@ -1,6 +1,8 @@
 package com.uade.tpo.ecommerce.controller;
 
+import com.uade.tpo.ecommerce.dto.LoginResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.uade.tpo.ecommerce.dto.LoginRequest;
@@ -16,8 +18,9 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/login")
-    public String login(@RequestBody LoginRequest request) {
-        return authenticationService.login(request);
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+        // Ahora devuelve el objeto LoginResponse en lugar de un String
+        return ResponseEntity.ok(authenticationService.login(request));
     }
 
     @PostMapping("/register")
