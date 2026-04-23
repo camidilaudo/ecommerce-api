@@ -8,6 +8,25 @@ import lombok.Data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+/**
+ * ==========================================================
+ *                   Clase: Categoria
+ * ==========================================================
+ * Descripción:
+ * Representa una categoría utilizada para clasificar
+ * productos dentro del sistema.
+ *
+ * @param id         → Identificador único de la categoría.
+ * @param nombre     → Nombre único de la categoría.
+ * @param productos  → Lista de productos asociados (ManyToMany).
+ *
+ * Relaciones:
+ * productos → ManyToMany con Producto
+ *             (mappedBy: categorias)
+ *
+ * ==========================================================
+ */
+
 @Data
 @Entity
 @Table(name = "categorias")

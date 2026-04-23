@@ -9,7 +9,39 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.uade.tpo.ecommerce.model.enums.Role;
+import com.uade.tpo.ecommerce.model.enums.Sexo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+/**
+ * ==========================================================
+ *                     Clase: Usuario
+ * ==========================================================
+ * Descripción:
+ * Representa un usuario del sistema e-commerce,
+ * incluyendo sus datos personales, credenciales
+ * y relaciones con pedidos y carrito.
+ *
+ * @param id                 → Identificador único del usuario.
+ * @param nombreUsuario      → Nombre de usuario único.
+ * @param nombre             → Nombre personal.
+ * @param apellido           → Apellido del usuario.
+ * @param email              → Correo electrónico único.
+ * @param password           → Contraseña del usuario.
+ * @param fechaNacimiento    → Fecha de nacimiento.
+ * @param sexo               → Sexo del usuario (Enum).
+ * @param role               → Rol del usuario (Enum).
+ * @param pedidos            → Lista de pedidos (OneToMany).
+ * @param carrito            → Carrito asociado (OneToOne).
+ *
+ * Relaciones:
+ * pedidos → OneToMany con Pedido (mappedBy: usuario)
+ * carrito → OneToOne con Carrito (mappedBy: usuario)
+ * role    → Enum (EnumType.STRING)
+ * sexo    → Enum (EnumType.STRING)
+ *
+ * ==========================================================
+ */
 
 @Data
 @Builder

@@ -9,6 +9,27 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import java.util.ArrayList;
 
+/**
+ * ==========================================================
+ *                     Clase: Pedido
+ * ==========================================================
+ * Descripción:
+ * Representa un pedido realizado por un usuario,
+ * incluyendo el total y los ítems comprados.
+ *
+ * @param id        → Identificador único del pedido.
+ * @param total     → Monto total del pedido.
+ * @param usuario   → Usuario que realizó el pedido (ManyToOne).
+ * @param items     → Lista de ítems del pedido (OneToMany).
+ *
+ * Relaciones:
+ * usuario → ManyToOne (FK: usuario_id)
+ * items   → OneToMany (FK: pedido_id,
+ *                      cascade ALL, orphanRemoval)
+ *
+ * ==========================================================
+ */
+
 @Data
 @Builder
 @NoArgsConstructor

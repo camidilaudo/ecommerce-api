@@ -1,4 +1,4 @@
-package com.uade.tpo.ecommerce.model;
+package com.uade.tpo.ecommerce.model.enums;
 
 public enum Sexo {
     MASCULINO,

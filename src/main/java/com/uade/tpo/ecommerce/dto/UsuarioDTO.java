@@ -1,8 +1,10 @@
 package com.uade.tpo.ecommerce.dto;
 
 import lombok.Data;
-import com.uade.tpo.ecommerce.model.Role;
-import com.uade.tpo.ecommerce.model.Sexo;
+
+import com.uade.tpo.ecommerce.model.enums.Role;
+import com.uade.tpo.ecommerce.model.enums.Sexo;
+
 import java.time.LocalDate;
 
 @Data

@@ -7,6 +7,32 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * ==========================================================
+ *                    Clase: Producto
+ * ==========================================================
+ * Descripción:
+ * Representa un producto disponible en el sistema,
+ * incluyendo información básica, stock, imágenes
+ * y categorías asociadas.
+ *
+ * @param id           → Identificador único del producto.
+ * @param nombre       → Nombre del producto.
+ * @param precio       → Precio actual del producto.
+ * @param descripcion  → Descripción detallada.
+ * @param stock        → Cantidad disponible en inventario.
+ * @param imagenes     → Lista de imágenes del producto.
+ * @param categorias   → Categorías asociadas (ManyToMany).
+ * @param usuario      → Usuario creador (ManyToOne).
+ *
+ * Relaciones:
+ * categorias → ManyToMany (tabla: productos_categorias)
+ * usuario    → ManyToOne (FK: usuario_id)
+ * imagenes   → ElementCollection (tabla: producto_imagenes)
+ *
+ * ==========================================================
+ */
+
 @Data
 @Entity
 @Table(name = "productos")

@@ -13,6 +13,33 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 
+/**
+ * ==========================================================
+ *              Clase: CategoriaController
+ * ==========================================================
+ * Descripción:
+ * Controlador encargado de gestionar las operaciones
+ * CRUD y consultas sobre categorías de productos.
+ *
+ * @param categoriaService → Servicio que maneja la
+ *                            lógica de categorías.
+ *
+ * Endpoints:
+ * GET    /api/categorias              → Obtener todas.
+ * GET    /api/categorias/{id}         → Obtener por ID.
+ * POST   /api/categorias              → Crear categoría.
+ * PUT    /api/categorias/{id}         → Actualizar categoría.
+ * DELETE /api/categorias/{id}         → Eliminar categoría.
+ * GET    /api/categorias/buscar       → Buscar por nombre.
+ *
+ * Configuración:
+ * - Utiliza validaciones con @Valid.
+ * - Permite gestión completa de categorías.
+ *
+ * @version 1.0
+ * ==========================================================
+ */
+
 @RestController
 @RequestMapping("/api/categorias")
 public class CategoriaController {

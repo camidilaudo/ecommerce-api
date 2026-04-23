@@ -8,6 +8,32 @@ import com.uade.tpo.ecommerce.model.Usuario;
 import com.uade.tpo.ecommerce.service.CarritoService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
+/**
+ * ==========================================================
+ *               Clase: CarritoController
+ * ==========================================================
+ * Descripción:
+ * Controlador encargado de gestionar las operaciones
+ * del carrito de compras del usuario autenticado.
+ *
+ * @param carritoService → Servicio que maneja la
+ *                          lógica del carrito.
+ *
+ * Endpoints:
+ * GET    /api/carrito                      → Obtener carrito.
+ * POST   /api/carrito/agregar/{productoId} → Agregar producto.
+ * DELETE /api/carrito/eliminar/{productoId}→ Eliminar producto.
+ * DELETE /api/carrito/vaciar               → Vaciar carrito.
+ * POST   /api/carrito/checkout             → Finalizar compra.
+ *
+ * Configuración:
+ * - Utiliza usuario autenticado mediante
+ *   @AuthenticationPrincipal.
+ * - Opera únicamente sobre el carrito del usuario logueado.
+ *
+ * ==========================================================
+ */
+
 @RestController
 @RequestMapping("/api/carrito")
 @RequiredArgsConstructor

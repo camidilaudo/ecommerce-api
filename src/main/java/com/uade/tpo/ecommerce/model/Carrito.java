@@ -7,6 +7,24 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * ==========================================================
+ *                      Clase: Carrito
+ * ==========================================================
+ * Descripción:
+ * Representa el carrito de compras asociado a un usuario.
+ *
+ * @param id        → Identificador único del carrito.
+ * @param usuario   → Usuario asociado (OneToOne).
+ * @param items     → Ítems del carrito (OneToMany).
+ *
+ * Relaciones:
+ * usuario → OneToOne (FK: usuario_id)
+ * items   → OneToMany (cascade ALL, orphanRemoval)
+ *
+ * ==========================================================
+ */
+
 @Data
 @Entity
 @Table(name = "carritos")

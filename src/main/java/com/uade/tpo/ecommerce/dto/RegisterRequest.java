@@ -1,6 +1,5 @@
 package com.uade.tpo.ecommerce.dto;
 
-import com.uade.tpo.ecommerce.model.Sexo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,6 +10,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
+
+import com.uade.tpo.ecommerce.model.enums.Sexo;
 
 @Data
 @Builder

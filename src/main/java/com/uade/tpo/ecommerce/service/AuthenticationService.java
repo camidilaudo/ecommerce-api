@@ -14,9 +14,9 @@ import com.uade.tpo.ecommerce.dto.LoginResponse;
 import com.uade.tpo.ecommerce.dto.RegisterRequest;
 import com.uade.tpo.ecommerce.dto.RegisterResponse;
 import com.uade.tpo.ecommerce.exception.*;
-import com.uade.tpo.ecommerce.model.Role;
-import com.uade.tpo.ecommerce.model.Sexo;
 import com.uade.tpo.ecommerce.model.Usuario;
+import com.uade.tpo.ecommerce.model.enums.Role;
+import com.uade.tpo.ecommerce.model.enums.Sexo;
 import com.uade.tpo.ecommerce.repository.UsuarioRepository;
 import com.uade.tpo.ecommerce.security.JwtUtil;
 

@@ -1,6 +1,6 @@
 package com.uade.tpo.ecommerce.config;
 
-import com.uade.tpo.ecommerce.model.Role;
+import com.uade.tpo.ecommerce.model.enums.Role;
 import com.uade.tpo.ecommerce.repository.UsuarioRepository;
 import com.uade.tpo.ecommerce.security.JwtFilter;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +18,34 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+/**
+ * ==========================================================
+ *                  Clase: SecurityConfig
+ * ==========================================================
+ * Descripción:
+ * Configura la seguridad del sistema utilizando
+ * Spring Security y autenticación basada en JWT.
+ *
+ * @param jwtFilter            → Filtro encargado de validar
+ *                                tokens JWT en cada request.
+ * @param usuarioRepository    → Repositorio utilizado para
+ *                                obtener usuarios desde la BD.
+ *
+ * Componentes principales:
+ * userDetailsService     → Carga usuarios por email.
+ * authenticationManager  → Gestiona la autenticación.
+ * passwordEncoder        → Encripta contraseñas con BCrypt.
+ * securityFilterChain    → Define reglas de acceso y seguridad.
+ *
+ * Configuración:
+ * - Autenticación stateless mediante JWT.
+ * - CSRF deshabilitado.
+ * - Acceso público a login y catálogo.
+ * - Acceso restringido por roles y autenticación.
+ *
+ * ==========================================================
+ */
 
 @Configuration
 @EnableWebSecurity
