@@ -40,16 +40,14 @@ public class ProductoService {
 
                 return productoRepository
                                 .findById(id)
-                                .orElse(null);
+                                .orElseThrow    (() -> new ResourceNotFoundException("Producto" , id));
 
         }
 
         // DELETE producto (Solo el propietario o ADMIN)
         public void deleteProductoById(Long id, Long usuarioId) {
                 Producto producto = getProductoById(id);
-                if (producto == null) {
-                        throw new ResourceNotFoundException("Producto no encontrado");
-                }
+                
                 validarPropietarioProducto(producto, usuarioId);
                 productoRepository.deleteById(id);
         }
@@ -73,35 +71,17 @@ public class ProductoService {
 
                 Producto existingProducto = getProductoById(id);
 
-                if (existingProducto != null) {
-                        validarPropietarioProducto(existingProducto, usuarioId);
+                
+                validarPropietarioProducto(existingProducto, usuarioId);
 
-                        existingProducto
-                                        .setNombre(producto.getNombre());
-
-                        existingProducto
-                                        .setDescripcion(
-                                                        producto.getDescripcion());
-
-                        existingProducto
-                                        .setPrecio(producto.getPrecio());
-
-                        existingProducto
-                                        .setStock(producto.getStock());
-
-                        existingProducto
-                                        .setImagenes(
-                                                        producto.getImagenes());
-
-                        existingProducto
-                                        .setCategorias(
-                                                        producto.getCategorias());
-
-                        return productoRepository
-                                        .save(existingProducto);
-                }
-
-                return null;
+                existingProducto.setNombre(producto.getNombre());
+                existingProducto.setDescripcion(producto.getDescripcion());
+                existingProducto.setPrecio(producto.getPrecio());
+                existingProducto.setStock(producto.getStock());
+                existingProducto.setImagenes(producto.getImagenes());
+                existingProducto.setCategorias(producto.getCategorias());
+                return productoRepository.save(existingProducto);
+                
         }
 
         // 🧩 NUEVO — buscar por categoria

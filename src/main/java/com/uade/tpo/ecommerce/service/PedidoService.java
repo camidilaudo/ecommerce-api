@@ -3,6 +3,8 @@ package com.uade.tpo.ecommerce.service;
 import java.util.List;
 
 import com.uade.tpo.ecommerce.exception.BadRequestException;
+import com.uade.tpo.ecommerce.exception.ResourceNotFoundException;
+
 import org.springframework.stereotype.Service;
 
 import com.uade.tpo.ecommerce.model.Pedido;
@@ -24,10 +26,11 @@ public class PedidoService {
 
     public Pedido getPedidoById(Long id) {
         return pedidoRepository.findById(id)
-                .orElseThrow(() -> new BadRequestException("Pedido no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado"));
     }
 
     public void deletePedidoById(Long id) {
+        getPedidoById(id); // Verificar que el pedido existe antes de eliminar
         pedidoRepository.deleteById(id);
     }
 
