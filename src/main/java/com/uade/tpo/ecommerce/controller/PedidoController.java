@@ -16,32 +16,32 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
 
-// La api para productos con los endpoints para crear, editar, eliminar y listar productos
-// http://localhost:8080/api/productos Listar productos
-// http://localhost:8080/api/productos/1 Buscar productos por ID
-// http://localhost:8080/api/productosEditar producto
-// http://localhost:8080/api/productosEliminar producto
+// La api para pedidos con los endpoints para editar, eliminar y listar pedidos
+// http://localhost:8080/api/pedidos Listar pedidos
+// http://localhost:8080/api/pedidos/1 Buscar pedidos por ID
+// http://localhost:8080/api/pedidos/Editar pedido
+// http://localhost:8080/api/pedidos/Eliminar pedido
 @RestController
 @RequestMapping("/api/pedidos")
 public class PedidoController {
     @Autowired
     private PedidoService pedidoService;
 
-    // http://localhost:8080/api/productos -> devuelve la lista de productos
+    // http://localhost:8080/api/pedidos -> devuelve la lista de pedidos
     @GetMapping
     public List<Pedido> getAllPedidos() {
         return pedidoService.getAllPedidos();
     }
 
-    // http://localhost:8080/api/productos/1 -> devuelve el producto con id 1
+    // http://localhost:8080/api/pedidos/1 -> devuelve el pedido con id 1
     @GetMapping("/{id}")
     public Pedido getPedidoById(@PathVariable Long id) {
         return pedidoService.getPedidoById(id);
     }
 
-    // del http://localhost:8080/api/productos/1 -> elimina el producto con id 1
+    // del http://localhost:8080/api/pedidos/1 -> elimina el pedido con id 1
     @DeleteMapping("/{id}")
-    public void deleteProductoById(@PathVariable Long id) {
+    public void deletePedidoById(@PathVariable Long id) {
         pedidoService.deletePedidoById(id);
     }
 
@@ -52,7 +52,7 @@ public class PedidoController {
     }
 
     @PutMapping("/{id}")
-    public Pedido udpatePedido(@PathVariable Long id, @RequestBody Pedido pedido) {
+    public Pedido updatePedido(@PathVariable Long id, @RequestBody Pedido pedido) {
         return pedidoService.updatePedido(id, pedido);
     }
 

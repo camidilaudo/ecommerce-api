@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import com.uade.tpo.ecommerce.exception.BadRequestException;
+import com.uade.tpo.ecommerce.exception.ResourceNotFoundException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,13 +33,18 @@ public class CategoriaService {
 
         return categoriaRepository
                 .findById(id)
-                .orElse(null);
+                .orElseThrow(() -> new ResourceNotFoundException("Categoria" , id));
 
     }
 
     // DELETE categoria
     public void deleteCategoriaById(Long id) {
 
+        Categoria existingCategoria = getCategoriaById(id);
+
+        if (existingCategoria == null) {
+            throw new ResourceNotFoundException("Categoria" , id);
+        }
         categoriaRepository.deleteById(id);
 
     }
@@ -70,16 +77,10 @@ public class CategoriaService {
         Categoria existingCategoria =
                 getCategoriaById(id);
 
-        if (existingCategoria != null) {
+        existingCategoria.setNombre(categoria.getNombre());
 
-            existingCategoria
-                    .setNombre(categoria.getNombre());
-
-            return categoriaRepository
-                    .save(existingCategoria);
-        }
-
-        return null;
+        return categoriaRepository.save(existingCategoria);
+   
     }
 
     //NUEVO — buscar por nombre
@@ -88,7 +89,7 @@ public class CategoriaService {
 
         return categoriaRepository
                 .findByNombre(nombre)
-                .orElse(null);
+                .orElseThrow(() -> new ResourceNotFoundException("Categoria con nombre '" + nombre + "' no encontrada"));
 
     }
 
