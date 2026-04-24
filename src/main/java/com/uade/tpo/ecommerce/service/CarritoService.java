@@ -1,32 +1,43 @@
 package com.uade.tpo.ecommerce.service;
 
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.uade.tpo.ecommerce.model.*;
 import com.uade.tpo.ecommerce.repository.*;
+import com.uade.tpo.ecommerce.dto.*;
 import com.uade.tpo.ecommerce.exception.*;
+
 import jakarta.transaction.Transactional;
+
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional // atomicidad
+@Transactional
 public class CarritoService {
 
-    private final CarritoRepository carritoRepository;
-    private final ProductoRepository productoRepository;
-    private final UsuarioRepository usuarioRepository;
-    private final PedidoRepository pedidoRepository;
+    @Autowired
+    private CarritoRepository carritoRepository;
 
-    // Metodo para obtener o crear el carrito del usuario
-    public Carrito obtenerCarrito(Long usuarioId) {
+    @Autowired
+    private ProductoService productoService;
+
+    @Autowired
+    private UsuarioService usuarioService;
+
+    @Autowired
+    private PedidoService pedidoService;
+
+    private Carrito getOrCreateCarritoEntity(Long usuarioId) {
         if (usuarioId == null) {
             throw new UnAuthorizedException("No se encontró un usuario autenticado para acceder al carrito.");
-        } //usuario no autenticado
-
-        Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
-
+        }
+        Usuario usuario = usuarioService.getUsuarioEntityById(usuarioId);
         return carritoRepository.findByUsuarioId(usuarioId)
                 .orElseGet(() -> {
                     Carrito nuevo = new Carrito();
@@ -35,11 +46,63 @@ public class CarritoService {
                 });
     }
 
-    // Metodo para agregar productos validando stock
-    public Carrito agregarProducto(Long productoId, Long usuarioId) {
-        Carrito carrito = obtenerCarrito(usuarioId);
-        Producto producto = productoRepository.findById(productoId)
-                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
+    private CarritoDTO toDto(Carrito carrito) {
+        if (carrito == null) return null;
+        Usuario usuario = carrito.getUsuario();
+        UsuarioDTO usuarioDto = usuario != null ? UsuarioDTO.builder()
+            .id(usuario.getId())
+            .nombreUsuario(usuario.getNombreUsuario())
+            .nombre(usuario.getNombre())
+            .apellido(usuario.getApellido())
+            .email(usuario.getEmail())
+            .role(usuario.getRole())
+            .fechaNacimiento(usuario.getFechaNacimiento())
+            .sexo(usuario.getSexo())
+            .build() : null;
+
+        List<CarritoItemDTO> items = carrito.getItems() != null ? carrito.getItems().stream().map(item -> {
+            Producto p = item.getProducto();
+            ProductoDTO pDto = p != null ? ProductoDTO.builder()
+                .id(p.getId())
+                .nombre(p.getNombre())
+                .precio(p.getPrecio())
+                .descripcion(p.getDescripcion())
+                .stock(p.getStock())
+                .imagenes(p.getImagenes())
+                .categoriaIds(p.getCategorias() != null ? p.getCategorias().stream().map(Categoria::getId).collect(Collectors.toList()) : null)
+                .usuarioId(p.getUsuario() != null ? p.getUsuario().getId() : null)
+                .build() : null;
+            return CarritoItemDTO.builder()
+                .id(item.getId())
+                .producto(pDto)
+                .cantidad(item.getCantidad())
+                .build();
+        }).collect(Collectors.toList()) : new ArrayList<>();
+
+        return CarritoDTO.builder()
+            .id(carrito.getId())
+            .usuario(usuarioDto)
+            .items(items)
+            .build();
+    }
+
+    public CarritoDTO obtenerCarrito(Long usuarioId) {
+        Carrito carrito = getOrCreateCarritoEntity(usuarioId);
+        return toDto(carrito);
+    }
+
+    public CarritoDTO agregarProducto(Long productoId, Long usuarioId) {
+        Carrito carrito = getOrCreateCarritoEntity(usuarioId);
+        ProductoDTO productoDTO = productoService.getProductoById(productoId);
+        Producto producto = Producto.builder()
+            .id(productoDTO.getId())
+            .nombre(productoDTO.getNombre())
+            .precio(productoDTO.getPrecio())
+            .descripcion(productoDTO.getDescripcion())
+            .stock(productoDTO.getStock())
+            .imagenes(productoDTO.getImagenes())
+            .usuario(usuarioService.getUsuarioEntityById(productoDTO.getUsuarioId()))
+            .build();
 
         if (producto.getStock() <= 0) {
             throw new BadRequestException("No hay stock disponible para el producto: " + producto.getNombre());
@@ -51,68 +114,72 @@ public class CarritoService {
                     throw new BadRequestException("No hay suficiente stock disponible");
                 }
                 item.setCantidad(item.getCantidad() + 1);
-                return carritoRepository.save(carrito);
+                Carrito saved = carritoRepository.save(carrito);
+                return toDto(saved);
             }
         }
 
-        CarritoItem item = new CarritoItem();
-        item.setProducto(producto);
-        item.setCantidad(1);
-        item.setCarrito(carrito);
-        carrito.getItems().add(item);
-        return carritoRepository.save(carrito);
+        CarritoItem newItem = new CarritoItem();
+        newItem.setProducto(producto);
+        newItem.setCantidad(1);
+        newItem.setCarrito(carrito);
+        carrito.getItems().add(newItem);
+        Carrito saved = carritoRepository.save(carrito);
+        return toDto(saved);
     }
 
-    public Carrito eliminarProducto(Long productoId, Long usuarioId) {
-        Carrito carrito = obtenerCarrito(usuarioId);
+    public CarritoDTO eliminarProducto(Long productoId, Long usuarioId) {
+        Carrito carrito = getOrCreateCarritoEntity(usuarioId);
         carrito.getItems().removeIf(item -> item.getProducto().getId().equals(productoId));
-        return carritoRepository.save(carrito);
+        Carrito saved = carritoRepository.save(carrito);
+        return toDto(saved);
     }
 
-    public Carrito vaciarCarrito(Long usuarioId) {
-        Carrito carrito = obtenerCarrito(usuarioId);
+    public CarritoDTO vaciarCarrito(Long usuarioId) {
+        Carrito carrito = getOrCreateCarritoEntity(usuarioId);
         carrito.getItems().clear();
-        return carritoRepository.save(carrito);
+        Carrito saved = carritoRepository.save(carrito);
+        return toDto(saved);
     }
 
-    /**
-     * LÓGICA DE CHECKOUT (Endpoint: POST /api/carrito/checkout)
-     * 1. Crea el Pedido asociado al usuario.
-     * 2. Descuenta stock de cada producto.
-     * 3. Calcula el total.
-     * 4. Vacía el carrito.
-     */
-    public String checkout(Long usuarioId) {
-        Carrito carrito = obtenerCarrito(usuarioId);
+    public CheckoutResponse checkout(Long usuarioId) {
+        Carrito carrito = getOrCreateCarritoEntity(usuarioId);
 
         if (carrito.getItems().isEmpty()) {
             throw new BadRequestException("El carrito está vacío");
         }
 
-        // creamos y asignamos pedido
-        Pedido pedido = new Pedido();
-        pedido.setUsuario(carrito.getUsuario());
-        pedido.setItems(new ArrayList<>());
+        Pedido pedido = Pedido.builder()
+                .usuario(carrito.getUsuario())
+                .items(new ArrayList<>())
+                .build();
+
         double totalCost = 0;
 
-        // Procesamos cada ítem del carrito
         for (CarritoItem itemCarrito : carrito.getItems()) {
-            Producto producto = itemCarrito.getProducto();
+            ProductoDTO productoDTO = productoService.getProductoById(itemCarrito.getProducto().getId());
 
-            // Validación de stock final
+            Producto producto = Producto.builder()
+                .id(productoDTO.getId())
+                .nombre(productoDTO.getNombre())
+                .precio(productoDTO.getPrecio())
+                .descripcion(productoDTO.getDescripcion())
+                .stock(productoDTO.getStock())
+                .imagenes(productoDTO.getImagenes())
+                .usuario(usuarioService.getUsuarioEntityById(productoDTO.getUsuarioId()))
+                .build();
+                
             if (producto.getStock() < itemCarrito.getCantidad()) {
                 throw new BadRequestException("Stock insuficiente para: " + producto.getNombre());
             }
 
-            // Descontamos el stock
             producto.setStock(producto.getStock() - itemCarrito.getCantidad());
-            productoRepository.save(producto);
+            productoService.saveProducto(producto,carrito.getUsuario());
 
-            // Creamos el detalle del pedido
             PedidoItem pedidoItem = PedidoItem.builder()
                     .producto(producto)
                     .cantidad(itemCarrito.getCantidad())
-                    .precioUnitario(producto.getPrecio()) // Capturamos el precio actual
+                    .precioUnitario(producto.getPrecio())
                     .build();
 
             pedido.getItems().add(pedidoItem);
@@ -120,14 +187,13 @@ public class CarritoService {
         }
 
         pedido.setTotal(totalCost);
+        PedidoDTO savedPedido = pedidoService.savePedido(pedido);
 
-        // Guardamos el pedido en la base de datos
-        pedidoRepository.save(pedido);
-
-        // Limpiamos el carrito
         carrito.getItems().clear();
         carritoRepository.save(carrito);
 
-        return String.format("Compra realizada con éxito. Pedido #%d generado. Total a pagar: $%.2f", pedido.getId(), totalCost);
+        return CheckoutResponse.builder()
+            .mensaje(String.format("Compra realizada con éxito. Pedido #%d generado. Total a pagar: $%.2f", savedPedido.getId(), totalCost))
+            .build();
     }
 }

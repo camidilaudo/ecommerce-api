@@ -1,5 +1,7 @@
 package com.uade.tpo.ecommerce.controller;
 
+import com.uade.tpo.ecommerce.dto.DeleteResponse;
+import com.uade.tpo.ecommerce.dto.UsuarioDTO;
 import com.uade.tpo.ecommerce.model.Usuario;
 import com.uade.tpo.ecommerce.service.UsuarioService;
 
@@ -21,19 +23,19 @@ public class UsuarioController {
 
     // Listar todos los usuarios
     @GetMapping
-    public List<Usuario> getAllUsuarios() {
+    public List<UsuarioDTO> getAllUsuarios() {
         return usuarioService.getAllUsuarios();
     }
 
     // Buscar usuario por ID
     @GetMapping("/{id}")
-    public Usuario getUsuarioById(@PathVariable Long id) {
+    public UsuarioDTO getUsuarioById(@PathVariable Long id) {
         return usuarioService.getUsuarioById(id);
     }
 
     // Crear usuario (encripta password)
     @PostMapping
-    public Usuario saveUsuario(@RequestBody Usuario usuario) {
+    public UsuarioDTO saveUsuario(@RequestBody Usuario usuario) {
 
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
 
@@ -42,7 +44,7 @@ public class UsuarioController {
 
     // Actualizar usuario (también encripta si cambia password)
     @PutMapping("/{id}")
-    public Usuario updateUsuario(@PathVariable Long id, @RequestBody Usuario usuario) {
+    public UsuarioDTO updateUsuario(@PathVariable Long id, @RequestBody Usuario usuario) {
 
         if (usuario.getPassword() != null) {
             usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
@@ -53,7 +55,7 @@ public class UsuarioController {
 
     // Eliminar usuario
     @DeleteMapping("/{id}")
-    public void deleteUsuarioById(@PathVariable Long id) {
-        usuarioService.deleteUsuarioById(id);
+    public DeleteResponse deleteUsuarioById(@PathVariable Long id) {
+        return usuarioService.deleteUsuarioById(id);
     }
 }

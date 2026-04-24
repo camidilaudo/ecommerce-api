@@ -8,9 +8,7 @@ import com.uade.tpo.ecommerce.model.Producto;
 import java.util.List;
 
 @Repository
-public interface ProductoRepository
-        extends JpaRepository<Producto, Long> {
-
+public interface ProductoRepository extends JpaRepository<Producto, Long> {
     // Buscar productos por categoria (ManyToMany)
     List<Producto> findByCategoriasId(Long categoriaId);
 

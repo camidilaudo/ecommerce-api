@@ -1,10 +1,10 @@
 package com.uade.tpo.ecommerce.controller;
 
-import com.uade.tpo.ecommerce.dto.LoginResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
 
+import com.uade.tpo.ecommerce.dto.LoginResponse;
 import com.uade.tpo.ecommerce.dto.LoginRequest;
 import com.uade.tpo.ecommerce.dto.RegisterRequest;
 import com.uade.tpo.ecommerce.dto.RegisterResponse;
@@ -40,9 +40,8 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
-
-        return ResponseEntity.ok(authenticationService.login(request));
+    public LoginResponse login(@RequestBody LoginRequest request) {
+        return authenticationService.login(request);
     }
 
     @PostMapping("/register")

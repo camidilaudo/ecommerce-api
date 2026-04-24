@@ -2,18 +2,17 @@ package com.uade.tpo.ecommerce.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import com.uade.tpo.ecommerce.service.UsuarioService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 //este filtro se ejecuta antes de llamar al controller
@@ -23,7 +22,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private JwtUtil jwtUtil;
 
     @Autowired
-    private com.uade.tpo.ecommerce.repository.UsuarioRepository usuarioRepository;
+    private UsuarioService usuarioService;
 
     /**
      * Este método se ejecuta en cada petición HTTP para verificar si existe un token JWT válido.
@@ -39,7 +38,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 String username = jwtUtil.getUsername(token);
                 
                 // Cargar el usuario completo desde la base de datos
-                var usuario = usuarioRepository.findByEmail(username).orElse(null);
+                var usuario = usuarioService.getUsuarioEntityByEmail(username);
                 
                 if (usuario != null) {
                     // Crea un objeto de autenticación con el objeto Usuario como principal

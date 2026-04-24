@@ -3,6 +3,8 @@ package com.uade.tpo.ecommerce.controller;
 import com.uade.tpo.ecommerce.model.Producto;
 import com.uade.tpo.ecommerce.model.Usuario;
 import com.uade.tpo.ecommerce.service.ProductoService;
+import com.uade.tpo.ecommerce.dto.DeleteResponse;
+import com.uade.tpo.ecommerce.dto.ProductoDTO;
 
 import java.util.List;
 
@@ -22,96 +24,55 @@ public class ProductoController {
     // GET todos los productos
     // http://localhost:8080/api/productos
     @GetMapping
-    public List<Producto> getAllProductos() {
-
+    public List<ProductoDTO> getAllProductos() {
         return productoService.getAllProductos();
-
     }
 
     // GET producto por ID
     // http://localhost:8080/api/productos/1
     @GetMapping("/{id}")
-    public Producto getProductoById(
-            @PathVariable Long id) {
-
-        return productoService
-                .getProductoById(id);
-
+    public ProductoDTO getProductoById(@PathVariable Long id) {
+        return productoService.getProductoById(id);
     }
 
     // DELETE producto
     // http://localhost:8080/api/productos/1
     @DeleteMapping("/{id}")
-    public void deleteProductoById(
-            @PathVariable Long id,
-            @AuthenticationPrincipal Usuario usuario) {
-
-        productoService
-                .deleteProductoById(id, usuario.getId());
-
+    public DeleteResponse deleteProductoById(@PathVariable Long id, @AuthenticationPrincipal Usuario usuario) {
+        return productoService.deleteProductoById(id, usuario.getId());
     }
 
     // POST crear producto
     // http://localhost:8080/api/productos
     @PostMapping
-    public Producto saveProducto(
-            @Valid @RequestBody Producto producto,
-            @AuthenticationPrincipal Usuario usuario) {
-
-        return productoService
-                .saveProducto(producto, usuario);
-
+    public ProductoDTO saveProducto(@Valid @RequestBody Producto producto, @AuthenticationPrincipal Usuario usuario) {
+        return productoService.saveProducto(producto, usuario);
     }
 
     // PUT actualizar producto
     // http://localhost:8080/api/productos/1
     @PutMapping("/{id}")
-    public Producto udpateProducto(
-            @PathVariable Long id,
-            @Valid @RequestBody Producto producto,
-            @AuthenticationPrincipal Usuario usuario) {
-
-        return productoService
-                .updateProducto(id, producto, usuario.getId());
+    public ProductoDTO udpateProducto(@PathVariable Long id, @Valid @RequestBody Producto producto, @AuthenticationPrincipal Usuario usuario) {
+        return productoService.updateProducto(id, producto, usuario.getId());
     }
 
-
-
-    // 🧩 NUEVO — buscar productos por categoria
     // http://localhost:8080/api/productos/categoria/1
     @GetMapping("/categoria/{id}")
-    public List<Producto> getByCategoria(
-            @PathVariable Long id) {
-
-        return productoService
-                .getByCategoria(id);
-
+    public List<ProductoDTO> getByCategoria(@PathVariable Long id) {
+        return productoService.getByCategoria(id);
     }
 
-    // 🧩 NUEVO — buscar por nombre
     // http://localhost:8080/api/productos/buscar?nombre=iphone
     @GetMapping("/buscar")
-    public List<Producto> buscarPorNombre(
-            @RequestParam String nombre) {
-
-        return productoService
-                .buscarPorNombre(nombre);
-
+    public List<ProductoDTO> buscarPorNombre(@RequestParam String nombre) {
+        return productoService.buscarPorNombre(nombre);
     }
 
-    
     // PUT actualizar stock de producto
     // http://localhost:8080/api/productos/1/stock?stock=10
     @PutMapping("/{id}/stock")
-    public Producto udpateStockProducto(
-            @PathVariable Long id,
-            @RequestParam Integer stock,
-
-            @AuthenticationPrincipal Usuario usuario) {
-
-        return productoService
-                .updateStockProducto(id, stock, usuario.getId());
-
+    public ProductoDTO udpateStockProducto(@PathVariable Long id, @RequestParam Integer stock, @AuthenticationPrincipal Usuario usuario) {
+        return productoService.updateStockProducto(id, stock, usuario.getId());
     }
 
 }
