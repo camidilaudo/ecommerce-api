@@ -1,11 +1,16 @@
 package com.uade.tpo.ecommerce.service;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import com.uade.tpo.ecommerce.exception.BadRequestException;
 import com.uade.tpo.ecommerce.model.*;
-import com.uade.tpo.ecommerce.repository.*;
+import com.uade.tpo.ecommerce.repository.CarritoRepository;
+import com.uade.tpo.ecommerce.dto.CheckoutResponse;
+import com.uade.tpo.ecommerce.dto.CarritoDTO;
+import com.uade.tpo.ecommerce.dto.ProductoDTO;
+import com.uade.tpo.ecommerce.dto.PedidoDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,14 +40,13 @@ public class CarritoServiceTest {
     private CarritoRepository carritoRepository;
 
     @Mock
-    private ProductoRepository productoRepository;
+    private ProductoService productoService;
 
     @Mock
-    private UsuarioRepository usuarioRepository;
+    private UsuarioService usuarioService;
 
     @Mock
-    private PedidoRepository pedidoRepository;
-
+    private PedidoService pedidoService;
     @InjectMocks
     private CarritoService carritoService; // Inyecta los mocks anteriores en el servicio
 
@@ -57,11 +61,12 @@ public class CarritoServiceTest {
         usuarioPrueba.setId(1L);
         usuarioPrueba.setEmail("test@uade.edu.ar");
 
-        productoPrueba = new Producto();
-        productoPrueba.setId(100L);
-        productoPrueba.setNombre("Notebook");
-        productoPrueba.setPrecio(1500.0);
-        productoPrueba.setStock(10); // Empezamos con 10 unidades
+        productoPrueba = Producto.builder()
+                .id(100L)
+                .nombre("Notebook")
+                .precio(1500.0)
+                .stock(10)
+                .build();
 
         carritoPrueba = new Carrito();
         carritoPrueba.setUsuario(usuarioPrueba);
@@ -78,20 +83,41 @@ public class CarritoServiceTest {
         carritoPrueba.getItems().add(item);
 
         // Simulamos el comportamiento del repositorio
-        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuarioPrueba));
+        when(usuarioService.getUsuarioEntityById(1L)).thenReturn(usuarioPrueba);
         when(carritoRepository.findByUsuarioId(1L)).thenReturn(Optional.of(carritoPrueba));
 
+        ProductoDTO productoDTO = ProductoDTO.builder()
+            .id(productoPrueba.getId())
+            .nombre(productoPrueba.getNombre())
+            .precio(productoPrueba.getPrecio())
+            .stock(productoPrueba.getStock())
+            .usuarioId(usuarioPrueba.getId())
+            .build();
+
+        when(productoService.getProductoById(productoPrueba.getId())).thenReturn(productoDTO);
+        when(pedidoService.savePedido(any(Pedido.class))).thenReturn(PedidoDTO.builder().id(1L).total(3000.0).build());
+
+        when(productoService.saveProducto(any(Producto.class), eq(usuarioPrueba))).thenAnswer(invocation -> {
+            Producto p = invocation.getArgument(0);
+            return ProductoDTO.builder()
+                .id(p.getId())
+                .nombre(p.getNombre())
+                .precio(p.getPrecio())
+                .stock(p.getStock())
+                .usuarioId(usuarioPrueba.getId())
+                .build();
+        });
+
         // WHEN: Ejecutamos el checkout
-        String resultado = carritoService.checkout(1L);
+        CheckoutResponse resultado = carritoService.checkout(1L);
 
         // THEN: Validaciones
         assertNotNull(resultado);
-        assertTrue(resultado.contains("Compra realizada con éxito"));
-        assertEquals(8, productoPrueba.getStock()); // Verificamos descuento de stock (10 - 2)
+        assertTrue(resultado.getMensaje().contains("Compra realizada con éxito"));
 
-        // Verificamos que se llamó al guardado de los cambios
-        verify(productoRepository, times(1)).save(any(Producto.class));
-        verify(pedidoRepository, times(1)).save(any(Pedido.class));
+        // Verificamos que se llamó al guardado de los cambios con stock descontado (10 - 2 = 8)
+        verify(productoService, times(1)).saveProducto(argThat(p -> p.getStock() == 8), eq(usuarioPrueba));
+        verify(pedidoService, times(1)).savePedido(any(Pedido.class));
         assertTrue(carritoPrueba.getItems().isEmpty()); // El carrito debe quedar vacío
     }
 
@@ -105,15 +131,55 @@ public class CarritoServiceTest {
         item.setCantidad(5);
         carritoPrueba.getItems().add(item);
 
-        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuarioPrueba));
+        when(usuarioService.getUsuarioEntityById(1L)).thenReturn(usuarioPrueba);
         when(carritoRepository.findByUsuarioId(1L)).thenReturn(Optional.of(carritoPrueba));
 
+        ProductoDTO productoDTO = ProductoDTO.builder()
+                .id(productoPrueba.getId())
+                .nombre(productoPrueba.getNombre())
+                .precio(productoPrueba.getPrecio())
+                .stock(productoPrueba.getStock())
+                .usuarioId(usuarioPrueba.getId())
+                .build();
+
+        when(productoService.getProductoById(productoPrueba.getId())).thenReturn(productoDTO);
+
         // WHEN & THEN: Verificamos que lance la excepción BadRequestException
-        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
-            carritoService.checkout(1L);
-        });
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> carritoService.checkout(1L));
 
         assertEquals("Stock insuficiente para: Notebook", exception.getMessage());
-        verify(pedidoRepository, never()).save(any()); // El pedido NO debe guardarse
+        verify(pedidoService, never()).savePedido(any()); // El pedido NO debe guardarse
+    }
+
+    @Test
+    void obtenerCarrito_RetornaCarritoDTO() {
+        when(usuarioService.getUsuarioEntityById(1L)).thenReturn(usuarioPrueba);
+        when(carritoRepository.findByUsuarioId(1L)).thenReturn(Optional.of(carritoPrueba));
+
+        CarritoDTO dto = carritoService.obtenerCarrito(1L);
+
+        assertNotNull(dto);
+        assertNotNull(dto.getUsuario());
+        assertEquals(usuarioPrueba.getId(), dto.getUsuario().getId());
+        assertTrue(dto.getItems().isEmpty());
+    }
+
+    @Test
+    void agregarProducto_NoStock_LanzaBadRequest() {
+        // GIVEN: producto con stock 0
+        ProductoDTO productoDTO = ProductoDTO.builder()
+                .id(productoPrueba.getId())
+                .nombre(productoPrueba.getNombre())
+                .precio(productoPrueba.getPrecio())
+                .stock(0)
+                .usuarioId(usuarioPrueba.getId())
+                .build();
+
+        when(usuarioService.getUsuarioEntityById(1L)).thenReturn(usuarioPrueba);
+        when(carritoRepository.findByUsuarioId(1L)).thenReturn(Optional.of(carritoPrueba));
+        when(productoService.getProductoById(productoPrueba.getId())).thenReturn(productoDTO);
+
+        BadRequestException ex = assertThrows(BadRequestException.class, () -> carritoService.agregarProducto(productoPrueba.getId(), 1L));
+        assertEquals("No hay stock disponible para el producto: " + productoPrueba.getNombre(), ex.getMessage());
     }
 }
