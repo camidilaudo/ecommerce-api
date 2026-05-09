@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "nombre": "Laptop Pro",
+    "descripcion": "Laptop de alta performance para profesionales",
+    "precio": 1299.99,
+    "categoria": "Electrónica",
+    "imagen": "https://via.placeholder.com/300x300?text=Laptop+Pro",
+    "stock": 15,
+    "rating": 4.5,
+    "gratis": true,
+    "internacional": false
+  },
+  {
+    "id": 2,
+    "nombre": "Auriculares Inalámbricos",
+    "descripcion": "Auriculares con cancelación de ruido activa",
+    "precio": 199.99,
+    "categoria": "Audio",
+    "imagen": "https://via.placeholder.com/300x300?text=Auriculares",
+    "stock": 42,
+    "rating": 4.8,
+    "gratis": true,
+    "internacional": false
+  },
+  {
+    "id": 3,
+    "nombre": "Monitor 4K",
+    "descripcion": "Monitor ultrawide 4K de 34 pulgadas",
+    "precio": 599.99,
+    "categoria": "Pantallas",
+    "imagen": "https://via.placeholder.com/300x300?text=Monitor+4K",
+    "stock": 8,
+    "rating": 4.7,
+    "gratis": false,
+    "internacional": false
+  },
+  {
+    "id": 4,
+    "nombre": "Teclado Mecánico",
+    "descripcion": "Teclado mecánico RGB con switches Cherry MX",
+    "precio": 149.99,
+    "categoria": "Periféricos",
+    "imagen": "https://via.placeholder.com/300x300?text=Teclado",
+    "stock": 25,
+    "rating": 4.6,
+    "gratis": false,
+    "internacional": false
+  },
+  {
+    "id": 5,
+    "nombre": "Ratón Gaming",
+    "descripcion": "Ratón óptico de precisión con 12 botones",
+    "precio": 79.99,
+    "categoria": "Periféricos",
+    "imagen": "https://via.placeholder.com/300x300?text=Raton",
+    "stock": 38,
+    "rating": 4.4,
+    "gratis": false,
+    "internacional": true
+  },
+  {
+    "id": 6,
+    "nombre": "Webcam HD",
+    "descripcion": "Webcam 1080p con micrófono integrado",
+    "precio": 89.99,
+    "categoria": "Accesorios",
+    "imagen": "https://via.placeholder.com/300x300?text=Webcam",
+    "stock": 20,
+    "rating": 4.3,
+    "gratis": true,
+    "internacional": false
+  }
+]
