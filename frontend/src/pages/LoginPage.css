@@ -1,0 +1,214 @@
+/* Paleta de colores minimalista Premium */
+:root {
+    --auth-bg: #f5f5f7;        /* Gris muy claro de fondo */
+    --auth-card: #ffffff;      /* Blanco para la tarjeta */
+    --input-border: #d2d2d7;   /* Borde gris definido */
+    --input-bg: #ffffff;
+    --text-main: #1d1d1f;      /* Texto negro Apple-style */
+    --text-muted: #86868b;     /* Texto gris de apoyo */
+    --accent-color: #007bff;   /* Azul Eléctrico para botones y foco */
+}
+
+/* Centrado total de la página de autenticación */
+.auth-page {
+    min-height: 100vh;
+    background-color: var(--auth-bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+/* Botón de "Volver al inicio" tipo link minimalista a la izquierda */
+.auth-back {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 14px;
+    cursor: pointer;
+    margin-bottom: 25px;
+    align-self: flex-start;
+    max-width: 440px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    transition: color 0.2s;
+    text-align: left;
+}
+
+.auth-back:hover {
+    color: var(--text-main);
+}
+
+/* Tarjeta del formulario con sombra suave */
+.auth-card {
+    background: var(--auth-card);
+    border-radius: 20px;
+    padding: 50px 40px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+}
+
+/* Ajuste para el registro que es más ancho */
+.auth-card--wide {
+    max-width: 540px;
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 35px;
+}
+
+.auth-logo {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-main);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+}
+
+.auth-logo span {
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+.auth-titulo {
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--text-main);
+    letter-spacing: -0.8px;
+}
+
+.auth-subtitulo {
+    font-size: 15px;
+    color: var(--text-muted);
+    margin-top: 25px;
+    text-align: center;
+}
+
+/* Formulario y campos de entrada con bordes definidos y accesibles */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.form-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-fila {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.form-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-left: 4px;
+}
+
+/* ✅ Scopeado a .auth-form para no pisar estilos globales de la app */
+.auth-form input,
+.auth-form select {
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 15px;
+    color: var(--text-main);
+    outline: none;
+    transition: all 0.2s ease-in-out;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Efecto de foco: Accesibilidad y diseño moderno */
+.auth-form input:focus,
+.auth-form select:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.15);
+}
+
+/* Botón principal de acción: Azul Eléctrico y centrado */
+.auth-submit {
+    background-color: var(--accent-color);
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    padding: 16px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    margin-top: 15px;
+
+    /* Centrado del botón dentro del formulario */
+    display: block;
+    width: auto;
+    min-width: 200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.auth-submit:hover {
+    opacity: 0.9;
+}
+
+.auth-submit:active {
+    transform: scale(0.98);
+}
+
+.auth-submit:disabled {
+    background-color: var(--text-muted);
+    cursor: not-allowed;
+}
+
+/* Links dentro del texto */
+.auth-link {
+    background: none;
+    border: none;
+    color: var(--accent-color);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: none;
+    margin-left: 4px;
+}
+
+.auth-link:hover {
+    text-decoration: underline;
+}
+
+/* Mensajes de error */
+.form-input--error {
+    border-color: #ff3b30 !important;
+    background-color: #fff5f5 !important;
+}
+
+.form-error {
+    font-size: 12px;
+    color: #ff3b30;
+    margin-left: 4px;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .auth-card {
+        padding: 35px 25px;
+    }
+    .form-fila {
+        grid-template-columns: 1fr;
+    }
+    .auth-submit {
+        width: 100%; /* Ocupa todo el ancho en móviles */
+    }
+}

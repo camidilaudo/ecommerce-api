@@ -1,0 +1,117 @@
+.categories-pills { display: flex; gap: 10px; overflow-x: auto; padding: 25px 0; scrollbar-width: none; justify-content: center; }
+.pill { padding: 10px 24px; border-radius: 25px; border: 1px solid #d2d2d7; background: white; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap; color: #1d1d1f; }
+.pill.active { background: #000; color: #fff; border-color: #000; }
+.pill:hover:not(.active) { background: #f5f5f7; border-color: #86868b; }
+
+.categorias {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+}
+
+.categorias-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+}
+
+.categorias-titulo {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: #37474F;
+}
+
+.categorias-limpiar {
+    background: none;
+    border: none;
+    color: #546E7A;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s;
+}
+
+.categorias-limpiar:hover {
+    color: #37474F;
+    text-decoration: underline;
+}
+
+/* ── CARRUSEL HORIZONTAL ── */
+.categorias-carrusel {
+    display: flex;
+    gap: 0.875rem;
+    overflow-x: auto;           /* scroll horizontal */
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.75rem;    /* espacio para la scrollbar */
+
+    /* Scrollbar discreta */
+    scrollbar-width: thin;
+    scrollbar-color: #B0BEC5 transparent;
+}
+
+.categorias-carrusel::-webkit-scrollbar {
+    height: 4px;
+}
+
+.categorias-carrusel::-webkit-scrollbar-thumb {
+    background: #B0BEC5;
+    border-radius: 2px;
+}
+
+/* Cada tarjeta tiene ancho fijo y no se encoge */
+.categoria-card {
+    flex: 0 0 150px;           /* ancho fijo, no encoge */
+    scroll-snap-align: start;
+
+    background: #ffffff;
+    border: 1.5px solid #CFD8DC;
+    border-radius: 12px;
+    padding: 1.25rem 0.75rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.categoria-card:hover {
+    border-color: #546E7A;
+    background: #F4F6F7;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(55, 71, 79, 0.1);
+}
+
+/* Tarjeta activa */
+.categoria-card--activa {
+    border-color: #37474F;
+    background: #CFD8DC;
+    box-shadow: 0 4px 12px rgba(55, 71, 79, 0.15);
+}
+
+.categoria-card--activa .categoria-nombre {
+    color: #37474F;
+}
+
+.categoria-icono {
+    font-size: 30px;
+    line-height: 1;
+}
+
+.categoria-nombre {
+    font-size: 13px;
+    font-weight: 600;
+    color: #546E7A;
+    white-space: nowrap;
+}
+
+.categoria-cantidad {
+    font-size: 11px;
+    color: #90A4AE;
+}
