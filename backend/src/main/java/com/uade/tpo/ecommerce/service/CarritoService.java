@@ -47,43 +47,46 @@ public class CarritoService {
     }
 
     private CarritoDTO toDto(Carrito carrito) {
-        if (carrito == null) return null;
+        if (carrito == null)
+            return null;
         Usuario usuario = carrito.getUsuario();
         UsuarioDTO usuarioDto = usuario != null ? UsuarioDTO.builder()
-            .id(usuario.getId())
-            .nombreUsuario(usuario.getNombreUsuario())
-            .nombre(usuario.getNombre())
-            .apellido(usuario.getApellido())
-            .email(usuario.getEmail())
-            .role(usuario.getRole())
-            .fechaNacimiento(usuario.getFechaNacimiento())
-            .sexo(usuario.getSexo())
-            .build() : null;
+                .id(usuario.getId())
+                .nombreUsuario(usuario.getNombreUsuario())
+                .nombre(usuario.getNombre())
+                .apellido(usuario.getApellido())
+                .email(usuario.getEmail())
+                .role(usuario.getRole())
+                .fechaNacimiento(usuario.getFechaNacimiento())
+                .sexo(usuario.getSexo())
+                .build() : null;
 
         List<CarritoItemDTO> items = carrito.getItems() != null ? carrito.getItems().stream().map(item -> {
             Producto p = item.getProducto();
             ProductoDTO pDto = p != null ? ProductoDTO.builder()
-                .id(p.getId())
-                .nombre(p.getNombre())
-                .precio(p.getPrecio())
-                .descripcion(p.getDescripcion())
-                .stock(p.getStock())
-                .imagenes(p.getImagenes())
-                .categoriaIds(p.getCategorias() != null ? p.getCategorias().stream().map(Categoria::getId).collect(Collectors.toList()) : null)
-                .usuarioId(p.getUsuario() != null ? p.getUsuario().getId() : null)
-                .build() : null;
+                    .id(p.getId())
+                    .nombre(p.getNombre())
+                    .precio(p.getPrecio())
+                    .descripcion(p.getDescripcion())
+                    .stock(p.getStock())
+                    .imagenes(p.getImagenes())
+                    .categoriaIds(p.getCategorias() != null
+                            ? p.getCategorias().stream().map(Categoria::getId).collect(Collectors.toList())
+                            : null)
+                    .usuarioId(p.getUsuario() != null ? p.getUsuario().getId() : null)
+                    .build() : null;
             return CarritoItemDTO.builder()
-                .id(item.getId())
-                .producto(pDto)
-                .cantidad(item.getCantidad())
-                .build();
+                    .id(item.getId())
+                    .producto(pDto)
+                    .cantidad(item.getCantidad())
+                    .build();
         }).collect(Collectors.toList()) : new ArrayList<>();
 
         return CarritoDTO.builder()
-            .id(carrito.getId())
-            .usuario(usuarioDto)
-            .items(items)
-            .build();
+                .id(carrito.getId())
+                .usuario(usuarioDto)
+                .items(items)
+                .build();
     }
 
     public CarritoDTO obtenerCarrito(Long usuarioId) {
@@ -95,14 +98,14 @@ public class CarritoService {
         Carrito carrito = getOrCreateCarritoEntity(usuarioId);
         ProductoDTO productoDTO = productoService.getProductoById(productoId);
         Producto producto = Producto.builder()
-            .id(productoDTO.getId())
-            .nombre(productoDTO.getNombre())
-            .precio(productoDTO.getPrecio())
-            .descripcion(productoDTO.getDescripcion())
-            .stock(productoDTO.getStock())
-            .imagenes(productoDTO.getImagenes())
-            .usuario(usuarioService.getUsuarioEntityById(productoDTO.getUsuarioId()))
-            .build();
+                .id(productoDTO.getId())
+                .nombre(productoDTO.getNombre())
+                .precio(productoDTO.getPrecio())
+                .descripcion(productoDTO.getDescripcion())
+                .stock(productoDTO.getStock())
+                .imagenes(productoDTO.getImagenes())
+                .usuario(usuarioService.getUsuarioEntityById(productoDTO.getUsuarioId()))
+                .build();
 
         if (producto.getStock() <= 0) {
             throw new BadRequestException("No hay stock disponible para el producto: " + producto.getNombre());
@@ -160,21 +163,21 @@ public class CarritoService {
             ProductoDTO productoDTO = productoService.getProductoById(itemCarrito.getProducto().getId());
 
             Producto producto = Producto.builder()
-                .id(productoDTO.getId())
-                .nombre(productoDTO.getNombre())
-                .precio(productoDTO.getPrecio())
-                .descripcion(productoDTO.getDescripcion())
-                .stock(productoDTO.getStock())
-                .imagenes(productoDTO.getImagenes())
-                .usuario(usuarioService.getUsuarioEntityById(productoDTO.getUsuarioId()))
-                .build();
-                
+                    .id(productoDTO.getId())
+                    .nombre(productoDTO.getNombre())
+                    .precio(productoDTO.getPrecio())
+                    .descripcion(productoDTO.getDescripcion())
+                    .stock(productoDTO.getStock())
+                    .imagenes(productoDTO.getImagenes())
+                    .usuario(usuarioService.getUsuarioEntityById(productoDTO.getUsuarioId()))
+                    .build();
+
             if (producto.getStock() < itemCarrito.getCantidad()) {
                 throw new BadRequestException("Stock insuficiente para: " + producto.getNombre());
             }
 
             producto.setStock(producto.getStock() - itemCarrito.getCantidad());
-            productoService.saveProducto(producto,carrito.getUsuario());
+            productoService.saveProducto(producto, carrito.getUsuario());
 
             PedidoItem pedidoItem = PedidoItem.builder()
                     .producto(producto)
@@ -193,7 +196,8 @@ public class CarritoService {
         carritoRepository.save(carrito);
 
         return CheckoutResponse.builder()
-            .mensaje(String.format("Compra realizada con éxito. Pedido #%d generado. Total a pagar: $%.2f", savedPedido.getId(), totalCost))
-            .build();
+                .mensaje(String.format("Compra realizada con éxito. Pedido #%d generado. Total a pagar: $%.2f",
+                        savedPedido.getId(), totalCost))
+                .build();
     }
 }
