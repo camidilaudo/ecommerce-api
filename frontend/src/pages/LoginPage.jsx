@@ -1,37 +1,52 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './LoginPage.css'; // Usamos el CSS unificado
+import { useNavigate, Link } from 'react-router-dom';
+import './LoginPage.css';
 
 /**
- * LoginPage — Página de inicio de sesión.
- * Corresponde al endpoint POST /api/auth/login.
+ * LoginPage — Componente para la autenticación de usuarios.
+ * Conecta con el endpoint POST /api/auth/login de Spring Boot 4.0.5.
  */
 const LoginPage = () => {
     const navigate = useNavigate();
 
-    // Estado del formulario mapeado al DTO LoginRequest
-    const [form, setForm] = useState({ email: '', password: '' });
+    // Estado del formulario mapeado al DTO LoginRequest.java
+    const [form, setForm] = useState({
+        email: '',
+        password: '',
+    });
+
     const [errores, setErrores] = useState({});
     const [cargando, setCargando] = useState(false);
 
+    // Manejador dinámico de cambios en los inputs
     const handleChange = (e) => {
         const { name, value } = e.target;
         setForm(prev => ({ ...prev, [name]: value }));
+
+        // Limpia el error del campo mientras el usuario escribe
         if (errores[name]) {
             setErrores(prev => ({ ...prev, [name]: '' }));
         }
     };
 
+    // Validación básica antes de enviar la petición a la red
     const validar = () => {
-        const err = {};
-        if (!form.email.trim()) err.email = 'Obligatorio';
-        else if (!/\S+@\S+\.\S+/.test(form.email)) err.email = 'Email inválido';
-        if (!form.password) err.password = 'Obligatorio';
-        return err;
+        const nuevosErrores = {};
+        if (!form.email.trim()) {
+            nuevosErrores.email = 'El correo es obligatorio';
+        } else if (!/\S+@\S+\.\S+/.test(form.email)) {
+            nuevosErrores.email = 'Ingresá un formato de email válido';
+        }
+        if (!form.password) {
+            nuevosErrores.password = 'La contraseña es obligatoria';
+        }
+        return nuevosErrores;
     };
 
-    const handleSubmit = (e) => {
+    // Lógica principal de inicio de sesión (Clase 08: Async/Await)
+    const handleSubmit = async (e) => {
         e.preventDefault();
+
         const erroresValidacion = validar();
         if (Object.keys(erroresValidacion).length > 0) {
             setErrores(erroresValidacion);
@@ -39,19 +54,47 @@ const LoginPage = () => {
         }
 
         setCargando(true);
-        console.log("Logueando usuario en Spring Boot 4.0.5:", form);
 
-        // Simulación de éxito de la API
-        setTimeout(() => {
+        try {
+            // Petición al backend en el puerto 8081
+            const response = await fetch('http://localhost:8081/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(form),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                // Manejo de credenciales incorrectas o errores de Spring Security
+                throw new Error(data.mensaje || 'Credenciales inválidas');
+            }
+
+            // --- PASO CLAVE: Persistencia del Token JWT ---
+            // Guardamos el token en localStorage para futuras peticiones (Carrito/Admin)
+            localStorage.setItem('token', data.token);
+
+            // Opcional: Podés guardar el rol o nombre de usuario si tu API lo devuelve
+            if (data.nombre) localStorage.setItem('usuarioNombre', data.nombre);
+
+            alert(`¡Bienvenido de nuevo!`);
+
+            // Redirige a la Home tras el éxito
+            navigate('/');
+
+        } catch (err) {
+            console.error("Error en el proceso de Login:", err.message);
+            alert(`Error al iniciar sesión: ${err.message}`);
+        } finally {
             setCargando(false);
-            alert(`¡Bienvenido!`);
-            navigate('/'); // Redirige a HomePage tras el login
-        }, 800);
+        }
     };
 
     return (
         <div className="auth-page">
-            {/* Navegación corregida con useNavigate */}
+            {/* Navegación fluida SPA */}
             <button className="auth-back" onClick={() => navigate('/')}>
                 ← Volver al inicio
             </button>
@@ -62,7 +105,6 @@ const LoginPage = () => {
                     <h2 className="auth-titulo">Iniciá sesión</h2>
                     <p className="auth-subtitulo">
                         ¿No tenés cuenta?{' '}
-                        {/* Navegación corregida con useNavigate */}
                         <button className="auth-link" onClick={() => navigate('/register')}>
                             Registrate
                         </button>
@@ -70,7 +112,8 @@ const LoginPage = () => {
                 </div>
 
                 <form className="auth-form" onSubmit={handleSubmit} noValidate>
-                    {/* Fila: Email */}
+
+                    {/* Campo: Email */}
                     <div className="form-grupo">
                         <label className="form-label" htmlFor="email">Correo electrónico</label>
                         <input
@@ -78,15 +121,17 @@ const LoginPage = () => {
                             name="email"
                             type="email"
                             className={errores.email ? 'form-input--error' : ''}
-                            // Placeholder eliminado para diseño minimalista
                             value={form.email}
                             onChange={handleChange}
+                            autoComplete="email"
                             required
                         />
-                        {errores.email && <span className="form-error">{errores.email}</span>}
+                        {errores.email && (
+                            <span className="form-error">{errores.email}</span>
+                        )}
                     </div>
 
-                    {/* Fila: Contraseña */}
+                    {/* Campo: Password */}
                     <div className="form-grupo">
                         <label className="form-label" htmlFor="password">Contraseña</label>
                         <input
@@ -96,19 +141,23 @@ const LoginPage = () => {
                             className={errores.password ? 'form-input--error' : ''}
                             value={form.password}
                             onChange={handleChange}
+                            autoComplete="current-password"
                             required
                         />
-                        {errores.password && <span className="form-error">{errores.password}</span>}
+                        {errores.password && (
+                            <span className="form-error">{errores.password}</span>
+                        )}
                     </div>
 
-                    {/* Botón submit: Centrado y Azul Eléctrico vía CSS */}
+                    {/* Botón de acción con estado de carga */}
                     <button
                         type="submit"
                         className="auth-submit"
                         disabled={cargando}
                     >
-                        {cargando ? 'Ingresando...' : 'Iniciar sesión'}
+                        {cargando ? 'Verificando...' : 'Iniciar sesión'}
                     </button>
+
                 </form>
             </div>
         </div>
