@@ -1,0 +1,150 @@
+.navbar {
+    height: 64px;
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px); /* Efecto cristalino */
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid #d2d2d7;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    padding: 0 30px;
+}
+
+/* Logo */
+.nav-brand {
+    text-decoration: none;
+    color: #1d1d1f;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.8px;
+    white-space: nowrap;
+    flex: 1; /* Ocupa espacio para equilibrar */
+}
+
+.brand-sub {
+    font-weight: 400;
+    color: #86868b;
+}
+
+/* Barra de búsqueda integrada y equilibrada */
+.nav-search-wrapper {
+    flex: 0 1 480px; /* Ancho máximo flexible */
+    display: flex;
+    justify-content: center;
+}
+
+.search-input-container {
+    position: relative;
+    width: 100%;
+}
+
+.search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #86868b;
+    pointer-events: none;
+}
+
+.nav-search-input {
+    width: 100%;
+    background-color: #f5f5f7;
+    border: 1px solid transparent;
+    border-radius: 20px; /* Bordes redondeados */
+    padding: 10px 15px 10px 40px;
+    font-size: 14px;
+    color: #1d1d1f;
+    transition: all 0.2s ease;
+}
+
+.nav-search-input:focus {
+    background-color: #ffffff;
+    border-color: #0071e3;
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+}
+
+/* Acciones derecha */
+.nav-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 1;
+}
+
+.nav-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #1d1d1f;
+    padding: 10px;
+    border-radius: 50%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.2s;
+}
+
+.nav-btn:hover {
+    background-color: #f5f5f7;
+}
+
+.nav-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background-color: #1d1d1f;
+    color: #ffffff;
+    font-size: 9px;
+    font-weight: 700;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Menú desplegable usuario */
+.user-menu-wrapper {
+    position: relative;
+}
+
+.user-dropdown {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    background: #ffffff;
+    border: 1px solid #d2d2d7;
+    border-radius: 14px;
+    width: 200px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    padding: 8px;
+}
+
+.user-dropdown a, .user-dropdown button {
+    display: block;
+    width: 100%;
+    padding: 12px 16px;
+    text-align: left;
+    color: #1d1d1f;
+    text-decoration: none;
+    font-size: 14px;
+    border: none;
+    background: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.user-dropdown a:hover {
+    background-color: #f5f5f7;
+}

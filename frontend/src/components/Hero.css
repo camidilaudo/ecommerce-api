@@ -1,0 +1,97 @@
+.hero {
+    background-color: #37474F;
+    padding: 6rem 2rem 5rem;
+    text-align: center;
+}
+
+.hero-badge {
+    display: inline-block;
+    background: rgba(176, 190, 197, 0.15);
+    color: #90A4AE;
+    border: 1px solid rgba(176, 190, 197, 0.25);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 1.75rem;
+}
+
+.hero-title {
+    color: #CFD8DC;
+    font-size: 54px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -1.5px;
+    max-width: 640px;
+    margin: 0 auto 1.25rem;
+    font-family: Georgia, serif;
+}
+
+/* Palabra destacada */
+.hero-title em {
+    color: #90A4AE;
+    font-style: normal;
+}
+
+.hero-subtitle {
+    color: #90A4AE;
+    font-size: 17px;
+    line-height: 1.65;
+    max-width: 480px;
+    margin: 0 auto 2.5rem;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.hero-btn-primary {
+    background: #546E7A;
+    color: #CFD8DC;
+    border: none;
+    padding: 14px 34px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.hero-btn-primary:hover {
+    background: #455A64;
+    transform: translateY(-2px);
+}
+
+.hero-btn-ghost {
+    background: transparent;
+    color: #B0BEC5;
+    border: 1px solid #546E7A;
+    padding: 14px 34px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.hero-btn-ghost:hover {
+    border-color: #90A4AE;
+    color: #CFD8DC;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 36px;
+        letter-spacing: -0.5px;
+    }
+
+    .hero-subtitle {
+        font-size: 15px;
+    }
+}

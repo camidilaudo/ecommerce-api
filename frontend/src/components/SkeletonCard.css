@@ -1,0 +1,49 @@
+/**
+ * Estilos para el efecto de carga (Skeleton).
+ * Incluye la animación 'shimmer' para dar sensación de movimiento.
+ */
+.skeleton-card {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid #d2d2d7;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.skeleton-image {
+    height: 200px;
+    background: #eee;
+    border-radius: 8px;
+}
+
+.skeleton-text {
+    height: 18px;
+    background: #eee;
+    border-radius: 4px;
+    width: 90%;
+}
+
+.skeleton-text.short {
+    width: 60%;
+}
+
+.skeleton-footer {
+    height: 40px;
+    background: #eee;
+    border-radius: 6px;
+    margin-top: 10px;
+}
+
+/* Animación de brillo */
+.shimmer {
+    background: linear-gradient(90deg, #f0f0f0 25%, #f8f8f8 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer-animation 1.5s infinite;
+}
+
+@keyframes shimmer-animation {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
