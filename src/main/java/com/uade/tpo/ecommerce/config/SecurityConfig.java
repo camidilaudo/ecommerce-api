@@ -18,35 +18,16 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 /**
- * ==========================================================
- *                  Clase: SecurityConfig
- * ==========================================================
- * Descripción:
- * Configura la seguridad del sistema utilizando
- * Spring Security y autenticación basada en JWT.
- *
- * @param jwtFilter            → Filtro encargado de validar
- *                                tokens JWT en cada request.
- * @param usuarioRepository    → Repositorio utilizado para
- *                                obtener usuarios desde la BD.
- *
- * Componentes principales:
- * userDetailsService     → Carga usuarios por email.
- * authenticationManager  → Gestiona la autenticación.
- * passwordEncoder        → Encripta contraseñas con BCrypt.
- * securityFilterChain    → Define reglas de acceso y seguridad.
- *
- * Configuración:
- * - Autenticación stateless mediante JWT.
- * - CSRF deshabilitado.
- * - Acceso público a login y catálogo.
- * - Acceso restringido por roles y autenticación.
- *
- * ==========================================================
+ * SecurityConfig - Integración Clase 08
+ * Configura la seguridad JWT y habilita la comunicación con el Frontend vía CORS.
  */
-
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -58,7 +39,7 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> usuarioRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
     }
 
     @Bean
@@ -71,50 +52,63 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    // Configura las reglas de seguridad para las diferentes rutas de la API
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                // 1. Llevado del profe: Habilitar CORS para permitir peticiones desde React
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
+                // 2. Deshabilitar CSRF (estándar para APIs Stateless con JWT)
                 .csrf(csrf -> csrf.disable())
+
+                // 3. Política de sesión Stateless (Clave para JWT)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // 4. Reglas de Autorización de Endpoints
                 .authorizeHttpRequests(auth -> auth
+                        // Rutas públicas (Login, Registro y ver Catálogo)
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/categorias/**").permitAll()
 
-                        // 1. ENDPOINTS PUBLICOS
-                        .requestMatchers("/api/auth/**").permitAll() // Login y Registro
-                        .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll() // Ver catálogo y detalles
+                        // Panel Admin: Solo usuarios con Rol ADMIN
+                        .requestMatchers("/api/admin/**").hasRole(Role.ADMIN.name())
 
-                        // 2. PRODUCTOS
-                        // GET: Públicos
-                        // POST: Cualquier usuario puede crear productos
-                        // PUT/DELETE: Usuarios autenticados pueden modificar/eliminar sus propios productos
+                        // Operaciones que requieren estar logueado (Cualquier ROL)
                         .requestMatchers(HttpMethod.POST, "/api/productos/**").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/api/productos/**").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/api/productos/**").authenticated()
-
-                        // 3. CATEGORIAS
-                        // Cualquier usuario logueado puede ver categorías para filtrar
-                        .requestMatchers(HttpMethod.GET, "/api/categorias/**").authenticated()
-                        // Solo ADMIN puede crear o borrar categorias
-                        .requestMatchers(HttpMethod.POST, "/api/categorias/**").hasRole(Role.ADMIN.name())
-                        .requestMatchers(HttpMethod.DELETE, "/api/categorias/**").hasRole(Role.ADMIN.name())
-
-                        // 4. CARRITO Y PEDIDOS (Requieren Token)
-                        // Cualquier usuario "USER" o "ADMIN" puede operar su propio carrito/pedidos
                         .requestMatchers("/api/carrito/**").authenticated()
                         .requestMatchers("/api/pedidos/**").authenticated()
+                        .requestMatchers("/api/usuarios/me").authenticated()
 
-                        // 5. USUARIOS
-                        // Admin puede listar a todos o borrar usuarios
-                        .requestMatchers(HttpMethod.GET, "/api/usuarios").hasRole(Role.ADMIN.name())
-                        .requestMatchers(HttpMethod.POST, "/api/usuarios").hasRole(Role.ADMIN.name())
-                        .requestMatchers(HttpMethod.DELETE, "/api/usuarios/**").hasRole(Role.ADMIN.name())
-                        // Cualquier usuario logueado puede acceder a su GET/PUT individual
-                        .requestMatchers("/api/usuarios/**").authenticated()
-
-                        // CUALQUIER OTRO (Catch-all por seguridad)
+                        // Cualquier otra petición debe estar autenticada
                         .anyRequest().authenticated()
                 )
+
+                // 5. Insertar el filtro JWT antes del filtro de autenticación por defecto
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    /**
+     * Definición de la política de CORS (Llevado del archivo del profe).
+     * Permite que el frontend en localhost:5173 acceda a los recursos de la API.
+     */
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        // Permitimos el origen de nuestro Frontend (Vite)
+        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        // Métodos HTTP permitidos
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        // Permitimos todos los headers para no tener problemas con Authorization (JWT)
+        configuration.setAllowedHeaders(List.of("*"));
+        // Permitir envío de credenciales (Cookies, Auth Headers)
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }

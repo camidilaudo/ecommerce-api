@@ -1,3 +1,4 @@
+/* --- Estilos base del listado (Tu código) --- */
 .product-list-container {
   padding: 3rem 2rem;
   max-width: 1100px;
@@ -27,8 +28,8 @@
 .product-list-empty {
   text-align: center;
   color: #90A4AE;
-  padding: 3rem 0;
-  font-size: 16px;
+  padding: 6rem 0;
+  font-size: 18px;
 }
 
 .products-grid {
@@ -37,33 +38,41 @@
   gap: 1.5rem;
 }
 
-.tag-gratis {
-  font-size: 12px;
-  color: #546E7A;
-  margin-top: 6px;
-  font-weight: 500;
+/* --- Estilos para el Hero de la HomePage (Nuevos para limpiar el JSX) --- */
+.home-hero {
+  padding: 80px 0;
+  text-align: center;
+  background-color: #f5f5f7;
 }
 
-.tag-intl {
-  font-size: 12px;
-  color: #546E7A;
-  margin-top: 4px;
-  font-weight: 500;
+.home-hero h1 {
+  font-size: 42px;
+  font-weight: 700;
+  letter-spacing: -1px;
 }
 
-@media (max-width: 768px) {
-  .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1rem;
-  }
+.home-hero p {
+  color: #86868b;
+  font-size: 20px;
 }
 
-@media (max-width: 480px) {
-  .products-grid {
-    grid-template-columns: 1fr;
-  }
+/* --- Estilos para estados de Error y Carga --- */
+.status-container {
+  text-align: center;
+  padding: 100px 20px;
+}
 
-  .product-list-title {
-    font-size: 20px;
-  }
+.btn-retry {
+  margin-top: 20px;
+  padding: 10px 24px;
+  cursor: pointer;
+  border-radius: 8px;
+  border: 1px solid #d2d2d7;
+  background: white;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.btn-retry:hover {
+  background: #f5f5f7;
 }
