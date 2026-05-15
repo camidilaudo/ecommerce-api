@@ -1,0 +1,184 @@
+.admin-page {
+    padding: 40px 20px;
+    min-height: 85vh;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    border-bottom: 1px solid #d2d2d7;
+    padding-bottom: 20px;
+}
+
+.admin-header h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1d1d1f;
+}
+
+.admin-header p {
+    color: #86868b;
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+.btn-back-store {
+    background: #000000;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.btn-back-store:hover {
+    opacity: 0.8;
+}
+
+.admin-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 30px;
+    align-items: start;
+}
+
+.admin-card {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    border: 1px solid #d2d2d7;
+}
+
+.admin-card h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 25px;
+    color: #1d1d1f;
+}
+
+/* Formulario */
+.admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.admin-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.admin-input-group label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1d1d1f;
+}
+
+.admin-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.admin-form input {
+    background: #f5f5f7;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.admin-form input:focus {
+    background: white;
+    border-color: #0071e3;
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+}
+
+.admin-submit-btn {
+    background: #0071e3;
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: opacity 0.2s;
+}
+
+.admin-submit-btn:hover {
+    opacity: 0.9;
+}
+
+/* Tabla de Inventario */
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    text-align: left;
+}
+
+.admin-table th {
+    padding: 12px;
+    border-bottom: 1px solid #d2d2d7;
+    color: #86868b;
+    font-weight: 500;
+}
+
+.admin-table td {
+    padding: 14px 12px;
+    border-bottom: 1px solid #f5f5f7;
+    color: #1d1d1f;
+}
+
+.table-name-cell {
+    font-weight: 600;
+}
+
+.stock-out {
+    color: #ff3b30;
+    font-weight: 600;
+}
+
+.admin-delete-btn {
+    background: none;
+    border: 1px solid #ff3b30;
+    color: #ff3b30;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.admin-delete-btn:hover {
+    background: #ff3b30;
+    color: white;
+}
+
+.admin-loading, .admin-empty {
+    text-align: center;
+    color: #86868b;
+    padding: 40px 0;
+}
+
+@media (max-width: 900px) {
+    .admin-grid {
+        grid-template-columns: 1fr;
+    }
+}

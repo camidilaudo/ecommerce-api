@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './LoginPage.css';
 
 /**
@@ -10,43 +10,27 @@ const LoginPage = () => {
     const navigate = useNavigate();
 
     // Estado del formulario mapeado al DTO LoginRequest.java
-    const [form, setForm] = useState({
-        email: '',
-        password: '',
-    });
-
+    const [form, setForm] = useState({ email: '', password: '' });
     const [errores, setErrores] = useState({});
     const [cargando, setCargando] = useState(false);
 
-    // Manejador dinámico de cambios en los inputs
     const handleChange = (e) => {
         const { name, value } = e.target;
         setForm(prev => ({ ...prev, [name]: value }));
-
-        // Limpia el error del campo mientras el usuario escribe
         if (errores[name]) {
             setErrores(prev => ({ ...prev, [name]: '' }));
         }
     };
 
-    // Validación básica antes de enviar la petición a la red
     const validar = () => {
         const nuevosErrores = {};
-        if (!form.email.trim()) {
-            nuevosErrores.email = 'El correo es obligatorio';
-        } else if (!/\S+@\S+\.\S+/.test(form.email)) {
-            nuevosErrores.email = 'Ingresá un formato de email válido';
-        }
-        if (!form.password) {
-            nuevosErrores.password = 'La contraseña es obligatoria';
-        }
+        if (!form.email.trim()) nuevosErrores.email = 'El correo es obligatorio';
+        if (!form.password) nuevosErrores.password = 'La contraseña es obligatoria';
         return nuevosErrores;
     };
 
-    // Lógica principal de inicio de sesión (Clase 08: Async/Await)
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         const erroresValidacion = validar();
         if (Object.keys(erroresValidacion).length > 0) {
             setErrores(erroresValidacion);
@@ -56,36 +40,29 @@ const LoginPage = () => {
         setCargando(true);
 
         try {
-            // Petición al backend en el puerto 8081
             const response = await fetch('http://localhost:8081/api/auth/login', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(form),
             });
 
             const data = await response.json();
 
             if (!response.ok) {
-                // Manejo de credenciales incorrectas o errores de Spring Security
                 throw new Error(data.mensaje || 'Credenciales inválidas');
             }
 
-            // --- PASO CLAVE: Persistencia del Token JWT ---
-            // Guardamos el token en localStorage para futuras peticiones (Carrito/Admin)
+            // Guardamos la información de la sesión de forma persistente
             localStorage.setItem('token', data.token);
-
-            // Opcional: Podés guardar el rol o nombre de usuario si tu API lo devuelve
+            localStorage.setItem('userRole', data.role || 'USER'); // Rol devuelto por el backend (USER o ADMIN)
             if (data.nombre) localStorage.setItem('usuarioNombre', data.nombre);
 
-            alert(`¡Bienvenido de nuevo!`);
-
-            // Redirige a la Home tras el éxito
-            navigate('/');
+            alert('¡Bienvenido de nuevo!');
+            navigate('/'); // Redirige a la página principal
+            window.location.reload(); // Fuerza la actualización para que la Navbar lea el nuevo estado
 
         } catch (err) {
-            console.error("Error en el proceso de Login:", err.message);
+            console.error("Error en Login:", err.message);
             alert(`Error al iniciar sesión: ${err.message}`);
         } finally {
             setCargando(false);
@@ -94,7 +71,6 @@ const LoginPage = () => {
 
     return (
         <div className="auth-page">
-            {/* Navegación fluida SPA */}
             <button className="auth-back" onClick={() => navigate('/')}>
                 ← Volver al inicio
             </button>
@@ -112,8 +88,6 @@ const LoginPage = () => {
                 </div>
 
                 <form className="auth-form" onSubmit={handleSubmit} noValidate>
-
-                    {/* Campo: Email */}
                     <div className="form-grupo">
                         <label className="form-label" htmlFor="email">Correo electrónico</label>
                         <input
@@ -123,15 +97,11 @@ const LoginPage = () => {
                             className={errores.email ? 'form-input--error' : ''}
                             value={form.email}
                             onChange={handleChange}
-                            autoComplete="email"
                             required
                         />
-                        {errores.email && (
-                            <span className="form-error">{errores.email}</span>
-                        )}
+                        {errores.email && <span className="form-error">{errores.email}</span>}
                     </div>
 
-                    {/* Campo: Password */}
                     <div className="form-grupo">
                         <label className="form-label" htmlFor="password">Contraseña</label>
                         <input
@@ -141,23 +111,14 @@ const LoginPage = () => {
                             className={errores.password ? 'form-input--error' : ''}
                             value={form.password}
                             onChange={handleChange}
-                            autoComplete="current-password"
                             required
                         />
-                        {errores.password && (
-                            <span className="form-error">{errores.password}</span>
-                        )}
+                        {errores.password && <span className="form-error">{errores.password}</span>}
                     </div>
 
-                    {/* Botón de acción con estado de carga */}
-                    <button
-                        type="submit"
-                        className="auth-submit"
-                        disabled={cargando}
-                    >
+                    <button type="submit" className="auth-submit" disabled={cargando}>
                         {cargando ? 'Verificando...' : 'Iniciar sesión'}
                     </button>
-
                 </form>
             </div>
         </div>
