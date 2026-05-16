@@ -1,30 +1,33 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './LoginPage.css';
+import { isValidEmail } from '../utils/validation';
+import { handleApiResponse } from '../utils/apiHelpers';
+import { toast } from 'react-toastify';
 
 /**
  * LoginPage — Componente para la autenticación de usuarios.
- * Conecta con el endpoint POST /api/auth/login de Spring Boot 4.0.5.
+ * Conecta con el endpoint POST /api/auth/login de Spring Boot.
  */
 const LoginPage = () => {
     const navigate = useNavigate();
 
-    // Estado del formulario mapeado al DTO LoginRequest.java
     const [form, setForm] = useState({ email: '', password: '' });
     const [errores, setErrores] = useState({});
     const [cargando, setCargando] = useState(false);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setForm(prev => ({ ...prev, [name]: value }));
+        setForm((prev) => ({ ...prev, [name]: value }));
         if (errores[name]) {
-            setErrores(prev => ({ ...prev, [name]: '' }));
+            setErrores((prev) => ({ ...prev, [name]: '' }));
         }
     };
 
     const validar = () => {
         const nuevosErrores = {};
         if (!form.email.trim()) nuevosErrores.email = 'El correo es obligatorio';
+        else if (!isValidEmail(form.email)) nuevosErrores.email = 'Email inválido';
         if (!form.password) nuevosErrores.password = 'La contraseña es obligatoria';
         return nuevosErrores;
     };
@@ -34,6 +37,7 @@ const LoginPage = () => {
         const erroresValidacion = validar();
         if (Object.keys(erroresValidacion).length > 0) {
             setErrores(erroresValidacion);
+            toast.error('Por favor completá los campos requeridos');
             return;
         }
 
@@ -46,24 +50,20 @@ const LoginPage = () => {
                 body: JSON.stringify(form),
             });
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.mensaje || 'Credenciales inválidas');
-            }
+            const data = await handleApiResponse(response);
 
             // Guardamos la información de la sesión de forma persistente
             localStorage.setItem('token', data.token);
-            localStorage.setItem('userRole', data.role || 'USER'); // Rol devuelto por el backend (USER o ADMIN)
+            localStorage.setItem('userRole', data.role || 'USER');
             if (data.nombre) localStorage.setItem('usuarioNombre', data.nombre);
 
-            alert('¡Bienvenido de nuevo!');
-            navigate('/'); // Redirige a la página principal
-            window.location.reload(); // Fuerza la actualización para que la Navbar lea el nuevo estado
-
+            toast.success('¡Bienvenido!');
+            navigate('/');
+            // recarga para que la navbar actualice estado; puedes eliminar si gestionas estado global
+            window.location.reload();
         } catch (err) {
-            console.error("Error en Login:", err.message);
-            alert(`Error al iniciar sesión: ${err.message}`);
+            console.error('Error en Login:', err.message);
+            toast.error(`Error al iniciar sesión: ${err.message}`);
         } finally {
             setCargando(false);
         }
@@ -94,7 +94,7 @@ const LoginPage = () => {
                             id="email"
                             name="email"
                             type="email"
-                            className={errores.email ? 'form-input--error' : ''}
+                            className={`form-input ${errores.email ? 'form-input--error' : ''}`}
                             value={form.email}
                             onChange={handleChange}
                             required
@@ -108,7 +108,7 @@ const LoginPage = () => {
                             id="password"
                             name="password"
                             type="password"
-                            className={errores.password ? 'form-input--error' : ''}
+                            className={`form-input ${errores.password ? 'form-input--error' : ''}`}
                             value={form.password}
                             onChange={handleChange}
                             required
