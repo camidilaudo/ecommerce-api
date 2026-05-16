@@ -1,43 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import './Navbar.css';
+import useDebounce from '../hooks/useDebounce';
 
 /**
- * Navbar - Barra de navegación con control de sesión adaptativo.
+ * Navbar actualizado para búsqueda en tiempo real con debounce.
+ * Llama a `onSearch` con el valor debounced cuando cambia.
  */
+
 const Navbar = ({ onSearch }) => {
     const { cartCount, toggleCart } = useCart();
     const navigate = useNavigate();
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+    const [query, setQuery] = useState('');
+    const debouncedQuery = useDebounce(query, 400);
 
-    // Verificamos de forma síncrona si hay una sesión activa en el navegador
     const isAuthenticated = !!localStorage.getItem('token');
     const userRole = localStorage.getItem('userRole') || 'USER';
 
-    /**
-     * Cierra la sesión eliminando las credenciales del almacenamiento local.
-     */
+    useEffect(() => {
+        if (typeof onSearch === 'function') {
+            onSearch(debouncedQuery);
+        } else {
+            // Si no se pasó onSearch, navegar a /search?q=
+            if (debouncedQuery.trim().length > 0) {
+                navigate(`/search?q=${encodeURIComponent(debouncedQuery)}`);
+            }
+        }
+    }, [debouncedQuery, onSearch, navigate]);
+
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('userRole');
         localStorage.removeItem('usuarioNombre');
         setIsUserMenuOpen(false);
+        // mejor usar toast (main.jsx tiene ToastContainer)
         alert('Sesión cerrada correctamente');
         navigate('/');
-        window.location.reload(); // Sincroniza la UI de inmediato
+        window.location.reload();
     };
 
     return (
         <nav className="navbar">
             <div className="navbar-container container">
-
-                {/* Logo Principal */}
                 <Link to="/" className="nav-brand">
                     GRUPO 3 <span className="brand-sub">— ECOMMERCE</span>
                 </Link>
 
-                {/* Barra de Búsqueda Redondeada */}
                 <div className="nav-search-wrapper">
                     <div className="search-input-container">
                         <svg className="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -48,13 +58,13 @@ const Navbar = ({ onSearch }) => {
                             type="text"
                             className="nav-search-input"
                             placeholder="Buscar productos..."
-                            onChange={(e) => onSearch && onSearch(e.target.value)}
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
                         />
                     </div>
                 </div>
 
                 <div className="nav-actions">
-                    {/* Botón del Carrito */}
                     <button className="nav-btn" onClick={toggleCart} aria-label="Abrir Carrito">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                             <path d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z" />
@@ -62,7 +72,6 @@ const Navbar = ({ onSearch }) => {
                         {cartCount > 0 && <span className="nav-badge">{cartCount}</span>}
                     </button>
 
-                    {/* Menú de Usuario */}
                     <div className="user-menu-wrapper">
                         <button className="nav-btn" onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} aria-label="Menú de usuario">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -73,12 +82,10 @@ const Navbar = ({ onSearch }) => {
                         {isUserMenuOpen && (
                             <div className="user-dropdown">
                                 {isAuthenticated ? (
-                                    /* --- VISTA PARA USUARIOS LOGUEADOS --- */
                                     <>
                                         <Link to="/perfil" onClick={() => setIsUserMenuOpen(false)}>Mi Perfil</Link>
                                         <Link to="/pedidos" onClick={() => setIsUserMenuOpen(false)}>Mis Pedidos</Link>
 
-                                        {/* Condicional de Rol: Solo visible si es ADMIN */}
                                         {userRole === 'ADMIN' && (
                                             <Link to="/admin" onClick={() => setIsUserMenuOpen(false)} style={{ color: '#0071e3', fontWeight: '600' }}>
                                                 Panel Admin
@@ -90,7 +97,6 @@ const Navbar = ({ onSearch }) => {
                                         </button>
                                     </>
                                 ) : (
-                                    /* --- VISTA PARA INVITADOS --- */
                                     <>
                                         <Link to="/login" onClick={() => setIsUserMenuOpen(false)}>Iniciar Sesión</Link>
                                         <Link to="/register" onClick={() => setIsUserMenuOpen(false)}>Registrarse</Link>

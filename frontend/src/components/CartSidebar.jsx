@@ -1,11 +1,47 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import './CartSidebar.css';
+import { toast } from 'react-toastify';
+import { handleApiResponse } from '../utils/apiHelpers';
 
 const CartSidebar = () => {
-    const { cart, removeFromCart, cartTotal, isCartOpen, toggleCart } = useCart();
+    const { cart, removeFromCart, cartTotal, isCartOpen, toggleCart, clearCart } = useCart();
+    const [loadingCheckout, setLoadingCheckout] = useState(false);
+    const token = localStorage.getItem('token');
 
     if (!isCartOpen) return null;
+
+    const handleCheckout = async () => {
+        if (cart.length === 0) {
+            return toast.info('El carrito está vacío');
+        }
+        setLoadingCheckout(true);
+        try {
+            // Ajusta el payload al formato que espera tu backend
+            const payload = {
+                items: cart.map(i => ({ productoId: i.id, cantidad: i.quantity }))
+            };
+
+            const response = await fetch('http://localhost:8081/api/carrito/checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const body = await handleApiResponse(response);
+            toast.success(body?.message || 'Compra realizada con éxito');
+            clearCart();
+            toggleCart(); // cierra el sidebar
+        } catch (err) {
+            console.error('Checkout error:', err);
+            toast.error(`Error al finalizar compra: ${err.message}`);
+        } finally {
+            setLoadingCheckout(false);
+        }
+    };
 
     return (
         <div className="cart-overlay" onClick={toggleCart}>
@@ -38,9 +74,8 @@ const CartSidebar = () => {
                             <span>Total estimado:</span>
                             <span>${cartTotal.toFixed(2)}</span>
                         </div>
-                        {/* TODO: conectar con POST /api/carrito/checkout cuando esté el backend */}
-                        <button className="checkout-btn" onClick={() => alert("Checkout próximamente")}>
-                            Finalizar Compra
+                        <button className="checkout-btn" onClick={handleCheckout} disabled={loadingCheckout}>
+                            {loadingCheckout ? 'Procesando...' : 'Finalizar Compra'}
                         </button>
                     </div>
                 )}

@@ -1,18 +1,79 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AdminPanel.css';
+import { toast } from 'react-toastify';
+import { handleApiResponse } from '../utils/apiHelpers';
 
 /**
  * AdminPanel - Panel de Gestión de Productos (CRUD).
- * Cumple con el requisito de Alta, Baja y Modificación de la actividad grupal.
- * Conecta con Spring Boot 4.0.5 en el puerto 8081.
+ * Incluye: Alta, Baja, Edición (PUT).
  */
+
+const EditProductForm = ({ product, onCancel, onSave, saving }) => {
+    const [form, setForm] = useState({ ...product });
+
+    useEffect(() => setForm({ ...product }), [product]);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setForm((p) => ({ ...p, [name]: value }));
+    };
+
+    const submit = (e) => {
+        e.preventDefault();
+        // Validaciones simples
+        if (!form.nombre || Number(form.precio) <= 0) {
+            return toast.error('Nombre y precio válidos son requeridos');
+        }
+        onSave({
+            ...form,
+            precio: Number(form.precio),
+            stock: Number(form.stock),
+            id: product.id
+        });
+    };
+
+    return (
+        <form onSubmit={submit} className="admin-edit-form">
+            <div className="admin-input-group">
+                <label>Nombre</label>
+                <input name="nombre" value={form.nombre} onChange={handleChange} required />
+            </div>
+            <div className="admin-input-group">
+                <label>Descripción</label>
+                <input name="descripcion" value={form.descripcion} onChange={handleChange} required />
+            </div>
+            <div className="admin-row">
+                <div className="admin-input-group">
+                    <label>Precio ($)</label>
+                    <input name="precio" type="number" value={form.precio} onChange={handleChange} required min="0.01" step="0.01" />
+                </div>
+                <div className="admin-input-group">
+                    <label>Stock</label>
+                    <input name="stock" type="number" value={form.stock} onChange={handleChange} required min="0" />
+                </div>
+            </div>
+            <div className="admin-input-group">
+                <label>Categoría</label>
+                <input name="categoria" value={form.categoria} onChange={handleChange} />
+            </div>
+            <div className="admin-input-group">
+                <label>URL de la Imagen</label>
+                <input name="imagen" value={form.imagen} onChange={handleChange} type="url" />
+            </div>
+
+            <div className="edit-actions">
+                <button type="button" onClick={onCancel}>Cancelar</button>
+                <button type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar cambios'}</button>
+            </div>
+        </form>
+    );
+};
+
 const AdminPanel = () => {
     const navigate = useNavigate();
     const [productos, setProductos] = useState([]);
     const [loading, setLoading] = useState(true);
-
-    // Estado unificado para el formulario de alta de producto
     const [form, setForm] = useState({
         nombre: '',
         descripcion: '',
@@ -22,12 +83,12 @@ const AdminPanel = () => {
         imagen: ''
     });
 
-    // Recuperamos el token de seguridad del localStorage
+    const [editingProduct, setEditingProduct] = useState(null);
+    const [isSaving, setIsSaving] = useState(false);
+
     const token = localStorage.getItem('token');
 
-    // useEffect: Carga la lista actual de artículos al montar la vista
     useEffect(() => {
-        // Redirección de seguridad: si no hay sesión, mandamos al login
         if (!token) {
             navigate('/login');
             return;
@@ -35,77 +96,89 @@ const AdminPanel = () => {
         fetchProducts();
     }, [token, navigate]);
 
-    /**
-     * Trae todos los productos desde el endpoint público del Backend.
-     * GET http://localhost:8081/api/productos
-     */
     const fetchProducts = async () => {
         try {
             setLoading(true);
             const response = await fetch('http://localhost:8081/api/productos');
-            if (!response.ok) throw new Error('Error al sincronizar el catálogo');
-            const data = await response.json();
-            setProductos(data);
+            const data = await handleApiResponse(response);
+            setProductos(data || []);
         } catch (err) {
-            console.error("Error Admin:", err.message);
+            console.error('Error Admin:', err.message);
+            toast.error(`No se pudo sincronizar catálogo: ${err.message}`);
         } finally {
             setLoading(false);
         }
     };
 
-    /**
-     * Procesa el formulario y envía un alta al servidor.
-     * POST http://localhost:8081/api/productos
-     */
     const handleCreate = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch('http://localhost:8081/api/productos', {
+            const payload = {
+                ...form,
+                precio: Number(form.precio),
+                stock: Number(form.stock)
+            };
+
+            const res = await fetch('http://localhost:8081/api/productos', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` // Cabecera obligatoria JWT
+                    Authorization: `Bearer ${token}`
                 },
-                body: JSON.stringify({
-                    ...form,
-                    precio: Number(form.precio),
-                    stock: Number(form.stock)
-                })
+                body: JSON.stringify(payload)
             });
 
-            if (!response.ok) throw new Error('No se pudo dar de alta el producto');
-
-            alert('¡Producto publicado con éxito!');
-            // Limpiamos el formulario
+            await handleApiResponse(res);
+            toast.success('Producto publicado con éxito');
             setForm({ nombre: '', descripcion: '', precio: '', stock: '', categoria: '', imagen: '' });
-            // Recargamos la tabla de inmediato
             fetchProducts();
         } catch (err) {
-            alert(err.message);
+            console.error(err);
+            toast.error(`No se pudo dar de alta el producto: ${err.message}`);
         }
     };
 
-    /**
-     * Envía la orden de baja lógica/física de un artículo usando su ID.
-     * DELETE http://localhost:8081/api/productos/{id}
-     */
     const handleDelete = async (id) => {
         if (!window.confirm('¿Estás seguro de eliminar este producto del catálogo?')) return;
-
         try {
-            const response = await fetch(`http://localhost:8081/api/productos/${id}`, {
+            const res = await fetch(`http://localhost:8081/api/productos/${id}`, {
                 method: 'DELETE',
                 headers: {
-                    'Authorization': `Bearer ${token}`
+                    Authorization: `Bearer ${token}`
                 }
             });
-
-            if (!response.ok) throw new Error('No se pudo eliminar el artículo');
-
-            alert('Producto removido');
+            await handleApiResponse(res);
+            toast.success('Producto eliminado');
             fetchProducts();
         } catch (err) {
-            alert(err.message);
+            console.error(err);
+            toast.error(`No se pudo eliminar el artículo: ${err.message}`);
+        }
+    };
+
+    const openEdit = (product) => setEditingProduct(product);
+    const closeEdit = () => setEditingProduct(null);
+
+    const handleSaveEdit = async (updated) => {
+        setIsSaving(true);
+        try {
+            const res = await fetch(`http://localhost:8081/api/productos/${updated.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify(updated)
+            });
+            await handleApiResponse(res);
+            toast.success('Producto actualizado correctamente');
+            fetchProducts();
+            closeEdit();
+        } catch (err) {
+            console.error(err);
+            toast.error(`No se pudo actualizar: ${err.message}`);
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -122,41 +195,39 @@ const AdminPanel = () => {
             </header>
 
             <div className="admin-grid">
-                {/* Formulario de Alta */}
                 <div className="admin-card">
                     <h3>Publicar Nuevo Artículo</h3>
                     <form onSubmit={handleCreate} className="admin-form">
                         <div className="admin-input-group">
                             <label>Nombre del Producto</label>
-                            <input type="text" value={form.nombre} onChange={e => setForm({...form, nombre: e.target.value})} required />
+                            <input type="text" value={form.nombre} onChange={e => setForm({ ...form, nombre: e.target.value })} required />
                         </div>
                         <div className="admin-input-group">
                             <label>Descripción Corta</label>
-                            <input type="text" value={form.descripcion} onChange={e => setForm({...form, descripcion: e.target.value})} required />
+                            <input type="text" value={form.descripcion} onChange={e => setForm({ ...form, descripcion: e.target.value })} required />
                         </div>
                         <div className="admin-row">
                             <div className="admin-input-group">
                                 <label>Precio ($)</label>
-                                <input type="number" value={form.precio} onChange={e => setForm({...form, precio: e.target.value})} required min="1" />
+                                <input type="number" value={form.precio} onChange={e => setForm({ ...form, precio: e.target.value })} required min="1" />
                             </div>
                             <div className="admin-input-group">
                                 <label>Stock Inicial</label>
-                                <input type="number" value={form.stock} onChange={e => setForm({...form, stock: e.target.value})} required min="0" />
+                                <input type="number" value={form.stock} onChange={e => setForm({ ...form, stock: e.target.value })} required min="0" />
                             </div>
                         </div>
                         <div className="admin-input-group">
                             <label>Categoría</label>
-                            <input type="text" placeholder="Ej: Notebooks, Celulares" value={form.categoria} onChange={e => setForm({...form, categoria: e.target.value})} required />
+                            <input type="text" placeholder="Ej: Notebooks, Celulares" value={form.categoria} onChange={e => setForm({ ...form, categoria: e.target.value })} required />
                         </div>
                         <div className="admin-input-group">
                             <label>URL de la Imagen</label>
-                            <input type="url" placeholder="https://ejemplo.com/foto.jpg" value={form.imagen} onChange={e => setForm({...form, imagen: e.target.value})} required />
+                            <input type="url" placeholder="https://ejemplo.com/foto.jpg" value={form.imagen} onChange={e => setForm({ ...form, imagen: e.target.value })} required />
                         </div>
                         <button type="submit" className="admin-submit-btn">Guardar en Base de Datos</button>
                     </form>
                 </div>
 
-                {/* Tabla de Inventario (Bajas) */}
                 <div className="admin-card">
                     <h3>Inventario Disponible</h3>
                     {loading ? (
@@ -180,10 +251,9 @@ const AdminPanel = () => {
                                         <td className="table-name-cell">{p.nombre}</td>
                                         <td>${p.precio}</td>
                                         <td className={p.stock === 0 ? "stock-out" : ""}>{p.stock} u</td>
-                                        <td>
-                                            <button onClick={() => handleDelete(p.id)} className="admin-delete-btn">
-                                                Eliminar
-                                            </button>
+                                        <td className="actions-cell">
+                                            <button onClick={() => openEdit(p)} className="admin-edit-btn">Editar</button>
+                                            <button onClick={() => handleDelete(p.id)} className="admin-delete-btn">Eliminar</button>
                                         </td>
                                     </tr>
                                 ))}
@@ -193,6 +263,15 @@ const AdminPanel = () => {
                     )}
                 </div>
             </div>
+
+            {editingProduct && (
+                <div className="modal-overlay" onClick={closeEdit}>
+                    <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+                        <h3>Editar Producto</h3>
+                        <EditProductForm product={editingProduct} onCancel={closeEdit} onSave={handleSaveEdit} saving={isSaving} />
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

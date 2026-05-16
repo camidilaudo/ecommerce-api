@@ -5,6 +5,7 @@ const CartContext = createContext();
 /**
  * CartProvider - Contexto global del carrito.
  * Valida stock y controla la visibilidad del sidebar.
+ * Añade clearCart para limpiar tras checkout.
  */
 export const CartProvider = ({ children }) => {
     const [cart, setCart] = useState([]);
@@ -16,24 +17,19 @@ export const CartProvider = ({ children }) => {
         const existingItem = cart.find(item => item.id === product.id);
         const currentQuantity = existingItem ? existingItem.quantity : 0;
 
-        // Detectamos si es un producto nuevo o uno que ya está en el carrito
-        const isNewProduct = !existingItem;
-
-        // Lógica de Stock: Validamos contra product.stock
         if (currentQuantity < product.stock) {
             if (existingItem) {
-                // Producto ya en carrito → solo suma cantidad, NO abre el sidebar
                 setCart(cart.map(item =>
                     item.id === product.id
                         ? { ...item, quantity: item.quantity + 1 }
                         : item
                 ));
             } else {
-                // Producto nuevo → agrega al carrito Y abre el sidebar
                 setCart([...cart, { ...product, quantity: 1 }]);
                 setIsCartOpen(true);
             }
         } else {
+            // Mantuvimos la llamada a alert por compatibilidad, pero se recomienda usar toast
             alert(`No hay más stock disponible de ${product.nombre}`);
         }
     };
@@ -42,13 +38,17 @@ export const CartProvider = ({ children }) => {
         setCart(cart.filter(item => item.id !== productId));
     };
 
+    const clearCart = () => {
+        setCart([]);
+    };
+
     const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
     const cartTotal = cart.reduce((acc, item) => acc + (item.precio * item.quantity), 0);
 
     return (
         <CartContext.Provider value={{
             cart, addToCart, removeFromCart, cartCount, cartTotal,
-            isCartOpen, toggleCart
+            isCartOpen, toggleCart, clearCart
         }}>
             {children}
         </CartContext.Provider>
