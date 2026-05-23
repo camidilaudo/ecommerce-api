@@ -63,8 +63,12 @@ const EditProductForm = ({ product, onCancel, onSave, saving }) => {
             </div>
 
             <div className="edit-actions">
-                <button type="button" onClick={onCancel}>Cancelar</button>
-                <button type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar cambios'}</button>
+                <button type="button " className="admin-edit-cancel-btn" onClick={onCancel}>
+                    Cancelar
+                </button>
+                <button type="submit" className="admin-edit-submit-btn" disabled={saving}>
+                    {saving ? 'Guardando...' : 'Guardar cambios'}
+                </button>
             </div>
         </form>
     );
@@ -85,6 +89,8 @@ const AdminPanel = () => {
 
     const [editingProduct, setEditingProduct] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 6;
 
     const token = localStorage.getItem('token');
 
@@ -102,6 +108,7 @@ const AdminPanel = () => {
             const response = await fetch('http://localhost:8081/api/productos');
             const data = await handleApiResponse(response);
             setProductos(data || []);
+            setCurrentPage(1);
         } catch (err) {
             console.error('Error Admin:', err.message);
             toast.error(`No se pudo sincronizar catálogo: ${err.message}`);
@@ -182,6 +189,16 @@ const AdminPanel = () => {
         }
     };
 
+    const getPaginatedProducts = () => {
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        const endIndex = startIndex + ITEMS_PER_PAGE;
+        return productos.slice(startIndex, endIndex);
+    };
+
+    const getTotalPages = () => {
+        return Math.ceil(productos.length / ITEMS_PER_PAGE);
+    };
+
     return (
         <div className="admin-page container">
             <header className="admin-header">
@@ -235,31 +252,54 @@ const AdminPanel = () => {
                     ) : productos.length === 0 ? (
                         <p className="admin-empty">No hay productos registrados en el sistema.</p>
                     ) : (
-                        <div className="table-wrapper">
-                            <table className="admin-table">
-                                <thead>
-                                <tr>
-                                    <th>Producto</th>
-                                    <th>Precio</th>
-                                    <th>Stock</th>
-                                    <th>Acciones</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {productos.map(p => (
-                                    <tr key={p.id}>
-                                        <td className="table-name-cell">{p.nombre}</td>
-                                        <td>${p.precio}</td>
-                                        <td className={p.stock === 0 ? "stock-out" : ""}>{p.stock} u</td>
-                                        <td className="actions-cell">
-                                            <button onClick={() => openEdit(p)} className="admin-edit-btn">Editar</button>
-                                            <button onClick={() => handleDelete(p.id)} className="admin-delete-btn">Eliminar</button>
-                                        </td>
+                        <>
+                            <div className="table-wrapper">
+                                <table className="admin-table">
+                                    <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Precio</th>
+                                        <th>Stock</th>
+                                        <th>Acciones</th>
                                     </tr>
-                                ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                    </thead>
+                                    <tbody>
+                                    {getPaginatedProducts().map(p => (
+                                        <tr key={p.id}>
+                                            <td className="table-name-cell">{p.nombre}</td>
+                                            <td>${p.precio}</td>
+                                            <td className={p.stock === 0 ? "stock-out" : ""}>{p.stock} u</td>
+                                            <td className="actions-cell">
+                                                <button onClick={() => openEdit(p)} className="admin-edit-btn">Editar</button>
+                                                <button onClick={() => handleDelete(p.id)} className="admin-delete-btn">Eliminar</button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {getTotalPages() > 1 && (
+                                <div className="pagination-controls">
+                                    <button 
+                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                        disabled={currentPage === 1}
+                                        className="pagination-btn"
+                                    >
+                                        Anterior
+                                    </button>
+                                    <span className="pagination-info">
+                                        Página {currentPage} de {getTotalPages()}
+                                    </span>
+                                    <button 
+                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, getTotalPages()))}
+                                        disabled={currentPage === getTotalPages()}
+                                        className="pagination-btn"
+                                    >
+                                        Siguiente
+                                    </button>
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
             </div>
