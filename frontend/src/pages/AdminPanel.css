@@ -171,10 +171,10 @@
     color: white;
 }
 
-.admin-edit-btn-test {
+.admin-edit-btn {
     background: none;
-    border: 1px solid #00d0ff;
-    color: #00d0ff;
+    border: 1px solid #0d00ff;
+    color: #0d00ff;
     padding: 6px 12px;
     border-radius: 6px;
     cursor: pointer;
@@ -183,9 +183,14 @@
     transition: all 0.2s;
 }
 
-.admin-edit-btn-test:hover {
-    background: #00d0ff;
+.admin-edit-btn:hover {
+    background: #0d00ff;
     color: white;
+}
+
+.actions-cell {
+    display: flex;
+    gap: 10px;
 }
 
 .admin-loading, .admin-empty {
@@ -193,6 +198,29 @@
     color: #86868b;
     padding: 40px 0;
 }
+
+.admin-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.admin-edit-form input {
+    background: #f5f5f7;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.admin-edit-form input:focus {
+    background: white;
+    border-color: #0071e3;
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+}
+
 
 @media (max-width: 900px) {
     .admin-grid {

@@ -224,7 +224,7 @@ const AdminPanel = () => {
                             <label>URL de la Imagen</label>
                             <input type="url" placeholder="https://ejemplo.com/foto.jpg" value={form.imagen} onChange={e => setForm({ ...form, imagen: e.target.value })} required />
                         </div>
-                        <button type="submit" className="admin-submit-btn">Guardar en Base de Datos</button>
+                        <button type="submit" className="admin-submit-btn">Guardar producto</button>
                     </form>
                 </div>
 
@@ -252,7 +252,7 @@ const AdminPanel = () => {
                                         <td>${p.precio}</td>
                                         <td className={p.stock === 0 ? "stock-out" : ""}>{p.stock} u</td>
                                         <td className="actions-cell">
-                                            <button onClick={() => openEdit(p)} className="admin-edit-btn-test">Editar</button>
+                                            <button onClick={() => openEdit(p)} className="admin-edit-btn">Editar</button>
                                             <button onClick={() => handleDelete(p.id)} className="admin-delete-btn">Eliminar</button>
                                         </td>
                                     </tr>
@@ -266,7 +266,7 @@ const AdminPanel = () => {
 
             {editingProduct && (
                 <div className="modal-overlay" onClick={closeEdit}>
-                    <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+                    <div className="admin-card" onClick={(e) => e.stopPropagation()}>
                         <h3>Editar Producto</h3>
                         <EditProductForm product={editingProduct} onCancel={closeEdit} onSave={handleSaveEdit} saving={isSaving} />
                     </div>
