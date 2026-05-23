@@ -252,7 +252,7 @@ const AdminPanel = () => {
                                         <td>${p.precio}</td>
                                         <td className={p.stock === 0 ? "stock-out" : ""}>{p.stock} u</td>
                                         <td className="actions-cell">
-                                            <button onClick={() => openEdit(p)} className="admin-edit-btn">Editar</button>
+                                            <button onClick={() => openEdit(p)} className="admin-edit-btn-test">Editar</button>
                                             <button onClick={() => handleDelete(p.id)} className="admin-delete-btn">Eliminar</button>
                                         </td>
                                     </tr>
