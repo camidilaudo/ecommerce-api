@@ -19,5 +19,10 @@ public class ProductoDTO {
 	private Integer stock;
 	private List<String> imagenes;
 	private List<Long> categoriaIds;
+	private List<String> categoriaNombres;
 	private Long usuarioId;
+
+	// Campos para compatibilidad con el frontend anterior
+	private String imagen;
+	private String categoria;
 }
