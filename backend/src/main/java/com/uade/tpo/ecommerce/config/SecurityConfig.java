@@ -88,6 +88,7 @@ public class SecurityConfig {
                         // 1. ENDPOINTS PUBLICOS
                         .requestMatchers("/api/auth/**").permitAll() // Login y Registro
                         .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll() // Ver catálogo y detalles
+                        .requestMatchers(HttpMethod.GET, "/api/categorias/**", "/api/categorias").permitAll() // Ver categorías públicamente
 
                         // 2. PRODUCTOS
                         // GET: Públicos
@@ -99,10 +100,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/productos/**").authenticated()
 
                         // 3. CATEGORIAS
-                        // Cualquier usuario logueado puede ver categorías para filtrar
-                        .requestMatchers(HttpMethod.GET, "/api/categorias/**").authenticated()
-                        // Solo ADMIN puede crear o borrar categorias
+                        // GET: Publicos (sin autenticación)
+                        // POST/DELETE: Solo ADMIN
                         .requestMatchers(HttpMethod.POST, "/api/categorias/**").hasRole(Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.PUT, "/api/categorias/**").hasRole(Role.ADMIN.name())
                         .requestMatchers(HttpMethod.DELETE, "/api/categorias/**").hasRole(Role.ADMIN.name())
 
                         // 4. CARRITO Y PEDIDOS (Requieren Token)

@@ -88,4 +88,11 @@ public class Producto {
     @JoinColumn(name = "usuario_id", nullable = false)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Usuario usuario;
+
+    // Campos virtuales recibidos desde el Frontend (no se guardan en la tabla directamente)
+    @Transient
+    private List<Long> categoriaIds;
+
+    @Transient
+    private String imagen;
 }

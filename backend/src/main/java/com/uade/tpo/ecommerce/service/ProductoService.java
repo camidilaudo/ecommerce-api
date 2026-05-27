@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 
 import com.uade.tpo.ecommerce.model.Producto;
 import com.uade.tpo.ecommerce.model.Usuario;
+import com.uade.tpo.ecommerce.model.Categoria;
 import com.uade.tpo.ecommerce.repository.ProductoRepository;
+import com.uade.tpo.ecommerce.repository.CategoriaRepository;
 import com.uade.tpo.ecommerce.exception.*;
 
 import jakarta.transaction.Transactional;
@@ -23,6 +25,9 @@ public class ProductoService {
 	@Autowired
 	private ProductoRepository productoRepository;
 
+	@Autowired
+	private CategoriaRepository categoriaRepository;
+
 	// Método auxiliar para validar que el usuario es el propietario del producto
 	private void validarPropietarioProducto(Producto producto, Long usuarioId) {
 		if (producto.getUsuario() == null || !producto.getUsuario().getId().equals(usuarioId)) {
@@ -30,12 +35,16 @@ public class ProductoService {
 		}
 	}
 
-	private ProductoDTO toDto(Producto producto) {
+	public ProductoDTO toDto(Producto producto) {
 		if (producto == null) return null;
 		List<Long> categoriaIds = null;
+		List<String> categoriaNombres = null;
 		if (producto.getCategorias() != null) {
 			categoriaIds = producto.getCategorias().stream().map(c -> c.getId()).collect(Collectors.toList());
+			categoriaNombres = producto.getCategorias().stream().map(c -> c.getNombre()).collect(Collectors.toList());
 		}
+		String imagen = (producto.getImagenes() != null && !producto.getImagenes().isEmpty()) ? producto.getImagenes().get(0) : "";
+		String categoria = (categoriaNombres != null && !categoriaNombres.isEmpty()) ? String.join(", ", categoriaNombres) : "";
 		return ProductoDTO.builder()
 				.id(producto.getId())
 				.nombre(producto.getNombre())
@@ -44,7 +53,10 @@ public class ProductoService {
 				.stock(producto.getStock())
 				.imagenes(producto.getImagenes())
 				.categoriaIds(categoriaIds)
+				.categoriaNombres(categoriaNombres)
 				.usuarioId(producto.getUsuario() != null ? producto.getUsuario().getId() : null)
+				.imagen(imagen)
+				.categoria(categoria)
 				.build();
 	}
 
@@ -74,6 +86,17 @@ public class ProductoService {
 	// CREATE productos
 	public ProductoDTO saveProducto(Producto producto, Usuario usuario) {
 		producto.setUsuario(usuario);
+
+		// Mapear IDs de categorías transitorios del Frontend a entidades Categoria reales
+		if (producto.getCategoriaIds() != null && !producto.getCategoriaIds().isEmpty()) {
+			List<Categoria> cats = categoriaRepository.findAllById(producto.getCategoriaIds());
+			producto.setCategorias(cats);
+		}
+		// Mapear imagen única del Frontend a la lista de imagenes
+		if (producto.getImagen() != null && !producto.getImagen().isEmpty()) {
+			producto.setImagenes(List.of(producto.getImagen()));
+		}
+
 		Producto saved = productoRepository.save(producto);
 		return toDto(saved);
 	}
@@ -89,8 +112,21 @@ public class ProductoService {
 		existingProducto.setDescripcion(producto.getDescripcion());
 		existingProducto.setPrecio(producto.getPrecio());
 		existingProducto.setStock(producto.getStock());
-		existingProducto.setImagenes(producto.getImagenes());
-		existingProducto.setCategorias(producto.getCategorias());
+
+		// Mapear IDs de categorías transitorios del Frontend a entidades Categoria reales
+		if (producto.getCategoriaIds() != null && !producto.getCategoriaIds().isEmpty()) {
+			List<Categoria> cats = categoriaRepository.findAllById(producto.getCategoriaIds());
+			existingProducto.setCategorias(cats);
+		} else if (producto.getCategorias() != null) {
+			existingProducto.setCategorias(producto.getCategorias());
+		}
+
+		// Mapear imagen única del Frontend a la lista de imagenes
+		if (producto.getImagen() != null && !producto.getImagen().isEmpty()) {
+			existingProducto.setImagenes(List.of(producto.getImagen()));
+		} else if (producto.getImagenes() != null) {
+			existingProducto.setImagenes(producto.getImagenes());
+		}
 
 		Producto saved = productoRepository.save(existingProducto);
 		return toDto(saved);

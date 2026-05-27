@@ -3,13 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import './AdminPanel.css';
 import { toast } from 'react-toastify';
 import { handleApiResponse } from '../utils/apiHelpers';
+import CategoryManager from '../components/CategoryManager';
 
 /**
  * AdminPanel - Panel de Gestión de Productos (CRUD).
  * Incluye: Alta, Baja, Edición (PUT).
  */
 
-const EditProductForm = ({ product, onCancel, onSave, saving }) => {
+const EditProductForm = ({ product, onCancel, onSave, saving, categories }) => {
     const [form, setForm] = useState({ ...product });
 
     useEffect(() => setForm({ ...product }), [product]);
@@ -19,11 +20,19 @@ const EditProductForm = ({ product, onCancel, onSave, saving }) => {
         setForm((p) => ({ ...p, [name]: value }));
     };
 
+    const handleCategoryChange = (e) => {
+        const selectedOptions = Array.from(e.target.selectedOptions, option => Number(option.value));
+        setForm((p) => ({ ...p, categoriaIds: selectedOptions }));
+    };
+
     const submit = (e) => {
         e.preventDefault();
         // Validaciones simples
         if (!form.nombre || Number(form.precio) <= 0) {
             return toast.error('Nombre y precio válidos son requeridos');
+        }
+        if (!form.categoriaIds || form.categoriaIds.length === 0) {
+            return toast.error('Selecciona al menos una categoría');
         }
         onSave({
             ...form,
@@ -54,8 +63,14 @@ const EditProductForm = ({ product, onCancel, onSave, saving }) => {
                 </div>
             </div>
             <div className="admin-input-group">
-                <label>Categoría</label>
-                <input name="categoria" value={form.categoria} onChange={handleChange} />
+                <label>Categorías</label>
+                <select multiple value={form.categoriaIds || []} onChange={handleCategoryChange}>
+                    {categories.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                            {cat.nombre}
+                        </option>
+                    ))}
+                </select>
             </div>
             <div className="admin-input-group">
                 <label>URL de la Imagen</label>
@@ -77,13 +92,14 @@ const EditProductForm = ({ product, onCancel, onSave, saving }) => {
 const AdminPanel = () => {
     const navigate = useNavigate();
     const [productos, setProductos] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [form, setForm] = useState({
         nombre: '',
         descripcion: '',
         precio: '',
         stock: '',
-        categoria: '',
+        categoriaIds: [],
         imagen: ''
     });
 
@@ -100,6 +116,7 @@ const AdminPanel = () => {
             return;
         }
         fetchProducts();
+        fetchCategories();
     }, [token, navigate]);
 
     const fetchProducts = async () => {
@@ -117,8 +134,25 @@ const AdminPanel = () => {
         }
     };
 
+    const fetchCategories = async () => {
+        try {
+            const response = await fetch('http://localhost:8081/api/categorias');
+            const data = await handleApiResponse(response);
+            setCategories(data || []);
+        } catch (err) {
+            console.error('Error fetching categories:', err.message);
+        }
+    };
+
     const handleCreate = async (e) => {
         e.preventDefault();
+
+        // Validar que al menos una categoría esté seleccionada
+        if (!form.categoriaIds || form.categoriaIds.length === 0) {
+            toast.error('Selecciona al menos una categoría');
+            return;
+        }
+
         try {
             const payload = {
                 ...form,
@@ -137,7 +171,7 @@ const AdminPanel = () => {
 
             await handleApiResponse(res);
             toast.success('Producto publicado con éxito');
-            setForm({ nombre: '', descripcion: '', precio: '', stock: '', categoria: '', imagen: '' });
+            setForm({ nombre: '', descripcion: '', precio: '', stock: '', categoriaIds: [], imagen: '' });
             fetchProducts();
         } catch (err) {
             console.error(err);
@@ -212,37 +246,56 @@ const AdminPanel = () => {
             </header>
 
             <div className="admin-grid">
-                <div className="admin-card">
-                    <h3>Publicar Nuevo Artículo</h3>
-                    <form onSubmit={handleCreate} className="admin-form">
-                        <div className="admin-input-group">
-                            <label>Nombre del Producto</label>
-                            <input type="text" value={form.nombre} onChange={e => setForm({ ...form, nombre: e.target.value })} required />
-                        </div>
-                        <div className="admin-input-group">
-                            <label>Descripción Corta</label>
-                            <input type="text" value={form.descripcion} onChange={e => setForm({ ...form, descripcion: e.target.value })} required />
-                        </div>
-                        <div className="admin-row">
+                <div>
+                    <div className="admin-card">
+                        <h3>Publicar Nuevo Artículo</h3>
+                        <form onSubmit={handleCreate} className="admin-form">
                             <div className="admin-input-group">
-                                <label>Precio ($)</label>
-                                <input type="number" value={form.precio} onChange={e => setForm({ ...form, precio: e.target.value })} required min="1" />
+                                <label>Nombre del Producto</label>
+                                <input type="text" value={form.nombre} onChange={e => setForm({ ...form, nombre: e.target.value })} required />
                             </div>
                             <div className="admin-input-group">
-                                <label>Stock Inicial</label>
-                                <input type="number" value={form.stock} onChange={e => setForm({ ...form, stock: e.target.value })} required min="0" />
+                                <label>Descripción Corta</label>
+                                <input type="text" value={form.descripcion} onChange={e => setForm({ ...form, descripcion: e.target.value })} required />
                             </div>
-                        </div>
-                        <div className="admin-input-group">
-                            <label>Categoría</label>
-                            <input type="text" placeholder="Ej: Notebooks, Celulares" value={form.categoria} onChange={e => setForm({ ...form, categoria: e.target.value })} required />
-                        </div>
-                        <div className="admin-input-group">
-                            <label>URL de la Imagen</label>
-                            <input type="url" placeholder="https://ejemplo.com/foto.jpg" value={form.imagen} onChange={e => setForm({ ...form, imagen: e.target.value })} required />
-                        </div>
-                        <button type="submit" className="admin-submit-btn">Guardar producto</button>
-                    </form>
+                            <div className="admin-row">
+                                <div className="admin-input-group">
+                                    <label>Precio ($)</label>
+                                    <input type="number" value={form.precio} onChange={e => setForm({ ...form, precio: e.target.value })} required min="1" />
+                                </div>
+                                <div className="admin-input-group">
+                                    <label>Stock Inicial</label>
+                                    <input type="number" value={form.stock} onChange={e => setForm({ ...form, stock: e.target.value })} required min="0" />
+                                </div>
+                            </div>
+                            <div className="admin-input-group">
+                                <label>Categorías (Ctrl+click para múltiples)</label>
+                                <select
+                                    multiple
+                                    value={form.categoriaIds}
+                                    onChange={e => {
+                                        const selectedOptions = Array.from(e.target.selectedOptions, option => Number(option.value));
+                                        setForm({ ...form, categoriaIds: selectedOptions });
+                                    }}
+                                    required
+                                >
+                                    <option value="" disabled>Selecciona categorías</option>
+                                    {categories.map((cat) => (
+                                        <option key={cat.id} value={cat.id}>
+                                            {cat.nombre}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="admin-input-group">
+                                <label>URL de la Imagen</label>
+                                <input type="url" placeholder="https://ejemplo.com/foto.jpg" value={form.imagen} onChange={e => setForm({ ...form, imagen: e.target.value })} required />
+                            </div>
+                            <button type="submit" className="admin-submit-btn">Guardar producto</button>
+                        </form>
+                    </div>
+
+                    <CategoryManager token={token} />
                 </div>
 
                 <div className="admin-card">
@@ -308,7 +361,7 @@ const AdminPanel = () => {
                 <div className="modal-overlay" onClick={closeEdit}>
                     <div className="admin-card" onClick={(e) => e.stopPropagation()}>
                         <h3>Editar Producto</h3>
-                        <EditProductForm product={editingProduct} onCancel={closeEdit} onSave={handleSaveEdit} saving={isSaving} />
+                        <EditProductForm product={editingProduct} onCancel={closeEdit} onSave={handleSaveEdit} saving={isSaving} categories={categories} />
                     </div>
                 </div>
             )}

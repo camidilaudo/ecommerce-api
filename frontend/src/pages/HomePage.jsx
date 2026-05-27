@@ -41,7 +41,7 @@ const HomePage = ({ searchQuery }) => {
 
     // Lógica de filtrado (Categoría + Búsqueda Navbar)
     const filtered = products.filter(p => {
-        const matchCat = category === 'Todos' || p.categoria === category;
+        const matchCat = category === 'Todos' || (p.categoriaNombres && p.categoriaNombres.includes(category));
         const matchSearch = p.nombre.toLowerCase().includes(searchQuery.toLowerCase());
         return matchCat && matchSearch;
     });

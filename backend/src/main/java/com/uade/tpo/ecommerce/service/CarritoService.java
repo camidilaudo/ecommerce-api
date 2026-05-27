@@ -63,18 +63,7 @@ public class CarritoService {
 
         List<CarritoItemDTO> items = carrito.getItems() != null ? carrito.getItems().stream().map(item -> {
             Producto p = item.getProducto();
-            ProductoDTO pDto = p != null ? ProductoDTO.builder()
-                    .id(p.getId())
-                    .nombre(p.getNombre())
-                    .precio(p.getPrecio())
-                    .descripcion(p.getDescripcion())
-                    .stock(p.getStock())
-                    .imagenes(p.getImagenes())
-                    .categoriaIds(p.getCategorias() != null
-                            ? p.getCategorias().stream().map(Categoria::getId).collect(Collectors.toList())
-                            : null)
-                    .usuarioId(p.getUsuario() != null ? p.getUsuario().getId() : null)
-                    .build() : null;
+            ProductoDTO pDto = p != null ? productoService.toDto(p) : null;
             return CarritoItemDTO.builder()
                     .id(item.getId())
                     .producto(pDto)
