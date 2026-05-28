@@ -9,6 +9,7 @@ import com.uade.tpo.ecommerce.dto.ProductoDTO;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,11 +22,18 @@ public class ProductoController {
     @Autowired
     private ProductoService productoService;
 
-    // GET todos los productos
+    // GET todos los productos (con soporte de paginación retrocompatible)
     // http://localhost:8080/api/productos
     @GetMapping
-    public List<ProductoDTO> getAllProductos() {
-        return productoService.getAllProductos();
+    public ResponseEntity<?> getAllProductos(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
+            @RequestParam(required = false, defaultValue = "id") String sortBy,
+            @RequestParam(required = false, defaultValue = "asc") String direction) {
+        if (page != null && size != null) {
+            return ResponseEntity.ok(productoService.getAllProductosPaginated(page, size, sortBy, direction));
+        }
+        return ResponseEntity.ok(productoService.getAllProductos());
     }
 
     // GET producto por ID
@@ -46,7 +54,16 @@ public class ProductoController {
     // http://localhost:8080/api/productos
     @PostMapping
     public ProductoDTO saveProducto(@Valid @RequestBody Producto producto, @AuthenticationPrincipal Usuario usuario) {
-        return productoService.saveProducto(producto, usuario);
+        System.out.println("DEBUG POST /api/productos: received producto=" + producto + ", user=" + (usuario != null ? usuario.getEmail() : "null"));
+        try {
+            ProductoDTO result = productoService.saveProducto(producto, usuario);
+            System.out.println("DEBUG POST /api/productos SUCCESS: returned=" + result);
+            return result;
+        } catch (Exception ex) {
+            System.err.println("ERROR inside saveProducto: " + ex.getMessage());
+            ex.printStackTrace();
+            throw ex;
+        }
     }
 
     // PUT actualizar producto

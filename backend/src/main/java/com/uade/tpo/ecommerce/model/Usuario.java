@@ -79,6 +79,14 @@ public class Usuario implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @org.hibernate.annotations.CreationTimestamp
+    @Column(name = "fecha_creacion", updatable = false)
+    private java.time.LocalDateTime fechaCreacion;
+
+    @org.hibernate.annotations.UpdateTimestamp
+    @Column(name = "fecha_modificacion")
+    private java.time.LocalDateTime fechaModificacion;
+
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<Pedido> pedidos;

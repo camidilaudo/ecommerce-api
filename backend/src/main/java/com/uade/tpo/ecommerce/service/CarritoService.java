@@ -25,6 +25,9 @@ public class CarritoService {
     private CarritoRepository carritoRepository;
 
     @Autowired
+    private ProductoRepository productoRepository;
+
+    @Autowired
     private ProductoService productoService;
 
     @Autowired
@@ -143,30 +146,21 @@ public class CarritoService {
 
         Pedido pedido = Pedido.builder()
                 .usuario(carrito.getUsuario())
+                .fechaCreacion(java.time.LocalDateTime.now())
                 .items(new ArrayList<>())
                 .build();
 
         double totalCost = 0;
 
         for (CarritoItem itemCarrito : carrito.getItems()) {
-            ProductoDTO productoDTO = productoService.getProductoById(itemCarrito.getProducto().getId());
+            Long productoId = itemCarrito.getProducto().getId();
 
-            Producto producto = Producto.builder()
-                    .id(productoDTO.getId())
-                    .nombre(productoDTO.getNombre())
-                    .precio(productoDTO.getPrecio())
-                    .descripcion(productoDTO.getDescripcion())
-                    .stock(productoDTO.getStock())
-                    .imagenes(productoDTO.getImagenes())
-                    .usuario(usuarioService.getUsuarioEntityById(productoDTO.getUsuarioId()))
-                    .build();
+            // 1. Descontar stock de forma segura (valida y resta stock)
+            productoService.descontarStock(productoId, itemCarrito.getCantidad());
 
-            if (producto.getStock() < itemCarrito.getCantidad()) {
-                throw new BadRequestException("Stock insuficiente para: " + producto.getNombre());
-            }
-
-            producto.setStock(producto.getStock() - itemCarrito.getCantidad());
-            productoService.saveProducto(producto, carrito.getUsuario());
+            // 2. Obtener producto actualizado de base de datos
+            Producto producto = productoRepository.findById(productoId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
 
             PedidoItem pedidoItem = PedidoItem.builder()
                     .producto(producto)

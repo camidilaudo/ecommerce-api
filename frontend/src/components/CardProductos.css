@@ -1,78 +1,92 @@
+/* ==========================================
+        CardProductos - Premium Elegant Styles
+   ========================================== */
+
 .card-producto {
-  background: white;
-  border-radius: 8px;
+  background: #ffffff;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), 0 2px 8px rgba(0, 0, 0, 0.01);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease;
   display: flex;
   flex-direction: column;
   height: 100%;
+  border: 1px solid #f5f5f7;
 }
 
 .card-producto:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.02);
+  border-color: #e5e5e7;
 }
 
 .producto-imagen-container {
   position: relative;
   width: 100%;
-  height: 200px;
+  height: 220px;
   overflow: hidden;
-  background: #f5f5f5;
+  background: #f5f5f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
 }
 
 .producto-imagen {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .card-producto:hover .producto-imagen {
-  transform: scale(1.05);
+  transform: scale(1.04);
 }
 
 .producto-categoria {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  background: #007bff;
-  color: white;
-  padding: 0.35rem 0.75rem;
+  top: 12px;
+  right: 12px;
+  background: rgba(29, 29, 31, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #ffffff;
+  padding: 5px 12px;
   border-radius: 20px;
-  font-size: 0.75rem;
+  font-size: 11px;
   font-weight: 600;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .producto-info {
-  padding: 1.25rem;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
 }
 
 .producto-nombre {
-  font-size: 1.1rem;
+  font-size: 16px;
   font-weight: 600;
-  color: #333;
-  margin: 0 0 0.5rem 0;
-  line-height: 1.3;
-  max-height: 2.6rem;
+  color: #1d1d1f;
+  margin: 0 0 8px 0;
+  line-height: 1.35;
+  max-height: 2.7rem;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  transition: color 0.2s ease;
 }
 
 .producto-descripcion {
-  font-size: 0.9rem;
-  color: #666;
-  margin: 0 0 1rem 0;
-  line-height: 1.4;
-  max-height: 2.8rem;
+  font-size: 13.5px;
+  color: #86868b;
+  margin: 0 0 12px 0;
+  line-height: 1.45;
+  max-height: 2.9rem;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
@@ -81,29 +95,40 @@
 }
 
 .producto-rating {
-  margin: 0.75rem 0;
+  margin: 4px 0 12px 0;
 }
 
 .stars {
-  font-size: 0.95rem;
-  color: #ff9800;
-  font-weight: 500;
+  font-size: 13px;
+  color: #ff9500;
+  font-weight: 600;
+  background: #f5f5f7;
+  padding: 4px 10px;
+  border-radius: 8px;
 }
 
 .producto-stock {
-  margin: 0.75rem 0;
+  margin: 4px 0 16px 0;
 }
 
 .en-stock {
-  color: #4caf50;
-  font-size: 0.9rem;
+  color: #1a7f37;
+  font-size: 13px;
   font-weight: 600;
+  background: #e6f6ec;
+  padding: 4px 10px;
+  border-radius: 8px;
+  display: inline-block;
 }
 
 .sin-stock {
-  color: #f44336;
-  font-size: 0.9rem;
+  color: #d11a2a;
+  font-size: 13px;
   font-weight: 600;
+  background: #fdf2f2;
+  padding: 4px 10px;
+  border-radius: 8px;
+  display: inline-block;
 }
 
 .producto-footer {
@@ -111,32 +136,63 @@
   justify-content: space-between;
   align-items: center;
   margin-top: auto;
-  padding-top: 1rem;
-  border-top: 1px solid #eee;
+  padding-top: 16px;
+  border-top: 1px solid #f5f5f7;
 }
 
 .producto-precio {
-  font-size: 1.5rem;
+  font-size: 20px;
   font-weight: 700;
-  color: #ff9800;
+  color: #1d1d1f;
 }
 
 .btn-agregar {
-  background: #007bff;
-  color: white;
+  background: #0071e3;
+  color: #ffffff;
   border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 5px;
+  padding: 10px 20px;
+  border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s ease;
-  font-size: 0.9rem;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.15);
 }
 
-.btn-agregar:hover {
-  background: #0056b3;
+.btn-agregar:hover:not(:disabled) {
+  background: #0077ed;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 113, 227, 0.25);
 }
 
-.btn-agregar:active {
-  transform: scale(0.98);
+.btn-agregar:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn-agregar:disabled {
+  background: #a1a1a6;
+  color: #ffffff;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.producto-imagen-link,
+.producto-nombre-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.producto-nombre-link:hover .producto-nombre {
+  color: #0071e3;
+  text-decoration: none;
+}
+
+/* Micro-animación de feedback de compra */
+.btn-agregar.agregado-exito {
+  background: #34c759 !important;
+  color: #ffffff !important;
+  border-color: #34c759 !important;
+  box-shadow: 0 4px 12px rgba(52, 199, 89, 0.25) !important;
+  transform: scale(1.04) translateY(-1px) !important;
 }

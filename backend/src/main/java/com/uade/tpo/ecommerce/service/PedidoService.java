@@ -46,12 +46,17 @@ public class PedidoService {
                 .id(pedido.getId())
                 .total(pedido.getTotal())
                 .usuarioId(pedido.getUsuario() != null ? pedido.getUsuario().getId() : null)
+                .fechaCreacion(pedido.getFechaCreacion())
                 .items(items)
                 .build();
     }
 
     public List<PedidoDTO> getAllPedidos() {
         return pedidoRepository.findAll().stream().map(this::toDto).collect(Collectors.toList());
+    }
+
+    public List<PedidoDTO> getPedidosByUsuario(Long usuarioId) {
+        return pedidoRepository.findByUsuarioId(usuarioId).stream().map(this::toDto).collect(Collectors.toList());
     }
 
     public PedidoDTO getPedidoById(Long id) {

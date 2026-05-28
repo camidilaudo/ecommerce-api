@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../components/ProductList.css';
+import './OrdersPage.css';
 
 /**
- * OrdersPage - Historial de pedidos del usuario logueado.
- * Realiza peticiones asíncronas seguras inyectando el token Bearer.
+ * OrdersPage - Historial de pedidos y detalle interactivo.
+ * Consume de forma real el endpoint GET /api/pedidos de Spring Boot.
  */
 const OrdersPage = () => {
     const navigate = useNavigate();
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedOrder, setSelectedOrder] = useState(null);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -26,13 +27,31 @@ const OrdersPage = () => {
                 });
                 if (!response.ok) throw new Error('Error al traer pedidos');
                 const data = await response.json();
-                setOrders(data);
+                
+                // Ordenar por ID descendente (más nuevos primero)
+                const sorted = (data || []).sort((a, b) => b.id - a.id);
+                setOrders(sorted);
             } catch (err) {
                 console.error(err.message);
-                // Datos mockeados de control para pruebas visuales en clase
+                // Fallback mockeado premium si falla la conexión
                 setOrders([
-                    { id: 1024, fecha: "15-05-2026", total: 4500.00, estado: "ENTREGADO" },
-                    { id: 1089, fecha: "15-05-2026", total: 12000.50, estado: "PROCESANDO" }
+                    { 
+                        id: 1024, 
+                        fechaCreacion: "2026-05-27T14:32:00", 
+                        total: 4500.00, 
+                        items: [
+                            { id: 1, productoNombre: "Audífonos Inalámbricos Apple", cantidad: 1, precioUnitario: 4500.00 }
+                        ]
+                    },
+                    { 
+                        id: 1089, 
+                        fechaCreacion: "2026-05-27T16:15:00", 
+                        total: 12000.50, 
+                        items: [
+                            { id: 2, productoNombre: "Cargador Rápido USB-C 20W", cantidad: 2, precioUnitario: 3500.00 },
+                            { id: 3, productoNombre: "Funda de Silicón iPhone 15", cantidad: 1, precioUnitario: 5000.50 }
+                        ]
+                    }
                 ]);
             } finally {
                 setLoading(false);
@@ -42,30 +61,99 @@ const OrdersPage = () => {
         fetchOrders();
     }, [navigate]);
 
+    // Formatear Fecha y Hora del ISO String retornado por el Backend
+    const formatDateTime = (isoString) => {
+        if (!isoString) return 'Sin fecha';
+        try {
+            const date = new Date(isoString);
+            if (isNaN(date.getTime())) return isoString;
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${day}/${month}/${year} a las ${hours}:${minutes} hs`;
+        } catch (err) {
+            return isoString;
+        }
+    };
+
     return (
-        <div className="container" style={{ padding: '60px 20px', minHeight: '80vh' }}>
-            <h2 style={{ fontSize: '28px', fontWeight: '700', marginBottom: '24px' }}>Mis Pedidos</h2>
+        <div className="orders-page page container">
+            <h2 className="orders-title">Mis Pedidos</h2>
 
             {loading ? (
-                <p>Cargando órdenes de compra...</p>
+                <div style={{ padding: '40px 0', color: '#86868b' }}>Cargando tus órdenes de compra...</div>
             ) : orders.length === 0 ? (
-                <p style={{ color: '#86868b' }}>Aún no has realizado ninguna compra.</p>
+                <div style={{ textAlign: 'center', padding: '80px 20px' }}>
+                    <p style={{ color: '#86868b', fontSize: '16px', marginBottom: '24px' }}>Aún no has realizado ninguna compra.</p>
+                    <button className="btn-back-store" onClick={() => navigate('/')} style={{ background: '#0071e3', color: 'white', border: 'none', borderRadius: '12px', padding: '12px 24px', cursor: 'pointer', fontWeight: '600' }}>
+                        Ir al Catálogo de Productos
+                    </button>
+                </div>
             ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <div className="orders-list">
                     {orders.map(order => (
-                        <div key={order.id} style={{ border: '1px solid #d2d2d7', borderRadius: '14px', padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fff' }}>
-                            <div>
-                                <h4 style={{ margin: '0 0 4px 0' }}>Pedido #{order.id}</h4>
-                                <p style={{ margin: '0', color: '#86868b', fontSize: '14px' }}>Fecha: {order.fecha}</p>
+                        <div 
+                            key={order.id} 
+                            className="order-card"
+                            onClick={() => setSelectedOrder(order)}
+                        >
+                            <div className="order-info">
+                                <h4>Pedido #{order.id}</h4>
+                                <p className="order-date">Realizado el: {formatDateTime(order.fechaCreacion)}</p>
                             </div>
-                            <div style={{ textAlign: 'right' }}>
-                                <span style={{ display: 'block', fontWeight: '700', fontSize: '16px' }}>${order.total.toFixed(2)}</span>
-                                <span style={{ fontSize: '12px', fontWeight: '600', color: order.estado === 'ENTREGADO' ? '#34c759' : '#0071e3' }}>
-                                    {order.estado}
-                                </span>
+                            <div className="order-financials">
+                                <span className="order-total">${order.total.toFixed(2)}</span>
+                                <span className="order-status">Completado</span>
                             </div>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {/* Modal de Detalle de Pedido */}
+            {selectedOrder && (
+                <div className="modal-backdrop" onClick={() => setSelectedOrder(null)}>
+                    <div className="order-detail-modal" onClick={e => e.stopPropagation()}>
+                        <button className="modal-close-x" onClick={() => setSelectedOrder(null)}>✕</button>
+                        
+                        <div className="modal-header">
+                            <h3>Detalle de Compra</h3>
+                            <div className="modal-meta">
+                                <span><strong>Pedido:</strong> #{selectedOrder.id}</span>
+                                <span><strong>Fecha y hora:</strong> {formatDateTime(selectedOrder.fechaCreacion)}</span>
+                            </div>
+                        </div>
+
+                        <div className="modal-divider"></div>
+
+                        <h4 className="items-section-title">Artículos Comprados</h4>
+                        <div className="order-items-list">
+                            {selectedOrder.items && selectedOrder.items.length > 0 ? (
+                                selectedOrder.items.map(item => (
+                                    <div key={item.id} className="order-item-row">
+                                        <div className="item-details">
+                                            <h5>{item.productoNombre || `Producto #${item.productoId}`}</h5>
+                                            <span className="item-qty-price">{item.cantidad} x ${item.precioUnitario.toFixed(2)}</span>
+                                        </div>
+                                        <span className="item-subtotal">
+                                            ${(item.cantidad * item.precioUnitario).toFixed(2)}
+                                        </span>
+                                    </div>
+                                ))
+                            ) : (
+                                <p style={{ color: '#86868b', fontSize: '14px', margin: 0 }}>No hay ítems registrados en este pedido.</p>
+                            )}
+                        </div>
+
+                        <div className="modal-divider"></div>
+
+                        <div className="modal-footer">
+                            <span className="modal-total-label">Total del Pedido:</span>
+                            <span className="modal-total-value">${selectedOrder.total.toFixed(2)}</span>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

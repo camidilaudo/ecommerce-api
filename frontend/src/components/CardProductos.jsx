@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom'; // Importamos Link para navegación
 import { useCart } from '../context/CartContext'; // Importamos el contexto
 import './CardProductos.css';
 
@@ -8,20 +9,33 @@ import './CardProductos.css';
  */
 const CardProductos = ({ product }) => {
   const { addToCart } = useCart(); // Accedemos a la función global
+  const [agregado, setAgregado] = useState(false);
+
+  const handleAgregar = () => {
+    addToCart(product);
+    setAgregado(true);
+    setTimeout(() => {
+      setAgregado(false);
+    }, 1500);
+  };
 
   return (
       <div className="card-producto">
-        <div className="producto-imagen-container">
-          <img
-              src={product.imagen}
-              alt={product.nombre}
-              className="producto-imagen"
-          />
-          <span className="producto-categoria">{product.categoria}</span>
-        </div>
+        <Link to={`/productos/${product.id}`} className="producto-imagen-link">
+          <div className="producto-imagen-container">
+            <img
+                src={product.imagen}
+                alt={product.nombre}
+                className="producto-imagen"
+            />
+            <span className="producto-categoria">{product.categoria}</span>
+          </div>
+        </Link>
 
         <div className="producto-info">
-          <h3 className="producto-nombre">{product.nombre}</h3>
+          <Link to={`/productos/${product.id}`} className="producto-nombre-link">
+            <h3 className="producto-nombre">{product.nombre}</h3>
+          </Link>
           <p className="producto-descripcion">{product.descripcion}</p>
 
           <div className="producto-rating">
@@ -36,13 +50,13 @@ const CardProductos = ({ product }) => {
 
           <div className="producto-footer">
             <span className="producto-precio">${product.precio}</span>
-            {/* Al hacer click, llamamos a la función del context */}
+            {/* Al hacer click, llamamos a la función del context con animación */}
             <button
-                className="btn-agregar"
-                onClick={() => addToCart(product)}
-                disabled={product.stock === 0}
+                className={`btn-agregar ${agregado ? 'agregado-exito' : ''}`}
+                onClick={handleAgregar}
+                disabled={product.stock === 0 || agregado}
             >
-              {product.stock > 0 ? 'Agregar' : 'Sin Stock'}
+              {product.stock === 0 ? 'Sin Stock' : (agregado ? '✓ ¡Agregado!' : 'Agregar')}
             </button>
           </div>
         </div>
