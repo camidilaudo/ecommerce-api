@@ -46,8 +46,38 @@ const CartSidebar = () => {
     return (
         <div className="cart-overlay" onClick={toggleCart}>
             <div className="cart-sidebar" onClick={(e) => e.stopPropagation()}>
-                <div className="cart-header">
-                    <h3>Tu Carrito</h3>
+                <div className="cart-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <h3 style={{ margin: 0 }}>Tu Carrito</h3>
+                        {cart.length > 0 && (
+                            <button 
+                                onClick={() => {
+                                    if (window.confirm('¿Estás seguro de que querés vaciar todo el carrito?')) {
+                                        clearCart();
+                                        toast.info('Carrito vaciado');
+                                    }
+                                }}
+                                style={{
+                                    background: 'rgba(255, 59, 48, 0.1)',
+                                    color: '#ff3b30',
+                                    border: 'none',
+                                    padding: '4px 10px',
+                                    borderRadius: '8px',
+                                    fontSize: '11px',
+                                    fontWeight: '600',
+                                    cursor: 'pointer',
+                                    transition: 'background 0.2s, transform 0.1s',
+                                    outline: 'none'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 59, 48, 0.18)'}
+                                onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 59, 48, 0.1)'}
+                                onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
+                                onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                            >
+                                Vaciar
+                            </button>
+                        )}
+                    </div>
                     <button className="close-btn" onClick={toggleCart}>✕</button>
                 </div>
 

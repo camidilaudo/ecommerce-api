@@ -1,0 +1,230 @@
+﻿backend-ecomerce-uade  | [INFO] Scanning for projects...
+backend-ecomerce-uade  | Downloading from central: https://repo.maven.apache.org/maven2/org/cyclonedx/maven-metadata.xml
+backend-ecomerce-uade  | Downloading from central: https://repo.maven.apache.org/maven2/io/github/git-commit-id/maven-metadata.xml
+backend-ecomerce-uade  | Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/maven-metadata.xml
+backend-ecomerce-uade  | Downloading from central: https://repo.maven.apache.org/maven2/org/flywaydb/maven-metadata.xml
+backend-ecomerce-uade  | Progress (1): 234 B
+Progress (2): 234 B | 255 B
+                           
+Downloaded from central: https://repo.maven.apache.org/maven2/io/github/git-commit-id/maven-metadata.xml (255 B at 357 B/s)
+backend-ecomerce-uade  | Downloaded from central: https://repo.maven.apache.org/maven2/org/flywaydb/maven-metadata.xml (234 B at 333 B/s)
+backend-ecomerce-uade  | Downloading from central: https://repo.maven.apache.org/maven2/org/jooq/maven-metadata.xml
+backend-ecomerce-uade  | Downloading from central: https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/maven-metadata.xml
+backend-ecomerce-uade  | Progress (1): 243 B
+                   
+Downloaded from central: https://repo.maven.apache.org/maven2/org/cyclonedx/maven-metadata.xml (243 B at 335 B/s)
+backend-ecomerce-uade  | Downloading from central: https://repo.maven.apache.org/maven2/org/liquibase/maven-metadata.xml
+backend-ecomerce-uade  | Progress (1): 249 B
+                   
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/maven-metadata.xml (249 B at 341 B/s)
+backend-ecomerce-uade  | Downloading from central: https://repo.maven.apache.org/maven2/org/graalvm/buildtools/maven-metadata.xml
+backend-ecomerce-uade  | Progress (1): 398 B
+                   
+Downloaded from central: https://repo.maven.apache.org/maven2/org/jooq/maven-metadata.xml (398 B at 6.5 kB/s)
+backend-ecomerce-uade  | Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-metadata.xml
+backend-ecomerce-uade  | Progress (1): 242 B
+                   
+Downloaded from central: https://repo.maven.apache.org/maven2/org/graalvm/buildtools/maven-metadata.xml (242 B at 4.7 kB/s)
+backend-ecomerce-uade  | Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/mojo/maven-metadata.xml
+backend-ecomerce-uade  | Progress (1): 375 B
+                   
+Downloaded from central: https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/maven-metadata.xml (375 B at 4.8 kB/s)
+backend-ecomerce-uade  | Progress (1): 394 B
+                   
+Downloaded from central: https://repo.maven.apache.org/maven2/org/liquibase/maven-metadata.xml (394 B at 5.0 kB/s)
+backend-ecomerce-uade  | Progress (1): 4.6 kB
+Progress (1): 9.7 kB
+Progress (1): 14 kB 
+                   
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-metadata.xml (14 kB at 340 kB/s)
+backend-ecomerce-uade  | Progress (1): 3.1 kB
+Progress (1): 7.7 kB
+Progress (1): 12 kB 
+Progress (1): 17 kB
+Progress (1): 20 kB
+Progress (1): 21 kB
+                   
+Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/mojo/maven-metadata.xml (21 kB at 175 kB/s)
+backend-ecomerce-uade  | [INFO] 
+backend-ecomerce-uade  | [INFO] -----------------------< com.uade.tpo:e-comerce >-----------------------
+backend-ecomerce-uade  | [INFO] Building e-comerce 0.0.1-SNAPSHOT
+backend-ecomerce-uade  | [INFO]   from pom.xml
+backend-ecomerce-uade  | [INFO] --------------------------------[ jar ]---------------------------------
+backend-ecomerce-uade  | [INFO] 
+backend-ecomerce-uade  | [INFO] >>> spring-boot:4.0.4:run (default-cli) > test-compile @ e-comerce >>>
+backend-ecomerce-uade  | [INFO] 
+backend-ecomerce-uade  | [INFO] --- resources:3.3.1:resources (default-resources) @ e-comerce ---
+backend-ecomerce-uade  | [INFO] Copying 1 resource from src/main/resources to target/classes
+backend-ecomerce-uade  | [INFO] Copying 0 resource from src/main/resources to target/classes
+backend-ecomerce-uade  | [INFO] 
+backend-ecomerce-uade  | [INFO] --- compiler:3.14.1:compile (default-compile) @ e-comerce ---
+backend-ecomerce-uade  | [INFO] Recompiling the module because of changed source code.
+backend-ecomerce-uade  | [INFO] Compiling 54 source files with javac [debug parameters release 17] to target/classes
+backend-ecomerce-uade  | [WARNING] /app/src/main/java/com/uade/tpo/ecommerce/model/Producto.java:[75,26] @Builder will ignore the initializing expression entirely. If you want the initializing expression to serve as default, add @Builder.Default. If it is not supposed to be settable during building, make the field final.
+backend-ecomerce-uade  | [WARNING] /app/src/main/java/com/uade/tpo/ecommerce/model/Producto.java:[84,29] @Builder will ignore the initializing expression entirely. If you want the initializing expression to serve as default, add @Builder.Default. If it is not supposed to be settable during building, make the field final.
+backend-ecomerce-uade  | [INFO] 
+backend-ecomerce-uade  | [INFO] --- resources:3.3.1:testResources (default-testResources) @ e-comerce ---
+backend-ecomerce-uade  | [INFO] skip non existing resourceDirectory /app/src/test/resources
+backend-ecomerce-uade  | [INFO] 
+backend-ecomerce-uade  | [INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ e-comerce ---
+backend-ecomerce-uade  | [INFO] Recompiling the module because of changed dependency.
+backend-ecomerce-uade  | [INFO] Compiling 2 source files with javac [debug parameters release 17] to target/test-classes
+backend-ecomerce-uade  | [INFO] 
+backend-ecomerce-uade  | [INFO] <<< spring-boot:4.0.4:run (default-cli) < test-compile @ e-comerce <<<
+backend-ecomerce-uade  | [INFO] 
+backend-ecomerce-uade  | [INFO] 
+backend-ecomerce-uade  | [INFO] --- spring-boot:4.0.4:run (default-cli) @ e-comerce ---
+backend-ecomerce-uade  | [INFO] Attaching agents: []
+backend-ecomerce-uade  | 
+backend-ecomerce-uade  |   .   ____          _            __ _ _
+backend-ecomerce-uade  |  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+backend-ecomerce-uade  | ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+backend-ecomerce-uade  |  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+backend-ecomerce-uade  |   '  |____| .__|_| |_|_| |_\__, | / / / /
+backend-ecomerce-uade  |  =========|_|==============|___/=/_/_/_/
+backend-ecomerce-uade  | 
+backend-ecomerce-uade  |  :: Spring Boot ::                (v4.0.4)
+backend-ecomerce-uade  | 
+backend-ecomerce-uade  | 2026-05-27T22:41:43.112Z  INFO 180 --- [e-comerce] [           main] c.u.t.ecommerce.ApiEcommerceApplication  : Starting ApiEcommerceApplication using Java 17.0.19 with PID 180 (/app/target/classes started by root in /app)
+backend-ecomerce-uade  | 2026-05-27T22:41:43.118Z  INFO 180 --- [e-comerce] [           main] c.u.t.ecommerce.ApiEcommerceApplication  : No active profile set, falling back to 1 default profile: "default"
+backend-ecomerce-uade  | 2026-05-27T22:41:45.143Z  INFO 180 --- [e-comerce] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+backend-ecomerce-uade  | 2026-05-27T22:41:45.272Z  INFO 180 --- [e-comerce] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 117 ms. Found 7 JPA repository interfaces.
+backend-ecomerce-uade  | 2026-05-27T22:41:45.996Z  INFO 180 --- [e-comerce] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8081 (http)
+backend-ecomerce-uade  | 2026-05-27T22:41:46.010Z  INFO 180 --- [e-comerce] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+backend-ecomerce-uade  | 2026-05-27T22:41:46.010Z  INFO 180 --- [e-comerce] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.18]
+backend-ecomerce-uade  | 2026-05-27T22:41:46.062Z  INFO 180 --- [e-comerce] [           main] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 2848 ms
+backend-ecomerce-uade  | 2026-05-27T22:41:46.247Z  INFO 180 --- [e-comerce] [           main] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+backend-ecomerce-uade  | 2026-05-27T22:41:46.296Z  INFO 180 --- [e-comerce] [           main] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.7.Final
+backend-ecomerce-uade  | 2026-05-27T22:41:46.694Z  INFO 180 --- [e-comerce] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+backend-ecomerce-uade  | 2026-05-27T22:41:46.725Z  INFO 180 --- [e-comerce] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+backend-ecomerce-uade  | 2026-05-27T22:41:46.856Z  INFO 180 --- [e-comerce] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@4e357792
+backend-ecomerce-uade  | 2026-05-27T22:41:46.858Z  INFO 180 --- [e-comerce] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+backend-ecomerce-uade  | 2026-05-27T22:41:46.909Z  WARN 180 --- [e-comerce] [           main] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+backend-ecomerce-uade  | 2026-05-27T22:41:46.931Z  INFO 180 --- [e-comerce] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+backend-ecomerce-uade  | 	Database JDBC URL [jdbc:mysql://mysql-db:3306/ecommercedb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true]
+backend-ecomerce-uade  | 	Database driver: MySQL Connector/J
+backend-ecomerce-uade  | 	Database dialect: MySQLDialect
+backend-ecomerce-uade  | 	Database version: 8.0.45
+backend-ecomerce-uade  | 	Default catalog/schema: ecommercedb/undefined
+backend-ecomerce-uade  | 	Autocommit mode: undefined/unknown
+backend-ecomerce-uade  | 	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+backend-ecomerce-uade  | 	JDBC fetch size: none
+backend-ecomerce-uade  | 	Pool: DataSourceConnectionProvider
+backend-ecomerce-uade  | 	Minimum pool size: undefined/unknown
+backend-ecomerce-uade  | 	Maximum pool size: undefined/unknown
+backend-ecomerce-uade  | 2026-05-27T22:41:48.165Z  INFO 180 --- [e-comerce] [           main] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+backend-ecomerce-uade  | Hibernate: alter table productos add column activo bit not null
+backend-ecomerce-uade  | 2026-05-27T22:41:48.320Z  INFO 180 --- [e-comerce] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+backend-ecomerce-uade  | 2026-05-27T22:41:48.381Z  INFO 180 --- [e-comerce] [           main] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+backend-ecomerce-uade  | 2026-05-27T22:41:49.247Z  INFO 180 --- [e-comerce] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
+backend-ecomerce-uade  | 2026-05-27T22:41:49.389Z  WARN 180 --- [e-comerce] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+backend-ecomerce-uade  | 2026-05-27T22:41:49.932Z  INFO 180 --- [e-comerce] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+backend-ecomerce-uade  | 2026-05-27T22:41:50.022Z  INFO 180 --- [e-comerce] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8081 (http) with context path '/'
+backend-ecomerce-uade  | 2026-05-27T22:41:50.034Z  INFO 180 --- [e-comerce] [           main] c.u.t.ecommerce.ApiEcommerceApplication  : Started ApiEcommerceApplication in 7.892 seconds (process running for 9.083)
+backend-ecomerce-uade  | 2026-05-27T22:41:56.898Z  INFO 180 --- [e-comerce] [nio-8081-exec-2] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+backend-ecomerce-uade  | 2026-05-27T22:41:56.899Z  INFO 180 --- [e-comerce] [nio-8081-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+backend-ecomerce-uade  | 2026-05-27T22:41:56.901Z  INFO 180 --- [e-comerce] [nio-8081-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+backend-ecomerce-uade  | Hibernate: select p1_0.id,p1_0.activo,p1_0.descripcion,p1_0.fecha_creacion,p1_0.fecha_modificacion,p1_0.nombre,p1_0.precio,p1_0.stock,p1_0.usuario_id from productos p1_0 where p1_0.activo=true order by p1_0.nombre
+backend-ecomerce-uade  | Hibernate: select c1_0.id,c1_0.nombre from categorias c1_0
+backend-ecomerce-uade  | Hibernate: select p1_0.id,p1_0.activo,p1_0.descripcion,p1_0.fecha_creacion,p1_0.fecha_modificacion,p1_0.nombre,p1_0.precio,p1_0.stock,p1_0.usuario_id from productos p1_0 where p1_0.activo=true order by p1_0.nombre
+backend-ecomerce-uade  | Hibernate: select c1_0.id,c1_0.nombre from categorias c1_0
+backend-ecomerce-uade  | Hibernate: select c1_0.id,c1_0.nombre from categorias c1_0
+backend-ecomerce-uade  | Hibernate: select c1_0.id,c1_0.nombre from categorias c1_0
+backend-ecomerce-uade  | Hibernate: select u1_0.id,u1_0.apellido,u1_0.email,u1_0.fecha_creacion,u1_0.fecha_modificacion,u1_0.fecha_nacimiento,u1_0.nombre,u1_0.nombre_usuario,u1_0.password,u1_0.role,u1_0.sexo from usuarios u1_0 where u1_0.email=?
+backend-ecomerce-uade  | Hibernate: select c1_0.id,u1_0.id,u1_0.apellido,u1_0.email,u1_0.fecha_creacion,u1_0.fecha_modificacion,u1_0.fecha_nacimiento,u1_0.nombre,u1_0.nombre_usuario,u1_0.password,u1_0.role,u1_0.sexo from carritos c1_0 left join usuarios u1_0 on u1_0.id=c1_0.usuario_id where c1_0.usuario_id=?
+backend-ecomerce-uade  | Hibernate: select coalesce(sum(p1_0.total),0.0) from pedidos p1_0
+backend-ecomerce-uade  | Hibernate: select count(*) from usuarios u1_0
+backend-ecomerce-uade  | Hibernate: select count(p1_0.id) from productos p1_0 where p1_0.activo=true
+backend-ecomerce-uade  | Hibernate: select coalesce(sum(p1_0.stock),0) from productos p1_0 where p1_0.activo=true
+backend-ecomerce-uade  | Hibernate: select u1_0.id,u1_0.apellido,u1_0.email,u1_0.fecha_creacion,u1_0.fecha_modificacion,u1_0.fecha_nacimiento,u1_0.nombre,u1_0.nombre_usuario,u1_0.password,u1_0.role,u1_0.sexo from usuarios u1_0 where u1_0.email=?
+backend-ecomerce-uade  | Hibernate: select c1_0.id,u1_0.id,u1_0.apellido,u1_0.email,u1_0.fecha_creacion,u1_0.fecha_modificacion,u1_0.fecha_nacimiento,u1_0.nombre,u1_0.nombre_usuario,u1_0.password,u1_0.role,u1_0.sexo from carritos c1_0 left join usuarios u1_0 on u1_0.id=c1_0.usuario_id where c1_0.usuario_id=?
+backend-ecomerce-uade  | Hibernate: select coalesce(sum(p1_0.total),0.0) from pedidos p1_0
+backend-ecomerce-uade  | Hibernate: select count(*) from usuarios u1_0
+backend-ecomerce-uade  | Hibernate: select count(p1_0.id) from productos p1_0 where p1_0.activo=true
+backend-ecomerce-uade  | Hibernate: select coalesce(sum(p1_0.stock),0) from productos p1_0 where p1_0.activo=true
+backend-ecomerce-uade  | Hibernate: select u1_0.id,u1_0.apellido,u1_0.email,u1_0.fecha_creacion,u1_0.fecha_modificacion,u1_0.fecha_nacimiento,u1_0.nombre,u1_0.nombre_usuario,u1_0.password,u1_0.role,u1_0.sexo from usuarios u1_0 where u1_0.email=?
+backend-ecomerce-uade  | Hibernate: select c1_0.id,u1_0.id,u1_0.apellido,u1_0.email,u1_0.fecha_creacion,u1_0.fecha_modificacion,u1_0.fecha_nacimiento,u1_0.nombre,u1_0.nombre_usuario,u1_0.password,u1_0.role,u1_0.sexo from carritos c1_0 left join usuarios u1_0 on u1_0.id=c1_0.usuario_id where c1_0.usuario_id=?
+backend-ecomerce-uade  | Hibernate: select u1_0.id,u1_0.apellido,u1_0.email,u1_0.fecha_creacion,u1_0.fecha_modificacion,u1_0.fecha_nacimiento,u1_0.nombre,u1_0.nombre_usuario,u1_0.password,u1_0.role,u1_0.sexo from usuarios u1_0 where u1_0.email=?
+backend-ecomerce-uade  | Hibernate: select c1_0.id,u1_0.id,u1_0.apellido,u1_0.email,u1_0.fecha_creacion,u1_0.fecha_modificacion,u1_0.fecha_nacimiento,u1_0.nombre,u1_0.nombre_usuario,u1_0.password,u1_0.role,u1_0.sexo from carritos c1_0 left join usuarios u1_0 on u1_0.id=c1_0.usuario_id where c1_0.usuario_id=?
+backend-ecomerce-uade  | 2026-05-27T22:44:41.503Z  INFO 180 --- [e-comerce] [ionShutdownHook] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+backend-ecomerce-uade  | 2026-05-27T22:44:41.506Z  INFO 180 --- [e-comerce] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+backend-ecomerce-uade  | 2026-05-27T22:44:41.515Z  INFO 180 --- [e-comerce] [ionShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+backend-ecomerce-uade  | 2026-05-27T22:44:41.517Z  INFO 180 --- [e-comerce] [ionShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+backend-ecomerce-uade  | 2026-05-27T22:44:41.522Z  INFO 180 --- [e-comerce] [ionShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+backend-ecomerce-uade  | [INFO] Scanning for projects...
+backend-ecomerce-uade  | [INFO] 
+backend-ecomerce-uade  | [INFO] -----------------------< com.uade.tpo:e-comerce >-----------------------
+backend-ecomerce-uade  | [INFO] Building e-comerce 0.0.1-SNAPSHOT
+backend-ecomerce-uade  | [INFO]   from pom.xml
+backend-ecomerce-uade  | [INFO] --------------------------------[ jar ]---------------------------------
+backend-ecomerce-uade  | [INFO] 
+backend-ecomerce-uade  | [INFO] >>> spring-boot:4.0.4:run (default-cli) > test-compile @ e-comerce >>>
+backend-ecomerce-uade  | [INFO] 
+backend-ecomerce-uade  | [INFO] --- resources:3.3.1:resources (default-resources) @ e-comerce ---
+backend-ecomerce-uade  | [INFO] Copying 1 resource from src/main/resources to target/classes
+backend-ecomerce-uade  | [INFO] Copying 0 resource from src/main/resources to target/classes
+backend-ecomerce-uade  | [INFO] 
+backend-ecomerce-uade  | [INFO] --- compiler:3.14.1:compile (default-compile) @ e-comerce ---
+backend-ecomerce-uade  | [INFO] Nothing to compile - all classes are up to date.
+backend-ecomerce-uade  | [INFO] 
+backend-ecomerce-uade  | [INFO] --- resources:3.3.1:testResources (default-testResources) @ e-comerce ---
+backend-ecomerce-uade  | [INFO] skip non existing resourceDirectory /app/src/test/resources
+backend-ecomerce-uade  | [INFO] 
+backend-ecomerce-uade  | [INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ e-comerce ---
+backend-ecomerce-uade  | [INFO] Nothing to compile - all classes are up to date.
+backend-ecomerce-uade  | [INFO] 
+backend-ecomerce-uade  | [INFO] <<< spring-boot:4.0.4:run (default-cli) < test-compile @ e-comerce <<<
+backend-ecomerce-uade  | [INFO] 
+backend-ecomerce-uade  | [INFO] 
+backend-ecomerce-uade  | [INFO] --- spring-boot:4.0.4:run (default-cli) @ e-comerce ---
+backend-ecomerce-uade  | [INFO] Attaching agents: []
+backend-ecomerce-uade  | 
+backend-ecomerce-uade  |   .   ____          _            __ _ _
+backend-ecomerce-uade  |  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+backend-ecomerce-uade  | ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+backend-ecomerce-uade  |  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+backend-ecomerce-uade  |   '  |____| .__|_| |_|_| |_\__, | / / / /
+backend-ecomerce-uade  |  =========|_|==============|___/=/_/_/_/
+backend-ecomerce-uade  | 
+backend-ecomerce-uade  |  :: Spring Boot ::                (v4.0.4)
+backend-ecomerce-uade  | 
+backend-ecomerce-uade  | 2026-05-27T22:44:46.777Z  INFO 170 --- [e-comerce] [           main] c.u.t.ecommerce.ApiEcommerceApplication  : Starting ApiEcommerceApplication using Java 17.0.19 with PID 170 (/app/target/classes started by root in /app)
+backend-ecomerce-uade  | 2026-05-27T22:44:46.780Z  INFO 170 --- [e-comerce] [           main] c.u.t.ecommerce.ApiEcommerceApplication  : No active profile set, falling back to 1 default profile: "default"
+backend-ecomerce-uade  | 2026-05-27T22:44:47.458Z  INFO 170 --- [e-comerce] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+backend-ecomerce-uade  | 2026-05-27T22:44:47.515Z  INFO 170 --- [e-comerce] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 50 ms. Found 7 JPA repository interfaces.
+backend-ecomerce-uade  | 2026-05-27T22:44:48.078Z  INFO 170 --- [e-comerce] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8081 (http)
+backend-ecomerce-uade  | 2026-05-27T22:44:48.089Z  INFO 170 --- [e-comerce] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+backend-ecomerce-uade  | 2026-05-27T22:44:48.090Z  INFO 170 --- [e-comerce] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.18]
+backend-ecomerce-uade  | 2026-05-27T22:44:48.134Z  INFO 170 --- [e-comerce] [           main] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 1311 ms
+backend-ecomerce-uade  | 2026-05-27T22:44:48.321Z  INFO 170 --- [e-comerce] [           main] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+backend-ecomerce-uade  | 2026-05-27T22:44:48.371Z  INFO 170 --- [e-comerce] [           main] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.7.Final
+backend-ecomerce-uade  | 2026-05-27T22:44:48.812Z  INFO 170 --- [e-comerce] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+backend-ecomerce-uade  | 2026-05-27T22:44:48.850Z  INFO 170 --- [e-comerce] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+backend-ecomerce-uade  | 2026-05-27T22:44:49.023Z  INFO 170 --- [e-comerce] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@4e357792
+backend-ecomerce-uade  | 2026-05-27T22:44:49.025Z  INFO 170 --- [e-comerce] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+backend-ecomerce-uade  | 2026-05-27T22:44:49.082Z  WARN 170 --- [e-comerce] [           main] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+backend-ecomerce-uade  | 2026-05-27T22:44:49.099Z  INFO 170 --- [e-comerce] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+backend-ecomerce-uade  | 	Database JDBC URL [jdbc:mysql://mysql-db:3306/ecommercedb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true]
+backend-ecomerce-uade  | 	Database driver: MySQL Connector/J
+backend-ecomerce-uade  | 	Database dialect: MySQLDialect
+backend-ecomerce-uade  | 	Database version: 8.0.45
+backend-ecomerce-uade  | 	Default catalog/schema: ecommercedb/undefined
+backend-ecomerce-uade  | 	Autocommit mode: undefined/unknown
+backend-ecomerce-uade  | 	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+backend-ecomerce-uade  | 	JDBC fetch size: none
+backend-ecomerce-uade  | 	Pool: DataSourceConnectionProvider
+backend-ecomerce-uade  | 	Minimum pool size: undefined/unknown
+backend-ecomerce-uade  | 	Maximum pool size: undefined/unknown
+backend-ecomerce-uade  | 2026-05-27T22:44:50.463Z  INFO 170 --- [e-comerce] [           main] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+backend-ecomerce-uade  | 2026-05-27T22:44:50.539Z  INFO 170 --- [e-comerce] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+backend-ecomerce-uade  | 2026-05-27T22:44:50.608Z  INFO 170 --- [e-comerce] [           main] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+backend-ecomerce-uade  | 2026-05-27T22:44:51.815Z  INFO 170 --- [e-comerce] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
+backend-ecomerce-uade  | 2026-05-27T22:44:52.010Z  WARN 170 --- [e-comerce] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+backend-ecomerce-uade  | 2026-05-27T22:44:52.740Z  INFO 170 --- [e-comerce] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+backend-ecomerce-uade  | 2026-05-27T22:44:52.812Z  INFO 170 --- [e-comerce] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8081 (http) with context path '/'
+backend-ecomerce-uade  | 2026-05-27T22:44:52.821Z  INFO 170 --- [e-comerce] [           main] c.u.t.ecommerce.ApiEcommerceApplication  : Started ApiEcommerceApplication in 6.375 seconds (process running for 6.672)
+backend-ecomerce-uade  | 2026-05-27T22:45:25.562Z  INFO 170 --- [e-comerce] [nio-8081-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+backend-ecomerce-uade  | 2026-05-27T22:45:25.562Z  INFO 170 --- [e-comerce] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+backend-ecomerce-uade  | 2026-05-27T22:45:25.564Z  INFO 170 --- [e-comerce] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+backend-ecomerce-uade  | Hibernate: select u1_0.id,u1_0.apellido,u1_0.email,u1_0.fecha_creacion,u1_0.fecha_modificacion,u1_0.fecha_nacimiento,u1_0.nombre,u1_0.nombre_usuario,u1_0.password,u1_0.role,u1_0.sexo from usuarios u1_0 where u1_0.email=?
+backend-ecomerce-uade  | Hibernate: select c1_0.id,u1_0.id,u1_0.apellido,u1_0.email,u1_0.fecha_creacion,u1_0.fecha_modificacion,u1_0.fecha_nacimiento,u1_0.nombre,u1_0.nombre_usuario,u1_0.password,u1_0.role,u1_0.sexo from carritos c1_0 left join usuarios u1_0 on u1_0.id=c1_0.usuario_id where c1_0.usuario_id=?

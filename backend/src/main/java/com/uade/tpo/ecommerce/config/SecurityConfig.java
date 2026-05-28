@@ -119,6 +119,9 @@ public class SecurityConfig {
                         // Cualquier usuario logueado puede acceder a su GET/PUT individual
                         .requestMatchers("/api/usuarios/**").authenticated()
 
+                        // 6. ADMIN STATS
+                        .requestMatchers("/api/admin/stats/**").hasRole(Role.ADMIN.name())
+
                         // CUALQUIER OTRO (Catch-all por seguridad)
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

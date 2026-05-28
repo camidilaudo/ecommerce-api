@@ -89,6 +89,18 @@ public class Producto {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Usuario usuario;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean activo = true;
+
+    @org.hibernate.annotations.CreationTimestamp
+    @Column(name = "fecha_creacion", updatable = false)
+    private java.time.LocalDateTime fechaCreacion;
+
+    @org.hibernate.annotations.UpdateTimestamp
+    @Column(name = "fecha_modificacion")
+    private java.time.LocalDateTime fechaModificacion;
+
     // Campos virtuales recibidos desde el Frontend (no se guardan en la tabla directamente)
     @Transient
     private List<Long> categoriaIds;

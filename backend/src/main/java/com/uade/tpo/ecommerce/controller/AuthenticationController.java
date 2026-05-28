@@ -2,6 +2,7 @@ package com.uade.tpo.ecommerce.controller;
 
 import lombok.RequiredArgsConstructor;
 
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import com.uade.tpo.ecommerce.dto.LoginResponse;
@@ -45,7 +46,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public RegisterResponse register(@RequestBody RegisterRequest request) {
+    public RegisterResponse register(@Valid @RequestBody RegisterRequest request) {
         return authenticationService.register(request);
     }
 }

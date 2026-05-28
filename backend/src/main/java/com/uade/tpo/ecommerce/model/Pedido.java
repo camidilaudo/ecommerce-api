@@ -50,6 +50,11 @@ public class Pedido {
     @JsonBackReference
     private Usuario usuario;
 
+    @Column(name = "fecha_creacion")
+    @Builder.Default
+    @com.fasterxml.jackson.annotation.JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private java.time.LocalDateTime fechaCreacion = java.time.LocalDateTime.now();
+
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "pedido_id") // Relación unidireccional con items
     @Builder.Default

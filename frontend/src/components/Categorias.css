@@ -1,7 +1,28 @@
-.categories-pills { display: flex; gap: 10px; overflow-x: auto; padding: 25px 0; scrollbar-width: none; justify-content: center; }
-.pill { padding: 10px 24px; border-radius: 25px; border: 1px solid #d2d2d7; background: white; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap; color: #1d1d1f; }
-.pill.active { background: #000; color: #fff; border-color: #000; }
-.pill:hover:not(.active) { background: #f5f5f7; border-color: #86868b; }
+.categories-pills { display: flex; gap: 12px; overflow-x: auto; padding: 25px 0; scrollbar-width: none; justify-content: center; }
+.pill {
+  padding: 10px 24px;
+  border-radius: 20px;
+  border: 1px solid #e5e5e7;
+  background: #f5f5f7;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  color: #515154;
+}
+.pill.active {
+  background: #1d1d1f;
+  color: #ffffff;
+  border-color: #1d1d1f;
+  box-shadow: 0 4px 12px rgba(29, 29, 31, 0.15);
+}
+.pill:hover:not(.active) {
+  background: #e8e8ed;
+  color: #1d1d1f;
+  border-color: #d2d2d7;
+  transform: translateY(-1px);
+}
 
 .categorias {
     max-width: 1100px;

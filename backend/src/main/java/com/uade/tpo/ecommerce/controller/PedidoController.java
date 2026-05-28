@@ -25,8 +25,11 @@ public class PedidoController {
     private PedidoService pedidoService;
 
     @GetMapping
-    public List<PedidoDTO> getAllPedidos() {
-        return pedidoService.getAllPedidos();
+    public List<PedidoDTO> getAllPedidos(@org.springframework.security.core.annotation.AuthenticationPrincipal com.uade.tpo.ecommerce.model.Usuario usuario) {
+        if (usuario == null) {
+            return java.util.List.of();
+        }
+        return pedidoService.getPedidosByUsuario(usuario.getId());
     }
 
     @GetMapping("/{id}")

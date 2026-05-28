@@ -13,6 +13,10 @@ const HomePage = ({ searchQuery }) => {
     const [category, setCategory] = useState('Todos');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    
+    // Filtros de precio
+    const [minPrice, setMinPrice] = useState('');
+    const [maxPrice, setMaxPrice] = useState('');
 
     // useEffect: Vigilante de carga inicial (Clase 08)
     useEffect(() => {
@@ -39,11 +43,16 @@ const HomePage = ({ searchQuery }) => {
         fetchProducts();
     }, []);
 
-    // Lógica de filtrado (Categoría + Búsqueda Navbar)
+    // Lógica de filtrado (Categoría + Búsqueda Navbar + Rango de Precios)
     const filtered = products.filter(p => {
         const matchCat = category === 'Todos' || (p.categoriaNombres && p.categoriaNombres.includes(category));
         const matchSearch = p.nombre.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchCat && matchSearch;
+        
+        const price = p.precio;
+        const matchMin = minPrice === '' || price >= parseFloat(minPrice);
+        const matchMax = maxPrice === '' || price <= parseFloat(maxPrice);
+        
+        return matchCat && matchSearch && matchMin && matchMax;
     });
 
     // Manejo de Error sin CSS en línea
@@ -68,6 +77,81 @@ const HomePage = ({ searchQuery }) => {
             </header>
 
             <Categorias activeCategory={category} onCategoryChange={setCategory} />
+
+            {/* Panel de Filtro de Rango de Precios Premium */}
+            <div className="container" style={{ margin: '20px auto 10px auto' }}>
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '16px',
+                    padding: '16px 24px',
+                    borderRadius: '16px',
+                    background: 'rgba(255, 255, 255, 0.8)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.03)',
+                    flexWrap: 'wrap'
+                }}>
+                    <span style={{ fontWeight: '600', fontSize: '14px', color: '#1d1d1f' }}>Filtrar por Precio:</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <label style={{ fontSize: '12px', color: '#86868b' }}>Mínimo ($)</label>
+                            <input
+                                type="number"
+                                placeholder="0"
+                                value={minPrice}
+                                onChange={(e) => setMinPrice(e.target.value)}
+                                style={{
+                                    width: '100px',
+                                    padding: '8px 12px',
+                                    borderRadius: '10px',
+                                    border: '1px solid rgba(0, 0, 0, 0.1)',
+                                    background: 'rgba(250, 250, 250, 0.8)',
+                                    fontSize: '13px',
+                                    outline: 'none',
+                                    transition: 'border 0.2s'
+                                }}
+                            />
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <label style={{ fontSize: '12px', color: '#86868b' }}>Máximo ($)</label>
+                            <input
+                                type="number"
+                                placeholder="Sin límite"
+                                value={maxPrice}
+                                onChange={(e) => setMaxPrice(e.target.value)}
+                                style={{
+                                    width: '120px',
+                                    padding: '8px 12px',
+                                    borderRadius: '10px',
+                                    border: '1px solid rgba(0, 0, 0, 0.1)',
+                                    background: 'rgba(250, 250, 250, 0.8)',
+                                    fontSize: '13px',
+                                    outline: 'none',
+                                    transition: 'border 0.2s'
+                                }}
+                            />
+                        </div>
+                        {(minPrice !== '' || maxPrice !== '') && (
+                            <button
+                                onClick={() => { setMinPrice(''); setMaxPrice(''); }}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: '#0071e3',
+                                    cursor: 'pointer',
+                                    fontSize: '13px',
+                                    fontWeight: '500',
+                                    padding: '4px 8px'
+                                }}
+                            >
+                                Limpiar rango
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </div>
 
             <main className="container">
                 {loading ? (

@@ -6,14 +6,25 @@ import { handleApiResponse } from '../utils/apiHelpers';
 import CategoryManager from '../components/CategoryManager';
 
 /**
- * AdminPanel - Panel de Gestión de Productos (CRUD).
- * Incluye: Alta, Baja, Edición (PUT).
+ * EditProductForm - Formulario de edición con soporte para múltiples fotos dinámicas.
  */
-
 const EditProductForm = ({ product, onCancel, onSave, saving, categories }) => {
-    const [form, setForm] = useState({ ...product });
+    // Inicializar lista de imágenes basada en el producto existente
+    const initialImages = product.imagenes && product.imagenes.length > 0
+        ? [...product.imagenes]
+        : (product.imagen ? [product.imagen] : ['']);
 
-    useEffect(() => setForm({ ...product }), [product]);
+    const [form, setForm] = useState({
+        ...product,
+        imagenes: initialImages
+    });
+
+    useEffect(() => {
+        const imgs = product.imagenes && product.imagenes.length > 0
+            ? [...product.imagenes]
+            : (product.imagen ? [product.imagen] : ['']);
+        setForm({ ...product, imagenes: imgs });
+    }, [product]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -25,19 +36,43 @@ const EditProductForm = ({ product, onCancel, onSave, saving, categories }) => {
         setForm((p) => ({ ...p, categoriaIds: selectedOptions }));
     };
 
+    // Funciones dinámicas para imágenes
+    const handleImageChange = (index, value) => {
+        const newImages = [...form.imagenes];
+        newImages[index] = value;
+        setForm((p) => ({ ...p, imagenes: newImages }));
+    };
+
+    const addImageField = () => {
+        setForm((p) => ({ ...p, imagenes: [...p.imagenes, ''] }));
+    };
+
+    const removeImageField = (index) => {
+        if (form.imagenes.length <= 1) return;
+        const newImages = form.imagenes.filter((_, idx) => idx !== index);
+        setForm((p) => ({ ...p, imagenes: newImages }));
+    };
+
     const submit = (e) => {
         e.preventDefault();
-        // Validaciones simples
         if (!form.nombre || Number(form.precio) <= 0) {
             return toast.error('Nombre y precio válidos son requeridos');
         }
         if (!form.categoriaIds || form.categoriaIds.length === 0) {
             return toast.error('Selecciona al menos una categoría');
         }
+
+        const validImages = form.imagenes.filter(img => img.trim() !== '');
+        if (validImages.length === 0) {
+            return toast.error('Por favor, ingresá al menos una URL de imagen válida');
+        }
+
         onSave({
             ...form,
             precio: Number(form.precio),
             stock: Number(form.stock),
+            imagenes: validImages,
+            imagen: validImages[0], // fallback primer elemento
             id: product.id
         });
     };
@@ -72,13 +107,44 @@ const EditProductForm = ({ product, onCancel, onSave, saving, categories }) => {
                     ))}
                 </select>
             </div>
+
+            {/* Listado dinámico de imágenes */}
             <div className="admin-input-group">
-                <label>URL de la Imagen</label>
-                <input name="imagen" value={form.imagen} onChange={handleChange} type="url" />
+                <label>Imágenes del Producto (URLs)</label>
+                {form.imagenes.map((img, index) => (
+                    <div key={index} className="admin-image-input-row" style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                        <input
+                            type="url"
+                            placeholder="https://ejemplo.com/foto.jpg"
+                            value={img}
+                            onChange={(e) => handleImageChange(index, e.target.value)}
+                            required={index === 0}
+                            style={{ flexGrow: 1 }}
+                        />
+                        {form.imagenes.length > 1 && (
+                            <button
+                                type="button"
+                                className="admin-remove-image-btn"
+                                onClick={() => removeImageField(index)}
+                                style={{ background: '#ff3b30', color: 'white', border: 'none', borderRadius: '6px', padding: '0 12px', cursor: 'pointer' }}
+                            >
+                                ✕
+                            </button>
+                        )}
+                    </div>
+                ))}
+                <button
+                    type="button"
+                    className="admin-add-image-btn"
+                    onClick={addImageField}
+                    style={{ background: '#0071e3', color: 'white', border: 'none', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', fontSize: '13px', marginTop: '4px' }}
+                >
+                    + Agregar otra foto
+                </button>
             </div>
 
             <div className="edit-actions">
-                <button type="button " className="admin-edit-cancel-btn" onClick={onCancel}>
+                <button type="button" className="admin-edit-cancel-btn" onClick={onCancel}>
                     Cancelar
                 </button>
                 <button type="submit" className="admin-edit-submit-btn" disabled={saving}>
@@ -89,6 +155,9 @@ const EditProductForm = ({ product, onCancel, onSave, saving, categories }) => {
     );
 };
 
+/**
+ * AdminPanel - Panel Principal de Gestión de Productos.
+ */
 const AdminPanel = () => {
     const navigate = useNavigate();
     const [productos, setProductos] = useState([]);
@@ -100,13 +169,20 @@ const AdminPanel = () => {
         precio: '',
         stock: '',
         categoriaIds: [],
-        imagen: ''
+        imagenes: ['']
     });
 
     const [editingProduct, setEditingProduct] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 6;
+
+    const [stats, setStats] = useState({
+        totalSales: 0.0,
+        totalUsers: 0,
+        totalProducts: 0,
+        totalStock: 0
+    });
 
     const token = localStorage.getItem('token');
 
@@ -119,6 +195,22 @@ const AdminPanel = () => {
         fetchCategories();
     }, [token, navigate]);
 
+    const fetchStats = async () => {
+        try {
+            const response = await fetch('http://localhost:8081/api/admin/stats', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setStats(data);
+            }
+        } catch (err) {
+            console.error('Error fetching admin stats:', err.message);
+        }
+    };
+
     const fetchProducts = async () => {
         try {
             setLoading(true);
@@ -126,6 +218,7 @@ const AdminPanel = () => {
             const data = await handleApiResponse(response);
             setProductos(data || []);
             setCurrentPage(1);
+            fetchStats();
         } catch (err) {
             console.error('Error Admin:', err.message);
             toast.error(`No se pudo sincronizar catálogo: ${err.message}`);
@@ -144,6 +237,23 @@ const AdminPanel = () => {
         }
     };
 
+    // Funciones dinámicas para imágenes en el alta
+    const handleImageChange = (index, value) => {
+        const newImages = [...form.imagenes];
+        newImages[index] = value;
+        setForm({ ...form, imagenes: newImages });
+    };
+
+    const addImageField = () => {
+        setForm({ ...form, imagenes: [...form.imagenes, ''] });
+    };
+
+    const removeImageField = (index) => {
+        if (form.imagenes.length <= 1) return;
+        const newImages = form.imagenes.filter((_, idx) => idx !== index);
+        setForm({ ...form, imagenes: newImages });
+    };
+
     const handleCreate = async (e) => {
         e.preventDefault();
 
@@ -153,11 +263,19 @@ const AdminPanel = () => {
             return;
         }
 
+        const validImages = form.imagenes.filter(img => img.trim() !== '');
+        if (validImages.length === 0) {
+            toast.error('Por favor, ingresá al menos una URL de imagen válida');
+            return;
+        }
+
         try {
             const payload = {
                 ...form,
                 precio: Number(form.precio),
-                stock: Number(form.stock)
+                stock: Number(form.stock),
+                imagenes: validImages,
+                imagen: validImages[0]
             };
 
             const res = await fetch('http://localhost:8081/api/productos', {
@@ -171,7 +289,7 @@ const AdminPanel = () => {
 
             await handleApiResponse(res);
             toast.success('Producto publicado con éxito');
-            setForm({ nombre: '', descripcion: '', precio: '', stock: '', categoriaIds: [], imagen: '' });
+            setForm({ nombre: '', descripcion: '', precio: '', stock: '', categoriaIds: [], imagenes: [''] });
             fetchProducts();
         } catch (err) {
             console.error(err);
@@ -245,6 +363,38 @@ const AdminPanel = () => {
                 </button>
             </header>
 
+            {/* Dashboard de Estadísticas y KPIs */}
+            <div className="admin-kpi-grid">
+                <div className="admin-kpi-card">
+                    <div className="kpi-icon">💰</div>
+                    <div className="kpi-content">
+                        <span className="kpi-label">Facturación Total</span>
+                        <h3 className="kpi-value">${stats.totalSales.toFixed(2)}</h3>
+                    </div>
+                </div>
+                <div className="admin-kpi-card">
+                    <div className="kpi-icon">👥</div>
+                    <div className="kpi-content">
+                        <span className="kpi-label">Clientes Registrados</span>
+                        <h3 className="kpi-value">{stats.totalUsers}</h3>
+                    </div>
+                </div>
+                <div className="admin-kpi-card">
+                    <div className="kpi-icon">🛍️</div>
+                    <div className="kpi-content">
+                        <span className="kpi-label">Publicaciones</span>
+                        <h3 className="kpi-value">{stats.totalProducts}</h3>
+                    </div>
+                </div>
+                <div className="admin-kpi-card">
+                    <div className="kpi-icon">📦</div>
+                    <div className="kpi-content">
+                        <span className="kpi-label">Stock General</span>
+                        <h3 className="kpi-value">{stats.totalStock} u</h3>
+                    </div>
+                </div>
+            </div>
+
             <div className="admin-grid">
                 <div>
                     <div className="admin-card">
@@ -261,7 +411,7 @@ const AdminPanel = () => {
                             <div className="admin-row">
                                 <div className="admin-input-group">
                                     <label>Precio ($)</label>
-                                    <input type="number" value={form.precio} onChange={e => setForm({ ...form, precio: e.target.value })} required min="1" />
+                                    <input type="number" value={form.precio} onChange={e => setForm({ ...form, precio: e.target.value })} required min="1" step="0.01" />
                                 </div>
                                 <div className="admin-input-group">
                                     <label>Stock Inicial</label>
@@ -287,10 +437,42 @@ const AdminPanel = () => {
                                     ))}
                                 </select>
                             </div>
+
+                            {/* Listado dinámico de imágenes */}
                             <div className="admin-input-group">
-                                <label>URL de la Imagen</label>
-                                <input type="url" placeholder="https://ejemplo.com/foto.jpg" value={form.imagen} onChange={e => setForm({ ...form, imagen: e.target.value })} required />
+                                <label>Imágenes del Producto (URLs)</label>
+                                {form.imagenes.map((img, index) => (
+                                    <div key={index} className="admin-image-input-row" style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                                        <input
+                                            type="url"
+                                            placeholder="https://ejemplo.com/foto.jpg"
+                                            value={img}
+                                            onChange={(e) => handleImageChange(index, e.target.value)}
+                                            required={index === 0}
+                                            style={{ flexGrow: 1 }}
+                                        />
+                                        {form.imagenes.length > 1 && (
+                                            <button
+                                                type="button"
+                                                className="admin-remove-image-btn"
+                                                onClick={() => removeImageField(index)}
+                                                style={{ background: '#ff3b30', color: 'white', border: 'none', borderRadius: '6px', padding: '0 12px', cursor: 'pointer' }}
+                                            >
+                                                ✕
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                                <button
+                                    type="button"
+                                    className="admin-add-image-btn"
+                                    onClick={addImageField}
+                                    style={{ background: '#0071e3', color: 'white', border: 'none', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', fontSize: '13px', marginTop: '4px' }}
+                                >
+                                    + Agregar otra foto
+                                </button>
                             </div>
+
                             <button type="submit" className="admin-submit-btn">Guardar producto</button>
                         </form>
                     </div>
@@ -330,10 +512,10 @@ const AdminPanel = () => {
                                     ))}
                                     </tbody>
                                 </table>
-                            </div>
+                             </div>
                             {getTotalPages() > 1 && (
                                 <div className="pagination-controls">
-                                    <button 
+                                    <button
                                         onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                                         disabled={currentPage === 1}
                                         className="pagination-btn"
@@ -343,7 +525,7 @@ const AdminPanel = () => {
                                     <span className="pagination-info">
                                         Página {currentPage} de {getTotalPages()}
                                     </span>
-                                    <button 
+                                    <button
                                         onClick={() => setCurrentPage(prev => Math.min(prev + 1, getTotalPages()))}
                                         disabled={currentPage === getTotalPages()}
                                         className="pagination-btn"
