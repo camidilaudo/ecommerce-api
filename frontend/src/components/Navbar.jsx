@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import './Navbar.css';
 import useDebounce from '../hooks/useDebounce';
+import { toast } from 'react-toastify';
 
 /**
  * Navbar actualizado para búsqueda en tiempo real con debounce.
@@ -35,8 +36,7 @@ const Navbar = ({ onSearch }) => {
         localStorage.removeItem('userRole');
         localStorage.removeItem('usuarioNombre');
         setIsUserMenuOpen(false);
-        // mejor usar toast (main.jsx tiene ToastContainer)
-        alert('Sesión cerrada correctamente');
+        toast.success('Sesión cerrada correctamente');
         navigate('/');
         window.location.reload();
     };

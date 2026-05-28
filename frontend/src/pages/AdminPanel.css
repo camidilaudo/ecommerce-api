@@ -96,12 +96,13 @@
 
 .admin-form input {
     background: #f5f5f7;
-    border: 1px solid black;
+    border: 1px solid var(--color-border, #d2d2d7);
     border-radius: 10px;
     padding: 12px 14px;
     font-size: 14px;
     outline: none;
     transition: all 0.2s;
+    font-family: inherit;
 }
 
 .admin-form input:focus {
@@ -150,6 +151,11 @@
     padding: 14px 12px;
     border-bottom: 1px solid #f5f5f7;
     color: #1d1d1f;
+    transition: background-color 0.15s ease;
+}
+
+.admin-table tr:hover td {
+    background-color: #fafafa;
 }
 
 .table-name-cell {
@@ -180,8 +186,8 @@
 
 .admin-edit-btn {
     background: none;
-    border: 1px solid #0d00ff;
-    color: #0d00ff;
+    border: 1px solid #0071e3;
+    color: #0071e3;
     padding: 6px 12px;
     border-radius: 6px;
     cursor: pointer;
@@ -191,7 +197,7 @@
 }
 
 .admin-edit-btn:hover {
-    background: #0d00ff;
+    background: #0071e3;
     color: white;
 }
 
@@ -292,12 +298,13 @@
 
 .admin-edit-form input {
     background: #f5f5f7;
-    border: 1px solid black;
+    border: 1px solid var(--color-border, #d2d2d7);
     border-radius: 10px;
     padding: 12px 14px;
     font-size: 14px;
     outline: none;
     transition: all 0.2s;
+    font-family: inherit;
 }
 
 .admin-edit-form input:focus {
@@ -353,14 +360,14 @@
 .admin-form select,
 .admin-edit-form select {
     background: #f5f5f7;
-    border: 1px solid black;
+    border: 1px solid var(--color-border, #d2d2d7);
     border-radius: 10px;
     padding: 12px 14px;
     font-size: 14px;
     outline: none;
     transition: all 0.2s;
     color: #1d1d1f;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: inherit;
 }
 
 .admin-form select:focus,
@@ -395,18 +402,21 @@
     }
 }
 
-/* Modal */
+/* Modal con animacion de entrada */
 .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    animation: fadeIn 0.2s ease both;
 }
 
 .modal-overlay .admin-card {
@@ -414,6 +424,7 @@
     width: 90%;
     max-height: 90vh;
     overflow-y: auto;
+    animation: scaleIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* Dashboard KPI Cards Styles */

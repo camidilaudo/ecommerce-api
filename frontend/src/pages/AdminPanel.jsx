@@ -191,6 +191,11 @@ const AdminPanel = () => {
             navigate('/login');
             return;
         }
+        const role = localStorage.getItem('userRole');
+        if (role !== 'ADMIN') {
+            navigate('/');
+            return;
+        }
         fetchProducts();
         fetchCategories();
     }, [token, navigate]);

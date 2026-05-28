@@ -1,57 +1,112 @@
-/* Paleta de colores minimalista Premium */
+/* ==========================================
+   AUTH PAGES — Login & Register Premium
+   ========================================== */
+
+/* Paleta de colores */
 :root {
-    --auth-bg: #f5f5f7;        /* Gris muy claro de fondo */
-    --auth-card: #ffffff;      /* Blanco para la tarjeta */
-    --input-border: #d2d2d7;   /* Borde gris definido */
+    --auth-bg: #f0f4ff;
+    --auth-card: #ffffff;
+    --input-border: #d2d2d7;
     --input-bg: #ffffff;
-    --text-main: #1d1d1f;      /* Texto negro Apple-style */
-    --text-muted: #86868b;     /* Texto gris de apoyo */
-    --accent-color: #007bff;   /* Azul Eléctrico para botones y foco */
+    --text-main: #1d1d1f;
+    --text-muted: #86868b;
+    --accent-color: #0071e3;
 }
 
-/* Centrado total de la página de autenticación */
+/* Fondo con gradiente animado sutil */
 .auth-page {
     min-height: 100vh;
-    background-color: var(--auth-bg);
+    background: linear-gradient(
+        135deg,
+        #f0f4ff 0%,
+        #f5f5f7 40%,
+        #e8f0fe 70%,
+        #f5f0ff 100%
+    );
+    background-size: 300% 300%;
+    animation: gradientShift 10s ease infinite;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 40px 20px;
+    position: relative;
+    overflow: hidden;
 }
 
-/* Botón de "Volver al inicio" tipo link minimalista a la izquierda */
+/* Decoración de fondo */
+.auth-page::before {
+    content: '';
+    position: fixed;
+    top: -100px;
+    right: -100px;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(0, 113, 227, 0.08) 0%, transparent 65%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.auth-page::after {
+    content: '';
+    position: fixed;
+    bottom: -100px;
+    left: -80px;
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(88, 86, 214, 0.07) 0%, transparent 65%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+/* Botón de volver */
 .auth-back {
+    position: relative;
+    z-index: 1;
     background: none;
     border: none;
     color: var(--text-muted);
     font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
     align-self: flex-start;
     max-width: 440px;
     width: 100%;
     margin-left: auto;
     margin-right: auto;
-    transition: color 0.2s;
+    transition: color 0.2s ease, transform 0.2s ease;
     text-align: left;
+    letter-spacing: -0.01em;
+    animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .auth-back:hover {
     color: var(--text-main);
+    transform: translateX(-3px);
 }
 
-/* Tarjeta del formulario con sombra suave */
+/* Card del formulario — con animación de entrada */
 .auth-card {
-    background: var(--auth-card);
-    border-radius: 20px;
+    position: relative;
+    z-index: 1;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 22px;
     padding: 50px 40px;
     width: 100%;
     max-width: 440px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.04),
+        0 12px 48px rgba(0, 0, 0, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(210, 210, 215, 0.5);
+
+    /* Animación de entrada */
+    animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both;
 }
 
-/* Ajuste para el registro que es más ancho */
 .auth-card--wide {
     max-width: 540px;
 }
@@ -62,12 +117,12 @@
 }
 
 .auth-logo {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
     color: var(--text-main);
     text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 12px;
+    letter-spacing: 1.2px;
+    margin-bottom: 14px;
 }
 
 .auth-logo span {
@@ -77,80 +132,90 @@
 
 .auth-titulo {
     font-size: 30px;
-    font-weight: 700;
+    font-weight: 800;
     color: var(--text-main);
     letter-spacing: -0.8px;
+    line-height: 1.15;
 }
 
 .auth-subtitulo {
     font-size: 15px;
     color: var(--text-muted);
-    margin-top: 25px;
+    margin-top: 10px;
     text-align: center;
 }
 
-/* Formulario y campos de entrada con bordes definidos y accesibles */
+/* Formulario */
 .auth-form {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 16px;
 }
 
 .form-grupo {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 7px;
 }
 
 .form-fila {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 15px;
+    gap: 14px;
 }
 
 .form-label {
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 600;
     color: var(--text-main);
-    margin-left: 4px;
+    margin-left: 2px;
+    letter-spacing: 0.01em;
 }
 
-/* ✅ Scopeado a .auth-form para no pisar estilos globales de la app */
+/* Inputs con ring de foco elegante */
 .auth-form input,
 .auth-form select {
-    background-color: var(--input-bg);
-    border: 1px solid var(--input-border);
-    border-radius: 12px;
-    padding: 14px 16px;
+    background-color: rgba(118, 118, 128, 0.08);
+    border: 1px solid transparent;
+    border-radius: 11px;
+    padding: 13px 15px;
     font-size: 15px;
     color: var(--text-main);
     outline: none;
-    transition: all 0.2s ease-in-out;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     width: 100%;
     box-sizing: border-box;
+    font-family: inherit;
+    font-weight: 400;
 }
 
-/* Efecto de foco: Accesibilidad y diseño moderno */
+.auth-form input:hover,
+.auth-form select:hover {
+    background-color: rgba(118, 118, 128, 0.11);
+}
+
 .auth-form input:focus,
 .auth-form select:focus {
+    background-color: #ffffff;
     border-color: var(--accent-color);
-    box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.15);
+    box-shadow: 0 0 0 3.5px rgba(0, 113, 227, 0.15);
 }
 
-/* Botón principal de acción: Azul Eléctrico y centrado */
+/* Botón submit */
 .auth-submit {
-    background-color: var(--accent-color);
+    background: linear-gradient(135deg, #0071e3 0%, #0077ed 100%);
     color: #ffffff;
     border: none;
     border-radius: 12px;
-    padding: 16px 30px;
+    padding: 15px 30px;
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    transition: opacity 0.2s, transform 0.1s;
-    margin-top: 15px;
+    letter-spacing: -0.01em;
+    transition: opacity 0.2s, transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s;
+    margin-top: 8px;
+    box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
 
-    /* Centrado del botón dentro del formulario */
     display: block;
     width: auto;
     min-width: 200px;
@@ -159,19 +224,24 @@
 }
 
 .auth-submit:hover {
-    opacity: 0.9;
+    opacity: 0.92;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0, 113, 227, 0.4);
 }
 
 .auth-submit:active {
-    transform: scale(0.98);
+    transform: scale(0.97) translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
 }
 
 .auth-submit:disabled {
-    background-color: var(--text-muted);
+    background: var(--text-muted);
+    box-shadow: none;
     cursor: not-allowed;
+    transform: none;
 }
 
-/* Links dentro del texto */
+/* Links */
 .auth-link {
     background: none;
     border: none;
@@ -182,33 +252,38 @@
     padding: 0;
     text-decoration: none;
     margin-left: 4px;
+    transition: opacity 0.2s;
 }
 
 .auth-link:hover {
+    opacity: 0.75;
     text-decoration: underline;
 }
 
 /* Mensajes de error */
 .form-input--error {
     border-color: #ff3b30 !important;
-    background-color: #fff5f5 !important;
+    background-color: rgba(255, 59, 48, 0.05) !important;
+    box-shadow: 0 0 0 3px rgba(255, 59, 48, 0.1) !important;
 }
 
 .form-error {
     font-size: 12px;
     color: #ff3b30;
     margin-left: 4px;
+    font-weight: 500;
 }
 
 /* Responsive */
 @media (max-width: 480px) {
     .auth-card {
-        padding: 35px 25px;
+        padding: 36px 24px;
+        border-radius: 18px;
     }
     .form-fila {
         grid-template-columns: 1fr;
     }
     .auth-submit {
-        width: 100%; /* Ocupa todo el ancho en móviles */
+        width: 100%;
     }
 }

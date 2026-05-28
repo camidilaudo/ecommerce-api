@@ -284,7 +284,7 @@ const ProductDetailPage = () => {
                                 <div 
                                     key={item.id} 
                                     onClick={() => {
-                                        navigate(`/producto/${item.id}`);
+                                        navigate(`/productos/${item.id}`);
                                         window.scrollTo({ top: 0, behavior: 'smooth' });
                                     }}
                                     style={{

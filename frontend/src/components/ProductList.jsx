@@ -40,9 +40,10 @@ const ProductList = ({ products, activeCategory }) => {
                         const id = product.id ?? product._id ?? product.codigo;
 
                         return (
-                            <CardProductos
+            <CardProductos
                                 key={id || Math.random()}
                                 product={product}
+                                index={items.indexOf(product)}
                             />
                         );
                     })}

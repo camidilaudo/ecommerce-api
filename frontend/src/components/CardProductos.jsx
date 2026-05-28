@@ -7,9 +7,12 @@ import './CardProductos.css';
  * Componente Tarjeta de Producto.
  * Utiliza el context para agregar productos al carrito.
  */
-const CardProductos = ({ product }) => {
-  const { addToCart } = useCart(); // Accedemos a la función global
+const CardProductos = ({ product, index = 0 }) => {
+  const { addToCart } = useCart();
   const [agregado, setAgregado] = useState(false);
+
+  // Stagger: cada card entra 60ms despues de la anterior (max 12 cards)
+  const delay = `${Math.min(index, 12) * 60}ms`;
 
   const handleAgregar = () => {
     addToCart(product);
@@ -20,7 +23,7 @@ const CardProductos = ({ product }) => {
   };
 
   return (
-      <div className="card-producto">
+      <div className="card-producto" style={{ animationDelay: delay }}>
         <Link to={`/productos/${product.id}`} className="producto-imagen-link">
           <div className="producto-imagen-container">
             <img

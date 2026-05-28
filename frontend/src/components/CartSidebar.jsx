@@ -17,22 +17,18 @@ const CartSidebar = () => {
         }
         setLoadingCheckout(true);
         try {
-            // Ajusta el payload al formato que espera tu backend
-            const payload = {
-                items: cart.map(i => ({ productoId: i.id, cantidad: i.quantity }))
-            };
-
+            // El backend identifica al usuario por JWT, no necesita body
             const response = await fetch('http://localhost:8081/api/carrito/checkout', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify(payload)
+                }
             });
 
             const body = await handleApiResponse(response);
-            toast.success(body?.message || 'Compra realizada con éxito');
+            // El backend devuelve el campo 'mensaje' (no 'message')
+            toast.success(body?.mensaje || 'Compra realizada con éxito');
             clearCart();
             toggleCart(); // cierra el sidebar
         } catch (err) {

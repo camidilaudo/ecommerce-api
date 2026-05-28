@@ -1,4 +1,4 @@
-/* --- Estilos base del listado (Tu código) --- */
+/* --- Estilos base del listado --- */
 .product-list-container {
   padding: 3rem 2rem;
   max-width: 1100px;
@@ -30,6 +30,7 @@
   color: #90A4AE;
   padding: 6rem 0;
   font-size: 18px;
+  animation: fadeInUp 0.5s ease-out both;
 }
 
 .products-grid {
@@ -38,28 +39,82 @@
   gap: 1.5rem;
 }
 
-/* --- Estilos para el Hero de la HomePage (Nuevos para limpiar el JSX) --- */
+/* ==========================================
+   HERO SECTION — Gradiente animado premium
+   ========================================== */
 .home-hero {
-  padding: 80px 0;
+  padding: 90px 0 80px;
   text-align: center;
-  background-color: #f5f5f7;
+  position: relative;
+  overflow: hidden;
+
+  /* Gradiente animado de fondo */
+  background: linear-gradient(
+    135deg,
+    #f0f4ff 0%,
+    #f5f5f7 30%,
+    #e8f0fe 60%,
+    #f5f0ff 100%
+  );
+  background-size: 300% 300%;
+  animation: gradientShift 8s ease infinite;
+}
+
+/* Decoración de fondo con círculos translúcidos */
+.home-hero::before {
+  content: '';
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(0, 113, 227, 0.07) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.home-hero::after {
+  content: '';
+  position: absolute;
+  bottom: -80px;
+  left: -40px;
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(88, 86, 214, 0.06) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.home-hero .container {
+  position: relative;
+  z-index: 1;
 }
 
 .home-hero h1 {
-  font-size: 42px;
-  font-weight: 700;
-  letter-spacing: -1px;
+  font-size: 48px;
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  color: #1d1d1f;
+  line-height: 1.1;
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .home-hero p {
   color: #86868b;
   font-size: 20px;
+  margin-top: 12px;
+  font-weight: 400;
+  letter-spacing: -0.2px;
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
 }
 
-/* --- Estilos para estados de Error y Carga --- */
+/* ==========================================
+   ESTADOS DE ERROR Y CARGA
+   ========================================== */
 .status-container {
   text-align: center;
   padding: 100px 20px;
+  animation: fadeInUp 0.5s ease-out both;
 }
 
 .btn-retry {
@@ -70,9 +125,14 @@
   border: 1px solid #d2d2d7;
   background: white;
   font-weight: 600;
-  transition: background 0.2s;
+  transition: background 0.2s, transform 0.15s;
 }
 
 .btn-retry:hover {
   background: #f5f5f7;
+  transform: translateY(-1px);
+}
+
+.btn-retry:active {
+  transform: translateY(0);
 }

@@ -1,12 +1,16 @@
+/* ==========================================
+   NAVBAR — Premium Glassmorphism
+   ========================================== */
 .navbar {
     height: 64px;
-    background-color: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(20px); /* Efecto cristalino */
+    background-color: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid #d2d2d7;
+    border-bottom: 1px solid rgba(210, 210, 215, 0.6);
     position: sticky;
     top: 0;
     z-index: 1000;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .navbar-container {
@@ -25,7 +29,12 @@
     font-size: 13px;
     letter-spacing: 0.8px;
     white-space: nowrap;
-    flex: 1; /* Ocupa espacio para equilibrar */
+    flex: 1;
+    transition: opacity 0.2s ease;
+}
+
+.nav-brand:hover {
+    opacity: 0.7;
 }
 
 .brand-sub {
@@ -33,9 +42,9 @@
     color: #86868b;
 }
 
-/* Barra de búsqueda integrada y equilibrada */
+/* Barra de búsqueda */
 .nav-search-wrapper {
-    flex: 0 1 480px; /* Ancho máximo flexible */
+    flex: 0 1 480px;
     display: flex;
     justify-content: center;
 }
@@ -52,29 +61,37 @@
     transform: translateY(-50%);
     color: #86868b;
     pointer-events: none;
+    transition: color 0.2s ease;
 }
 
 .nav-search-input {
     width: 100%;
-    background-color: #f5f5f7;
+    background-color: rgba(118, 118, 128, 0.12);
     border: 1px solid transparent;
-    border-radius: 20px; /* Bordes redondeados */
-    padding: 10px 15px 10px 40px;
+    border-radius: 20px;
+    padding: 9px 15px 9px 40px;
     font-size: 14px;
     color: #1d1d1f;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    font-family: inherit;
 }
 
 .nav-search-input:focus {
     background-color: #ffffff;
-    border-color: #0071e3;
-    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+    border-color: var(--color-accent, #0071e3);
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.12);
+    outline: none;
+}
+
+.nav-search-input:focus ~ .search-icon,
+.search-input-container:focus-within .search-icon {
+    color: var(--color-accent, #0071e3);
 }
 
 /* Acciones derecha */
 .nav-actions {
     display: flex;
-    gap: 8px;
+    gap: 4px;
     align-items: center;
     justify-content: flex-end;
     flex: 1;
@@ -90,27 +107,35 @@
     position: relative;
     display: flex;
     align-items: center;
-    transition: background-color 0.2s;
+    justify-content: center;
+    transition: background-color 0.2s ease, transform 0.15s ease;
 }
 
 .nav-btn:hover {
-    background-color: #f5f5f7;
+    background-color: rgba(118, 118, 128, 0.1);
 }
 
+.nav-btn:active {
+    transform: scale(0.93);
+}
+
+/* Badge del carrito — con animación popIn */
 .nav-badge {
     position: absolute;
     top: 4px;
     right: 4px;
-    background-color: #1d1d1f;
+    background: linear-gradient(135deg, #0071e3, #0077ed);
     color: #ffffff;
     font-size: 9px;
     font-weight: 700;
-    min-width: 16px;
-    height: 16px;
+    min-width: 17px;
+    height: 17px;
     border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
+    border: 1.5px solid white;
+    animation: popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
 /* Menú desplegable usuario */
@@ -120,31 +145,47 @@
 
 .user-dropdown {
     position: absolute;
-    top: 50px;
+    top: calc(100% + 8px);
     right: 0;
-    background: #ffffff;
-    border: 1px solid #d2d2d7;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(210, 210, 215, 0.7);
     border-radius: 14px;
-    width: 200px;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    width: 210px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
     overflow: hidden;
-    padding: 8px;
+    padding: 6px;
+
+    /* Animación de entrada */
+    animation: slideInDown 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+    transform-origin: top right;
 }
 
-.user-dropdown a, .user-dropdown button {
-    display: block;
+.user-dropdown a,
+.user-dropdown button {
+    display: flex;
+    align-items: center;
     width: 100%;
-    padding: 12px 16px;
+    padding: 10px 14px;
     text-align: left;
     color: #1d1d1f;
     text-decoration: none;
     font-size: 14px;
+    font-weight: 500;
     border: none;
     background: none;
-    border-radius: 8px;
+    border-radius: 9px;
     cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    letter-spacing: -0.01em;
 }
 
 .user-dropdown a:hover {
-    background-color: #f5f5f7;
+    background-color: rgba(118, 118, 128, 0.1);
+    color: #1d1d1f;
+}
+
+.user-dropdown button:hover {
+    background-color: rgba(255, 59, 48, 0.08);
 }

@@ -10,6 +10,7 @@ const OrdersPage = () => {
     const navigate = useNavigate();
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [selectedOrder, setSelectedOrder] = useState(null);
 
     useEffect(() => {
@@ -33,26 +34,7 @@ const OrdersPage = () => {
                 setOrders(sorted);
             } catch (err) {
                 console.error(err.message);
-                // Fallback mockeado premium si falla la conexión
-                setOrders([
-                    { 
-                        id: 1024, 
-                        fechaCreacion: "2026-05-27T14:32:00", 
-                        total: 4500.00, 
-                        items: [
-                            { id: 1, productoNombre: "Audífonos Inalámbricos Apple", cantidad: 1, precioUnitario: 4500.00 }
-                        ]
-                    },
-                    { 
-                        id: 1089, 
-                        fechaCreacion: "2026-05-27T16:15:00", 
-                        total: 12000.50, 
-                        items: [
-                            { id: 2, productoNombre: "Cargador Rápido USB-C 20W", cantidad: 2, precioUnitario: 3500.00 },
-                            { id: 3, productoNombre: "Funda de Silicón iPhone 15", cantidad: 1, precioUnitario: 5000.50 }
-                        ]
-                    }
-                ]);
+                setError('No se pudo conectar con el servidor. Verificá que el backend esté corriendo.');
             } finally {
                 setLoading(false);
             }
@@ -84,6 +66,13 @@ const OrdersPage = () => {
 
             {loading ? (
                 <div style={{ padding: '40px 0', color: '#86868b' }}>Cargando tus órdenes de compra...</div>
+            ) : error ? (
+                <div style={{ textAlign: 'center', padding: '80px 20px' }}>
+                    <p style={{ color: '#ff3b30', fontSize: '16px', marginBottom: '24px' }}>{error}</p>
+                    <button className="btn-back-store" onClick={() => navigate('/')} style={{ background: '#0071e3', color: 'white', border: 'none', borderRadius: '12px', padding: '12px 24px', cursor: 'pointer', fontWeight: '600' }}>
+                        Volver al Catálogo
+                    </button>
+                </div>
             ) : orders.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '80px 20px' }}>
                     <p style={{ color: '#86868b', fontSize: '16px', marginBottom: '24px' }}>Aún no has realizado ninguna compra.</p>
