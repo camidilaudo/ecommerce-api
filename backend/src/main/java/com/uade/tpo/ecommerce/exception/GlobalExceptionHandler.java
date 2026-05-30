@@ -62,6 +62,24 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.CONFLICT);
     }
 
+    // Captura errores de validación de DTOs (@Valid) y los expone ordenadamente en un HTTP 400
+    @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleValidationExceptions(
+            org.springframework.web.bind.MethodArgumentNotValidException ex) {
+        java.util.Map<String, String> errors = new java.util.LinkedHashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error -> 
+            errors.put(error.getField(), error.getDefaultMessage())
+        );
+        
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                "timestamp", LocalDateTime.now().toString(),
+                "status", 400,
+                "error", "Error de validación en los campos",
+                "message", errors.values().stream().findFirst().orElse("Datos inválidos"),
+                "details", errors
+        ));
+    }
+
     // Captura cualquier otra excepción no prevista (500)
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {

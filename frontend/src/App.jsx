@@ -6,6 +6,7 @@ import AdminPanel from './pages/AdminPanel';
 import ProfilePage from './pages/ProfilePage'; // Nuevo
 import OrdersPage from './pages/OrdersPage';   // Nuevo
 import ProductDetailPage from './pages/ProductDetailPage'; // Nuevo
+import Favorite from './pages/Favorite'; // Nuevo (TPG)
 import CartSidebar from './components/CartSidebar';
 import Navbar from './components/Navbar';
 import { useState } from 'react';
@@ -25,6 +26,7 @@ function App() {
                 <Route path="/perfil" element={<ProfilePage />} /> {/* Nueva ruta perfil */}
                 <Route path="/pedidos" element={<OrdersPage />} /> {/* Nueva ruta pedidos */}
                 <Route path="/productos/:id" element={<ProductDetailPage />} /> {/* Nueva ruta detalle producto */}
+                <Route path="/favoritos" element={<Favorite />} /> {/* Nueva ruta favoritos TPG */}
                 <Route path="*" element={<div style={{padding: '100px', textAlign: 'center'}}>Página no encontrada</div>} />
             </Routes>
         </div>

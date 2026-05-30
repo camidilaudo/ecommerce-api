@@ -4,6 +4,7 @@ import './LoginPage.css';
 import { isValidEmail } from '../utils/validation';
 import { handleApiResponse } from '../utils/apiHelpers';
 import { toast } from 'react-toastify';
+import { useAuth } from '../context/AuthContext';
 
 /**
  * LoginPage — Componente para la autenticación de usuarios.
@@ -11,6 +12,7 @@ import { toast } from 'react-toastify';
  */
 const LoginPage = () => {
     const navigate = useNavigate();
+    const { login } = useAuth();
 
     const [form, setForm] = useState({ email: '', password: '' });
     const [errores, setErrores] = useState({});
@@ -52,15 +54,11 @@ const LoginPage = () => {
 
             const data = await handleApiResponse(response);
 
-            // Guardamos la información de la sesión de forma persistente
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('userRole', data.role || 'USER');
-            if (data.nombre) localStorage.setItem('usuarioNombre', data.nombre);
+            // Guardamos la información de la sesión de forma persistente y reactiva
+            login(data.token, data.role || 'USER', data.nombre || '');
 
             toast.success('¡Bienvenido!');
             navigate('/');
-            // recarga para que la navbar actualice estado; puedes eliminar si gestionas estado global
-            window.location.reload();
         } catch (err) {
             console.error('Error en Login:', err.message);
             toast.error(`Error al iniciar sesión: ${err.message}`);
