@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
+import { useFavorites } from '../context/FavoriteContext';
 import { toast } from 'react-toastify';
 import './ProductDetailPage.css';
 
@@ -12,6 +14,8 @@ const ProductDetailPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { addToCart } = useCart();
+    const { isAuthenticated } = useAuth();
+    const { favoriteItems, addToFavorite } = useFavorites();
 
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -181,7 +185,51 @@ const ProductDetailPage = () => {
                 {/* Panel Derecho: Información y Acción */}
                 <div className="info-section">
                     <span className="detail-category">{product.categoria || 'Sin Categoría'}</span>
-                    <h1 className="detail-title">{product.nombre}</h1>
+                    
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', marginBottom: '18px' }}>
+                        <h1 className="detail-title" style={{ margin: 0 }}>{product.nombre}</h1>
+                        <button 
+                            className="detail-favorite-btn"
+                            onClick={() => addToFavorite(product)}
+                            style={{
+                                background: 'rgba(255,255,255,0.85)',
+                                border: '1px solid #e5e5e7',
+                                borderRadius: '50%',
+                                width: '46px',
+                                height: '46px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                transition: 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s, background-color 0.2s',
+                                outline: 'none',
+                                flexShrink: 0,
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'scale(1.08)';
+                                e.currentTarget.style.borderColor = '#ff2d55';
+                                e.currentTarget.style.backgroundColor = 'rgba(255, 45, 85, 0.04)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'scale(1)';
+                                e.currentTarget.style.borderColor = '#e5e5e7';
+                                e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.85)';
+                            }}
+                        >
+                            <svg 
+                                width="24" 
+                                height="24" 
+                                viewBox="0 0 24 24" 
+                                fill={favoriteItems.some(item => item.id === product.id) ? '#ff2d55' : 'none'} 
+                                stroke={favoriteItems.some(item => item.id === product.id) ? '#ff2d55' : '#1d1d1f'} 
+                                strokeWidth="2"
+                                style={{ transition: 'fill 0.2s, stroke 0.2s' }}
+                            >
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                            </svg>
+                        </button>
+                    </div>
                     
                     <div className="detail-price-row">
                         <span className="detail-price">${product.precio.toFixed(2)}</span>
@@ -201,41 +249,60 @@ const ProductDetailPage = () => {
 
                     {/* Fila de Compra */}
                     {product.stock > 0 ? (
-                        <div className="buy-controls-panel">
-                            <div className="quantity-selector-wrapper">
-                                <label htmlFor="qty-select">Cantidad:</label>
-                                <div className="qty-controls">
-                                    <button 
-                                        onClick={() => setQuantity(prev => Math.max(prev - 1, 1))}
-                                        disabled={quantity <= 1}
-                                        className="qty-btn"
-                                    >
-                                        −
-                                    </button>
-                                    <span className="qty-val">{quantity}</span>
-                                    <button 
-                                        onClick={() => setQuantity(prev => Math.min(prev + 1, product.stock))}
-                                        disabled={quantity >= product.stock}
-                                        className="qty-btn"
-                                    >
-                                        +
-                                    </button>
+                        isAuthenticated ? (
+                            <div className="buy-controls-panel">
+                                <div className="quantity-selector-wrapper">
+                                    <label htmlFor="qty-select">Cantidad:</label>
+                                    <div className="qty-controls">
+                                        <button 
+                                            onClick={() => setQuantity(prev => Math.max(prev - 1, 1))}
+                                            disabled={quantity <= 1}
+                                            className="qty-btn"
+                                        >
+                                            −
+                                        </button>
+                                        <span className="qty-val">{quantity}</span>
+                                        <button 
+                                            onClick={() => setQuantity(prev => Math.min(prev + 1, product.stock))}
+                                            disabled={quantity >= product.stock}
+                                            className="qty-btn"
+                                        >
+                                            +
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <button 
-                                className="btn-add-to-cart" 
-                                onClick={handleAddToCart}
-                                disabled={adding}
-                            >
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{marginRight: '8px'}}>
-                                    <circle cx="9" cy="21" r="1"></circle>
-                                    <circle cx="20" cy="21" r="1"></circle>
-                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                                </svg>
-                                {adding ? 'Agregando...' : 'Agregar al carrito'}
-                            </button>
-                        </div>
+                                <button 
+                                    className="btn-add-to-cart" 
+                                    onClick={handleAddToCart}
+                                    disabled={adding}
+                                >
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{marginRight: '8px'}}>
+                                        <circle cx="9" cy="21" r="1"></circle>
+                                        <circle cx="20" cy="21" r="1"></circle>
+                                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                    </svg>
+                                    {adding ? 'Agregando...' : 'Agregar al carrito'}
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="login-required-banner">
+                                <div className="login-required-info">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff3b30" strokeWidth="2" style={{flexShrink: 0, marginTop: '2px'}}>
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                    </svg>
+                                    <div className="login-required-text">
+                                        <span className="login-required-title">Iniciá sesión para comprar</span>
+                                        <p className="login-required-desc">Debes tener una cuenta activa para poder comprar este producto. ¡Iniciá sesión o regístrate en segundos!</p>
+                                    </div>
+                                </div>
+                                <button className="btn-login-cta" onClick={() => navigate('/login')}>
+                                    Iniciar Sesión
+                                </button>
+                            </div>
+                        )
                     ) : (
                         <div className="out-of-stock-alert">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff3b30" strokeWidth="2" style={{marginRight: '12px'}}>

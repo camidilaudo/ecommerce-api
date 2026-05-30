@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom'; // Importamos Link para navegación
 import { useCart } from '../context/CartContext'; // Importamos el contexto
+import { useFavorites } from '../context/FavoriteContext'; // Importamos favoritos
 import './CardProductos.css';
 
 /**
@@ -9,7 +10,10 @@ import './CardProductos.css';
  */
 const CardProductos = ({ product, index = 0 }) => {
   const { addToCart } = useCart();
+  const { favoriteItems, addToFavorite } = useFavorites();
   const [agregado, setAgregado] = useState(false);
+
+  const isFavorite = favoriteItems.some(item => item.id === product.id);
 
   // Stagger: cada card entra 60ms despues de la anterior (max 12 cards)
   const delay = `${Math.min(index, 12) * 60}ms`;
@@ -24,16 +28,61 @@ const CardProductos = ({ product, index = 0 }) => {
 
   return (
       <div className="card-producto" style={{ animationDelay: delay }}>
-        <Link to={`/productos/${product.id}`} className="producto-imagen-link">
-          <div className="producto-imagen-container">
-            <img
-                src={product.imagen}
-                alt={product.nombre}
-                className="producto-imagen"
-            />
-            <span className="producto-categoria">{product.categoria}</span>
-          </div>
-        </Link>
+        <div className="producto-imagen-link" style={{ position: 'relative' }}>
+          <Link to={`/productos/${product.id}`}>
+            <div className="producto-imagen-container">
+              <img
+                  src={product.imagen}
+                  alt={product.nombre}
+                  className="producto-imagen"
+              />
+              <span className="producto-categoria">{product.categoria}</span>
+            </div>
+          </Link>
+
+          {/* Botón de Favoritos (TPG Corazoncito) */}
+          <button 
+              className="card-favorite-btn" 
+              onClick={(e) => { 
+                  e.preventDefault(); 
+                  e.stopPropagation(); 
+                  addToFavorite(product); 
+              }}
+              style={{
+                  position: 'absolute',
+                  top: '12px',
+                  left: '12px',
+                  background: 'rgba(255, 255, 255, 0.85)',
+                  backdropFilter: 'blur(4px)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justify: 'center',
+                  cursor: 'pointer',
+                  transition: 'transform 0.2s, background 0.2s',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                  zIndex: '5',
+                  outline: 'none'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          >
+              <svg 
+                  width="18" 
+                  height="18" 
+                  viewBox="0 0 24 24" 
+                  fill={isFavorite ? '#ff2d55' : 'none'} 
+                  stroke={isFavorite ? '#ff2d55' : '#1d1d1f'} 
+                  strokeWidth="2"
+                  style={{ transition: 'fill 0.2s, stroke 0.2s' }}
+              >
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+              </svg>
+          </button>
+        </div>
 
         <div className="producto-info">
           <Link to={`/productos/${product.id}`} className="producto-nombre-link">

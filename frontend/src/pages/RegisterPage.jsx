@@ -47,11 +47,12 @@ const RegisterPage = () => {
         if (!form.password) err.password = 'Obligatorio';
         else {
             const hasUpper = /[A-Z]/.test(form.password);
+            const hasLower = /[a-z]/.test(form.password);
             const hasNum = /\d/.test(form.password);
             if (form.password.length < 6) {
                 err.password = 'Mínimo 6 caracteres';
-            } else if (!hasUpper || !hasNum) {
-                err.password = 'Debe incluir al menos una mayúscula y un número';
+            } else if (!hasUpper || !hasLower || !hasNum) {
+                err.password = 'Debe incluir al menos una mayúscula, una minúscula y un número';
             }
         }
 
@@ -185,7 +186,7 @@ const RegisterPage = () => {
                             autoComplete="new-password"
                         />
                         <span style={{ fontSize: '11px', color: '#8e8e93', marginTop: '4px', display: 'block' }}>
-                            Mínimo de 6 caracteres con al menos una mayúscula y un número.
+                            Mínimo de 6 caracteres con al menos una mayúscula, una minúscula y un número.
                         </span>
                         {errores.password && <span className="form-error">{errores.password}</span>}
                     </div>

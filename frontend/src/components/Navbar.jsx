@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
+import { useFavorites } from '../context/FavoriteContext';
 import './Navbar.css';
 import useDebounce from '../hooks/useDebounce';
 import { toast } from 'react-toastify';
@@ -12,13 +14,12 @@ import { toast } from 'react-toastify';
 
 const Navbar = ({ onSearch }) => {
     const { cartCount, toggleCart } = useCart();
+    const { isAuthenticated, usuarioNombre, userRole, logout } = useAuth();
+    const { favoriteItems } = useFavorites();
     const navigate = useNavigate();
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const [query, setQuery] = useState('');
     const debouncedQuery = useDebounce(query, 400);
-
-    const isAuthenticated = !!localStorage.getItem('token');
-    const userRole = localStorage.getItem('userRole') || 'USER';
 
     useEffect(() => {
         if (typeof onSearch === 'function') {
@@ -32,13 +33,10 @@ const Navbar = ({ onSearch }) => {
     }, [debouncedQuery, onSearch, navigate]);
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('userRole');
-        localStorage.removeItem('usuarioNombre');
+        logout();
         setIsUserMenuOpen(false);
         toast.success('Sesión cerrada correctamente');
         navigate('/');
-        window.location.reload();
     };
 
     return (
@@ -65,7 +63,15 @@ const Navbar = ({ onSearch }) => {
                 </div>
 
                 <div className="nav-actions">
-                    <button className="nav-btn" onClick={toggleCart} aria-label="Abrir Carrito">
+                    {/* Botón de Favoritos (TPG) */}
+                    <Link to="/favoritos" className="nav-btn nav-favorites-btn" aria-label="Ver Favoritos" style={{ position: 'relative' }}>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                        </svg>
+                        {favoriteItems.length > 0 && <span className="nav-badge" style={{ backgroundColor: '#ff3b30' }}>{favoriteItems.length}</span>}
+                    </Link>
+
+                    <button className="nav-btn" onClick={toggleCart} aria-label="Abrir Carrito" style={{ position: 'relative' }}>
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                             <path d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z" />
                         </svg>
@@ -73,7 +79,8 @@ const Navbar = ({ onSearch }) => {
                     </button>
 
                     <div className="user-menu-wrapper">
-                        <button className="nav-btn" onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} aria-label="Menú de usuario">
+                        <button className="nav-btn" onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} aria-label="Menú de usuario" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            {isAuthenticated && <span className="user-greeting-navbar" style={{ fontSize: '13px', fontWeight: '500', color: '#1d1d1f' }}>¡Hola, {usuarioNombre}!</span>}
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                                 <path d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
