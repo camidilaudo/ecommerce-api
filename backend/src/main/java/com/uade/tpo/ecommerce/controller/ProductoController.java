@@ -1,34 +1,41 @@
 package com.uade.tpo.ecommerce.controller;
 
-import com.uade.tpo.ecommerce.model.Producto;
-import com.uade.tpo.ecommerce.model.Usuario;
-import com.uade.tpo.ecommerce.service.ProductoService;
 import com.uade.tpo.ecommerce.dto.DeleteResponse;
 import com.uade.tpo.ecommerce.dto.ProductoDTO;
+import com.uade.tpo.ecommerce.dto.ProductoRequest;
+import com.uade.tpo.ecommerce.model.Usuario;
+import com.uade.tpo.ecommerce.service.ProductoService;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
+/**
+ * ProductoController — CRUD de productos.
+ *
+ * BUG-03 FIX: todos los endpoints retornan ResponseEntity con HTTP status explícito.
+ * DT-01 FIX: POST y PUT reciben ProductoRequest DTO, no la entidad JPA directa.
+ * DT-09 FIX: eliminados todos los System.out.println de debug.
+ */
 @RestController
 @RequestMapping("/api/productos")
+@RequiredArgsConstructor
 public class ProductoController {
 
-    @Autowired
-    private ProductoService productoService;
+    private final ProductoService productoService;
 
     // GET todos los productos (con soporte de paginación retrocompatible)
-    // http://localhost:8080/api/productos
     @GetMapping
     public ResponseEntity<?> getAllProductos(
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size,
-            @RequestParam(required = false, defaultValue = "id") String sortBy,
+            @RequestParam(required = false, defaultValue = "nombre") String sortBy,
             @RequestParam(required = false, defaultValue = "asc") String direction) {
         if (page != null && size != null) {
             return ResponseEntity.ok(productoService.getAllProductosPaginated(page, size, sortBy, direction));
@@ -37,59 +44,55 @@ public class ProductoController {
     }
 
     // GET producto por ID
-    // http://localhost:8080/api/productos/1
     @GetMapping("/{id}")
-    public ProductoDTO getProductoById(@PathVariable Long id) {
-        return productoService.getProductoById(id);
+    public ResponseEntity<ProductoDTO> getProductoById(@PathVariable Long id) {
+        return ResponseEntity.ok(productoService.getProductoById(id));
     }
 
-    // DELETE producto
-    // http://localhost:8080/api/productos/1
+    // DELETE producto (soft delete — solo propietario o ADMIN)
     @DeleteMapping("/{id}")
-    public DeleteResponse deleteProductoById(@PathVariable Long id, @AuthenticationPrincipal Usuario usuario) {
-        return productoService.deleteProductoById(id, usuario.getId());
+    public ResponseEntity<DeleteResponse> deleteProductoById(
+            @PathVariable Long id,
+            @AuthenticationPrincipal Usuario usuario) {
+        return ResponseEntity.ok(productoService.deleteProductoById(id, usuario.getId()));
     }
 
-    // POST crear producto
-    // http://localhost:8080/api/productos
+    // POST crear producto — DT-01: recibe ProductoRequest DTO
     @PostMapping
-    public ProductoDTO saveProducto(@Valid @RequestBody Producto producto, @AuthenticationPrincipal Usuario usuario) {
-        System.out.println("DEBUG POST /api/productos: received producto=" + producto + ", user=" + (usuario != null ? usuario.getEmail() : "null"));
-        try {
-            ProductoDTO result = productoService.saveProducto(producto, usuario);
-            System.out.println("DEBUG POST /api/productos SUCCESS: returned=" + result);
-            return result;
-        } catch (Exception ex) {
-            System.err.println("ERROR inside saveProducto: " + ex.getMessage());
-            ex.printStackTrace();
-            throw ex;
-        }
+    public ResponseEntity<ProductoDTO> saveProducto(
+            @Valid @RequestBody ProductoRequest request,
+            @AuthenticationPrincipal Usuario usuario) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(productoService.saveProducto(request, usuario));
     }
 
-    // PUT actualizar producto
-    // http://localhost:8080/api/productos/1
+    // PUT actualizar producto — DT-01: recibe ProductoRequest DTO
     @PutMapping("/{id}")
-    public ProductoDTO udpateProducto(@PathVariable Long id, @Valid @RequestBody Producto producto, @AuthenticationPrincipal Usuario usuario) {
-        return productoService.updateProducto(id, producto, usuario.getId());
+    public ResponseEntity<ProductoDTO> updateProducto(
+            @PathVariable Long id,
+            @Valid @RequestBody ProductoRequest request,
+            @AuthenticationPrincipal Usuario usuario) {
+        return ResponseEntity.ok(productoService.updateProducto(id, request, usuario.getId()));
     }
 
-    // http://localhost:8080/api/productos/categoria/1
+    // GET productos por categoría
     @GetMapping("/categoria/{id}")
-    public List<ProductoDTO> getByCategoria(@PathVariable Long id) {
-        return productoService.getByCategoria(id);
+    public ResponseEntity<List<ProductoDTO>> getByCategoria(@PathVariable Long id) {
+        return ResponseEntity.ok(productoService.getByCategoria(id));
     }
 
-    // http://localhost:8080/api/productos/buscar?nombre=iphone
+    // GET buscar productos por nombre
     @GetMapping("/buscar")
-    public List<ProductoDTO> buscarPorNombre(@RequestParam String nombre) {
-        return productoService.buscarPorNombre(nombre);
+    public ResponseEntity<List<ProductoDTO>> buscarPorNombre(@RequestParam String nombre) {
+        return ResponseEntity.ok(productoService.buscarPorNombre(nombre));
     }
 
     // PUT actualizar stock de producto
-    // http://localhost:8080/api/productos/1/stock?stock=10
     @PutMapping("/{id}/stock")
-    public ProductoDTO udpateStockProducto(@PathVariable Long id, @RequestParam Integer stock, @AuthenticationPrincipal Usuario usuario) {
-        return productoService.updateStockProducto(id, stock, usuario.getId());
+    public ResponseEntity<ProductoDTO> updateStockProducto(
+            @PathVariable Long id,
+            @RequestParam Integer stock,
+            @AuthenticationPrincipal Usuario usuario) {
+        return ResponseEntity.ok(productoService.updateStockProducto(id, stock, usuario.getId()));
     }
-
 }

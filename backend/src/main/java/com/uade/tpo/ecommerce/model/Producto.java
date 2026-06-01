@@ -72,6 +72,7 @@ public class Producto {
             joinColumns = @JoinColumn(name = "producto_id")
     )
     @Column(name = "imagen")
+    @Builder.Default
     private List<String> imagenes = new ArrayList<>();
 
     // Categorías del producto (ManyToMany)
@@ -81,6 +82,7 @@ public class Producto {
             joinColumns = @JoinColumn(name = "producto_id"),
             inverseJoinColumns = @JoinColumn(name = "categoria_id")
     )
+    @Builder.Default
     private List<Categoria> categorias = new ArrayList<>();
 
     // Usuario creador del producto

@@ -1,15 +1,23 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
+import { useAuth } from './AuthContext';
 
 const CartContext = createContext();
 
 /**
  * CartProvider - Contexto global del carrito de compras.
  * Sincronizado con la base de datos MySQL de Spring Boot.
+ *
+ * DT-04 FIX: al hacer logout (token = null), el useEffect limpia el carrito automáticamente.
+ * DT-05 FIX: 'token' es dependencia del useEffect → recarga el carrito al iniciar sesión.
+ * BUG-06 FIX: addToCart envía UNA sola request POST con ?cantidad=N en lugar de N requests.
  */
 export const CartProvider = ({ children }) => {
     const [cart, setCart] = useState([]);
     const [isCartOpen, setIsCartOpen] = useState(false);
+
+    // DT-04 + DT-05 FIX: consumir el token del AuthContext para reaccionar al login/logout
+    const { token } = useAuth();
 
     const toggleCart = () => setIsCartOpen(!isCartOpen);
 
@@ -26,11 +34,17 @@ export const CartProvider = ({ children }) => {
         }));
     };
 
-    // Carga el carrito del usuario autenticado de la base de datos al inicio
+    /**
+     * DT-05 FIX: 'token' como dependencia → se ejecuta cuando el usuario hace login.
+     * DT-04 FIX: cuando token es null (logout), limpia el carrito inmediatamente.
+     */
     useEffect(() => {
         const fetchCart = async () => {
-            const token = localStorage.getItem('token');
-            if (!token) return;
+            if (!token) {
+                // DT-04: limpiar carrito al cerrar sesión (sin esperar recarga)
+                setCart([]);
+                return;
+            }
             try {
                 const response = await fetch('http://localhost:8081/api/carrito', {
                     headers: {
@@ -46,41 +60,38 @@ export const CartProvider = ({ children }) => {
             }
         };
         fetchCart();
-    }, []);
+    }, [token]); // ← DT-05 FIX: dependencia en token, no array vacío []
 
-    // Agregar producto al carrito persistente
+    /**
+     * BUG-06 FIX: una sola request POST /api/carrito/agregar/{id}?cantidad=N
+     * en lugar del loop de N requests secuenciales.
+     */
     const addToCart = async (product, quantityRequested = 1, showToast = true) => {
-        const token = localStorage.getItem('token');
         if (!token) {
             toast.warn('Por favor, iniciá sesión para poder agregar productos al carrito.');
             return;
         }
 
         try {
-            // El backend agrega de a 1 unidad por invocación al endpoint POST
-            // Invocamos tantas veces como unidades pida (por defecto es 1)
-            let lastCartData = null;
-            for (let i = 0; i < quantityRequested; i++) {
-                const response = await fetch(`http://localhost:8081/api/carrito/agregar/${product.id}`, {
+            const response = await fetch(
+                `http://localhost:8081/api/carrito/agregar/${product.id}?cantidad=${quantityRequested}`,
+                {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     }
-                });
-
-                if (!response.ok) {
-                    const errData = await response.json().catch(() => ({}));
-                    throw new Error(errData.message || 'No hay suficiente stock de este producto.');
                 }
-                lastCartData = await response.json();
+            );
+
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.error || errData.message || 'No hay suficiente stock de este producto.');
             }
 
-            if (lastCartData) {
-                setCart(mapBackendCartToFrontend(lastCartData));
-            }
-            
-            // UX Enhancement: Sutil toast de aviso en vez de forzar la apertura del sidebar
+            const cartData = await response.json();
+            setCart(mapBackendCartToFrontend(cartData));
+
             if (showToast) {
                 toast.success(`¡"${product.nombre}" agregado al carrito! 🛒`);
             }
@@ -91,7 +102,6 @@ export const CartProvider = ({ children }) => {
 
     // Eliminar producto del carrito persistente
     const removeFromCart = async (productId) => {
-        const token = localStorage.getItem('token');
         if (!token) return;
 
         try {
@@ -104,7 +114,7 @@ export const CartProvider = ({ children }) => {
 
             if (!response.ok) {
                 const errData = await response.json().catch(() => ({}));
-                throw new Error(errData.message || 'Error al eliminar el producto del carrito.');
+                throw new Error(errData.error || errData.message || 'Error al eliminar el producto del carrito.');
             }
 
             const data = await response.json();
@@ -117,7 +127,6 @@ export const CartProvider = ({ children }) => {
 
     // Vaciar el carrito en memoria y en la base de datos
     const clearCart = async () => {
-        const token = localStorage.getItem('token');
         if (!token) {
             setCart([]);
             return;
@@ -133,7 +142,7 @@ export const CartProvider = ({ children }) => {
 
             if (!response.ok) {
                 const errData = await response.json().catch(() => ({}));
-                throw new Error(errData.message || 'Error al vaciar el carrito.');
+                throw new Error(errData.error || errData.message || 'Error al vaciar el carrito.');
             }
 
             setCart([]);

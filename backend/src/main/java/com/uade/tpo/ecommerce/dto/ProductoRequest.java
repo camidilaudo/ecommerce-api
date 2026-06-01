@@ -9,6 +9,13 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+/**
+ * DTO para crear y actualizar productos.
+ * DT-01 FIX: Desacopla la capa de presentación de la entidad JPA Producto.
+ *
+ * Soporta múltiples categorías (categoriaIds) para compatibilidad con el AdminPanel.
+ * Las validaciones con @Valid en el controller aseguran datos correctos antes de llegar al servicio.
+ */
 @Data
 @Builder
 @AllArgsConstructor
@@ -29,10 +36,9 @@ public class ProductoRequest {
     @Min(value = 0, message = "El stock no puede ser negativo")
     private Integer stock;
 
-    @NotNull(message = "La categoría es obligatoria")
-    private Long categoriaId;
+    // Soporte para múltiples categorías (enviado como array desde AdminPanel)
+    private List<Long> categoriaIds;
 
-    // NUEVO — imágenes
+    // Lista de imágenes del producto (URLs)
     private List<String> imagenes;
-
 }
