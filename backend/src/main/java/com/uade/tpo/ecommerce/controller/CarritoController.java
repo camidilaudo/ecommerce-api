@@ -49,10 +49,13 @@ public class CarritoController {
         return ResponseEntity.ok(carritoService.obtenerCarrito(usuario.getId()));
     }
 
-    // Agregar producto al carrito del usuario autenticado
+    // BUG-06 FIX: acepta ?cantidad=N para agregar múltiples unidades en una sola request atómica
     @PostMapping("/agregar/{productoId}")
-    public ResponseEntity<CarritoDTO> agregarProducto(@PathVariable Long productoId, @AuthenticationPrincipal Usuario usuario) {
-        return ResponseEntity.ok(carritoService.agregarProducto(productoId, usuario.getId()));
+    public ResponseEntity<CarritoDTO> agregarProducto(
+            @PathVariable Long productoId,
+            @RequestParam(defaultValue = "1") int cantidad,
+            @AuthenticationPrincipal Usuario usuario) {
+        return ResponseEntity.ok(carritoService.agregarProducto(productoId, usuario.getId(), cantidad));
     }
 
     // Eliminar un producto del carrito

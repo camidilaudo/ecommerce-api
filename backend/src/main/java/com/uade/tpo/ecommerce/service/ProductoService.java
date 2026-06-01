@@ -1,46 +1,46 @@
 package com.uade.tpo.ecommerce.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.uade.tpo.ecommerce.dto.DeleteResponse;
+import com.uade.tpo.ecommerce.dto.ProductoDTO;
+import com.uade.tpo.ecommerce.dto.ProductoRequest;
+import com.uade.tpo.ecommerce.exception.BadRequestException;
+import com.uade.tpo.ecommerce.exception.ResourceNotFoundException;
+import com.uade.tpo.ecommerce.exception.UnAuthorizedException;
+import com.uade.tpo.ecommerce.model.Categoria;
 import com.uade.tpo.ecommerce.model.Producto;
 import com.uade.tpo.ecommerce.model.Usuario;
-import com.uade.tpo.ecommerce.model.Categoria;
-import com.uade.tpo.ecommerce.repository.ProductoRepository;
+import com.uade.tpo.ecommerce.repository.CarritoItemRepository;
 import com.uade.tpo.ecommerce.repository.CategoriaRepository;
-import com.uade.tpo.ecommerce.exception.*;
+import com.uade.tpo.ecommerce.repository.PedidoItemRepository;
+import com.uade.tpo.ecommerce.repository.ProductoRepository;
+import com.uade.tpo.ecommerce.repository.UsuarioRepository;
 
-import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-import com.uade.tpo.ecommerce.dto.DeleteResponse;
-import com.uade.tpo.ecommerce.dto.ProductoDTO;
-
+// DT-02 FIX: Inyección por constructor (RequiredArgsConstructor + final fields)
+// BUG-02 FIX: import correcto de Spring @Transactional
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class ProductoService {
 
-	@Autowired
-	private ProductoRepository productoRepository;
-
-	@Autowired
-	private CategoriaRepository categoriaRepository;
-
-	@Autowired
-	private com.uade.tpo.ecommerce.repository.CarritoItemRepository carritoItemRepository;
-
-	@Autowired
-	private com.uade.tpo.ecommerce.repository.PedidoItemRepository pedidoItemRepository;
-
-	@Autowired
-	private com.uade.tpo.ecommerce.repository.UsuarioRepository usuarioRepository;
+	private final ProductoRepository productoRepository;
+	private final CategoriaRepository categoriaRepository;
+	private final CarritoItemRepository carritoItemRepository;
+	private final PedidoItemRepository pedidoItemRepository;
+	private final UsuarioRepository usuarioRepository;
 
 	// Método auxiliar para validar que el usuario es el propietario del producto
 	private void validarPropietarioProducto(Producto producto, Long usuarioId) {
@@ -106,10 +106,10 @@ public class ProductoService {
 			.orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
 		validarPropietarioProducto(producto, usuarioId);
 
-		// Clean up from active shopping carts (since the product is deactivated)
+		// Limpiar de los carritos activos
 		carritoItemRepository.deleteByProductoId(id);
 
-		// Perform Soft Delete (Logical deletion)
+		// Soft Delete (Baja lógica)
 		producto.setActivo(false);
 		productoRepository.save(producto);
 
@@ -118,65 +118,67 @@ public class ProductoService {
 			.build();
 	}
 
-	// CREATE productos
-	public ProductoDTO saveProducto(Producto producto, Usuario usuario) {
-		// Asegurarse de que el usuario esté gestionado en la sesión de Hibernate actual para evitar problemas de entidades detached
+	// DT-01 FIX: Recibe ProductoRequest DTO en lugar de la entidad Producto directamente
+	public ProductoDTO saveProducto(ProductoRequest request, Usuario usuario) {
 		Usuario managedUsuario = usuarioRepository.findById(usuario.getId())
 			.orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
-		producto.setUsuario(managedUsuario);
 
-		// Si el estado activo viene nulo (porque el frontend no lo manda en el JSON), lo seteamos por defecto a true
-		if (producto.getActivo() == null) {
-			producto.setActivo(true);
+		// Mapear lista de categoriaIds a entidades Categoria
+		List<Categoria> categorias = new ArrayList<>();
+		if (request.getCategoriaIds() != null && !request.getCategoriaIds().isEmpty()) {
+			categorias = categoriaRepository.findAllById(request.getCategoriaIds());
 		}
 
-		// Mapear IDs de categorías transitorios del Frontend a entidades Categoria reales
-		if (producto.getCategoriaIds() != null && !producto.getCategoriaIds().isEmpty()) {
-			List<Categoria> cats = categoriaRepository.findAllById(producto.getCategoriaIds());
-			producto.setCategorias(cats);
+		// Mapear imágenes
+		List<String> imagenes = new ArrayList<>();
+		if (request.getImagenes() != null && !request.getImagenes().isEmpty()) {
+			imagenes.addAll(request.getImagenes());
 		}
-		// Mapear imagen única del Frontend a la lista de imagenes
-		if (producto.getImagen() != null && !producto.getImagen().isEmpty()) {
-			producto.setImagenes(new java.util.ArrayList<>(java.util.List.of(producto.getImagen())));
-		}
+
+		Producto producto = Producto.builder()
+			.nombre(request.getNombre())
+			.descripcion(request.getDescripcion())
+			.precio(request.getPrecio())
+			.stock(request.getStock())
+			.activo(true)
+			.usuario(managedUsuario)
+			.categorias(categorias)
+			.imagenes(imagenes)
+			.build();
 
 		Producto saved = productoRepository.save(producto);
 		return toDto(saved);
 	}
 
-	// UPDATE producto (Solo el propietario o ADMIN)
-	public ProductoDTO updateProducto(Long id, Producto producto, Long usuarioId) {
+	// DT-01 FIX: Recibe ProductoRequest DTO en lugar de la entidad Producto directamente
+	public ProductoDTO updateProducto(Long id, ProductoRequest request, Long usuarioId) {
 		Producto existingProducto = productoRepository
 			.findById(id)
 			.orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
 		validarPropietarioProducto(existingProducto, usuarioId);
 
-		existingProducto.setNombre(producto.getNombre());
-		existingProducto.setDescripcion(producto.getDescripcion());
-		existingProducto.setPrecio(producto.getPrecio());
-		existingProducto.setStock(producto.getStock());
+		existingProducto.setNombre(request.getNombre());
+		existingProducto.setDescripcion(request.getDescripcion());
+		existingProducto.setPrecio(request.getPrecio());
+		existingProducto.setStock(request.getStock());
 
-		// Mapear IDs de categorías de forma segura para Hibernate (clear + addAll)
+		// Mapear categorías de forma segura para Hibernate (clear + addAll)
 		if (existingProducto.getCategorias() == null) {
-			existingProducto.setCategorias(new java.util.ArrayList<>());
+			existingProducto.setCategorias(new ArrayList<>());
 		}
 		existingProducto.getCategorias().clear();
-		if (producto.getCategoriaIds() != null && !producto.getCategoriaIds().isEmpty()) {
-			List<Categoria> cats = categoriaRepository.findAllById(producto.getCategoriaIds());
+		if (request.getCategoriaIds() != null && !request.getCategoriaIds().isEmpty()) {
+			List<Categoria> cats = categoriaRepository.findAllById(request.getCategoriaIds());
 			existingProducto.getCategorias().addAll(cats);
-		} else if (producto.getCategorias() != null) {
-			existingProducto.getCategorias().addAll(producto.getCategorias());
 		}
 
-		// Mapear imágenes de forma segura para Hibernate (clear + addAll)
+		// Mapear imágenes de forma segura (clear + addAll)
 		if (existingProducto.getImagenes() == null) {
-			existingProducto.setImagenes(new java.util.ArrayList<>());
+			existingProducto.setImagenes(new ArrayList<>());
 		}
 		existingProducto.getImagenes().clear();
-		if (producto.getImagen() != null && !producto.getImagen().isEmpty()) {
-			existingProducto.getImagenes().add(producto.getImagen());
-		} else if (producto.getImagenes() != null) {
-			existingProducto.getImagenes().addAll(producto.getImagenes());
+		if (request.getImagenes() != null && !request.getImagenes().isEmpty()) {
+			existingProducto.getImagenes().addAll(request.getImagenes());
 		}
 
 		Producto saved = productoRepository.save(existingProducto);
@@ -207,15 +209,22 @@ public class ProductoService {
 		return toDto(saved);
 	}
 
+	/**
+	 * BUG-01 FIX — Descuento de stock atómico.
+	 * Usa una query UPDATE con WHERE stock >= cantidad para evitar la race condition.
+	 * Si retorna 0 filas afectadas, el stock era insuficiente.
+	 */
+	@Transactional
 	public void descontarStock(Long id, int cantidad) {
-		Producto producto = productoRepository.findById(id)
-			.orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
-
-		if (producto.getStock() < cantidad) {
-			throw new BadRequestException("Stock insuficiente para el producto: " + producto.getNombre());
+		if (!productoRepository.existsById(id)) {
+			throw new ResourceNotFoundException("Producto no encontrado con id: " + id);
 		}
-		producto.setStock(producto.getStock() - cantidad);
-		productoRepository.save(producto);
+		int filasAfectadas = productoRepository.decrementarStockAtomico(id, cantidad);
+		if (filasAfectadas == 0) {
+			Producto p = productoRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
+			throw new BadRequestException("Stock insuficiente para el producto: " + p.getNombre()
+				+ ". Stock actual: " + p.getStock() + ", solicitado: " + cantidad);
+		}
 	}
-
 }

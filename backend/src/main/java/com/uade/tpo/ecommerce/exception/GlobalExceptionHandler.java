@@ -1,5 +1,7 @@
 package com.uade.tpo.ecommerce.exception;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -13,6 +15,9 @@ import java.util.Map;
 // Cualquier excepción lanzada desde cualquier controller pasa por acá
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    // DT-09 FIX: SLF4J logger en lugar de System.out.println / printStackTrace
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleNotFound(ResourceNotFoundException ex) {
@@ -83,7 +88,8 @@ public class GlobalExceptionHandler {
     // Captura cualquier otra excepción no prevista (500)
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
-        ex.printStackTrace(); // Log the exact error to console for debugging
+        // DT-09 FIX: logging estructurado con SLF4J (incluye stack trace en los logs del servidor)
+        log.error("Error interno no controlado: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
                 "timestamp", LocalDateTime.now().toString(),
                 "status", 500,

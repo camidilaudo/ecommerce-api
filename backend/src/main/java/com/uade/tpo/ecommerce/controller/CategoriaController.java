@@ -7,85 +7,58 @@ import com.uade.tpo.ecommerce.service.CategoriaService;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 
 /**
- * ==========================================================
- *              Clase: CategoriaController
- * ==========================================================
- * Descripción:
- * Controlador encargado de gestionar las operaciones
- * CRUD y consultas sobre categorías de productos.
- *
- * @param categoriaService → Servicio que maneja la
- *                            lógica de categorías.
- *
- * Endpoints:
- * GET    /api/categorias              → Obtener todas.
- * GET    /api/categorias/{id}         → Obtener por ID.
- * POST   /api/categorias              → Crear categoría.
- * PUT    /api/categorias/{id}         → Actualizar categoría.
- * DELETE /api/categorias/{id}         → Eliminar categoría.
- * GET    /api/categorias/buscar       → Buscar por nombre.
- *
- * Configuración:
- * - Utiliza validaciones con @Valid.
- * - Permite gestión completa de categorías.
- *
- * @version 1.0
- * ==========================================================
+ * CategoriaController — CRUD de categorías.
+ * BUG-03 FIX: todos los endpoints retornan ResponseEntity con HTTP status explícito.
+ * DT-02 FIX: inyección por constructor con @RequiredArgsConstructor.
  */
-
 @RestController
 @RequestMapping("/api/categorias")
+@RequiredArgsConstructor
 public class CategoriaController {
 
-    @Autowired
-    private CategoriaService categoriaService;
+    private final CategoriaService categoriaService;
 
     // GET todas las categorias
-    // http://localhost:8080/api/categorias
     @GetMapping
-    public List<CategoriaDTO> getAllCategorias() {
-        return categoriaService.getAllCategorias();
+    public ResponseEntity<List<CategoriaDTO>> getAllCategorias() {
+        return ResponseEntity.ok(categoriaService.getAllCategorias());
     }
 
     // GET categoria por ID
-    // http://localhost:8080/api/categorias/1
     @GetMapping("/{id}")
-    public CategoriaDTO getCategoriaById(@PathVariable Long id) {
-        return categoriaService.getCategoriaById(id);
+    public ResponseEntity<CategoriaDTO> getCategoriaById(@PathVariable Long id) {
+        return ResponseEntity.ok(categoriaService.getCategoriaById(id));
     }
 
     // DELETE categoria
-    // http://localhost:8080/api/categorias/1
     @DeleteMapping("/{id}")
-    public DeleteResponse deleteCategoriaById(@PathVariable Long id) {
-        return categoriaService.deleteCategoriaById(id);
+    public ResponseEntity<DeleteResponse> deleteCategoriaById(@PathVariable Long id) {
+        return ResponseEntity.ok(categoriaService.deleteCategoriaById(id));
     }
 
     // POST crear categoria
-    // http://localhost:8080/api/categorias
     @PostMapping
-    public CategoriaDTO saveCategoria(@Valid @RequestBody Categoria categoria) {
-        return categoriaService.saveCategoria(categoria);
+    public ResponseEntity<CategoriaDTO> saveCategoria(@Valid @RequestBody Categoria categoria) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(categoriaService.saveCategoria(categoria));
     }
 
     // PUT actualizar categoria
-    // http://localhost:8080/api/categorias/1
     @PutMapping("/{id}")
-    public CategoriaDTO updateCategoria(@PathVariable Long id, @Valid @RequestBody Categoria categoria) {
-        return categoriaService.updateCategoria(id, categoria);
+    public ResponseEntity<CategoriaDTO> updateCategoria(@PathVariable Long id, @Valid @RequestBody Categoria categoria) {
+        return ResponseEntity.ok(categoriaService.updateCategoria(id, categoria));
     }
 
-    // buscar por nombre
-    // http://localhost:8080/api/categorias/buscar?nombre=electronica
+    // GET buscar por nombre
     @GetMapping("/buscar")
-    public CategoriaDTO buscarPorNombre(@RequestParam String nombre) {
-        return categoriaService.buscarPorNombre(nombre);
+    public ResponseEntity<CategoriaDTO> buscarPorNombre(@RequestParam String nombre) {
+        return ResponseEntity.ok(categoriaService.buscarPorNombre(nombre));
     }
-
 }

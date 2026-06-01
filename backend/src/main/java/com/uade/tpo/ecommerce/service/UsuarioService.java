@@ -12,7 +12,7 @@ import com.uade.tpo.ecommerce.repository.UsuarioRepository;
 import com.uade.tpo.ecommerce.dto.DeleteResponse;
 import com.uade.tpo.ecommerce.dto.UsuarioDTO;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
@@ -76,9 +76,20 @@ public class UsuarioService {
     public UsuarioDTO updateUsuario(Long id, Usuario usuario) {
         Usuario existing = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado."));
+
+        // DT-07 FIX: Validar que el nuevo email no esté registrado por otro usuario
+        if (usuario.getEmail() != null
+                && !usuario.getEmail().equalsIgnoreCase(existing.getEmail())
+                && usuarioRepository.existsByEmail(usuario.getEmail())) {
+            throw new com.uade.tpo.ecommerce.exception.UserAlreadyExistsException(
+                "El email '" + usuario.getEmail() + "' ya está registrado por otro usuario.");
+        }
+
         existing.setNombre(usuario.getNombre());
         existing.setApellido(usuario.getApellido());
-        existing.setEmail(usuario.getEmail());
+        if (usuario.getEmail() != null && !usuario.getEmail().isBlank()) {
+            existing.setEmail(usuario.getEmail());
+        }
         Usuario saved = usuarioRepository.save(existing);
         return toDto(saved);
     }

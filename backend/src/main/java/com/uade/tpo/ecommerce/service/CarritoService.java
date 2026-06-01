@@ -3,38 +3,29 @@ package com.uade.tpo.ecommerce.service;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.uade.tpo.ecommerce.model.*;
 import com.uade.tpo.ecommerce.repository.*;
 import com.uade.tpo.ecommerce.dto.*;
 import com.uade.tpo.ecommerce.exception.*;
 
-import jakarta.transaction.Transactional;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+// BUG-02 FIX: import correcto de Spring @Transactional (era jakarta.transaction.Transactional)
+// DT-02 FIX: inyección por constructor con final fields (eliminada mezcla de @Autowired + @RequiredArgsConstructor)
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class CarritoService {
 
-    @Autowired
-    private CarritoRepository carritoRepository;
-
-    @Autowired
-    private ProductoRepository productoRepository;
-
-    @Autowired
-    private ProductoService productoService;
-
-    @Autowired
-    private UsuarioService usuarioService;
-
-    @Autowired
-    private PedidoService pedidoService;
+    private final CarritoRepository carritoRepository;
+    private final ProductoRepository productoRepository;
+    private final ProductoService productoService;
+    private final UsuarioService usuarioService;
+    private final PedidoService pedidoService;
 
     private Carrito getOrCreateCarritoEntity(Long usuarioId) {
         if (usuarioId == null) {
@@ -86,37 +77,42 @@ public class CarritoService {
         return toDto(carrito);
     }
 
-    public CarritoDTO agregarProducto(Long productoId, Long usuarioId) {
+    /**
+     * BUG-05 FIX: Obtiene la entidad Producto real desde la BD (no construye una detached).
+     * BUG-06 FIX: Acepta cantidadSolicitada en lugar de siempre agregar de a 1.
+     */
+    public CarritoDTO agregarProducto(Long productoId, Long usuarioId, int cantidadSolicitada) {
         Carrito carrito = getOrCreateCarritoEntity(usuarioId);
-        ProductoDTO productoDTO = productoService.getProductoById(productoId);
-        Producto producto = Producto.builder()
-                .id(productoDTO.getId())
-                .nombre(productoDTO.getNombre())
-                .precio(productoDTO.getPrecio())
-                .descripcion(productoDTO.getDescripcion())
-                .stock(productoDTO.getStock())
-                .imagenes(productoDTO.getImagenes())
-                .usuario(usuarioService.getUsuarioEntityById(productoDTO.getUsuarioId()))
-                .build();
+
+        // BUG-05 FIX: Obtener la entidad JPA real para evitar entidad detached
+        Producto producto = productoRepository.findById(productoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
 
         if (producto.getStock() <= 0) {
             throw new BadRequestException("No hay stock disponible para el producto: " + producto.getNombre());
         }
 
+        // Verificar si el producto ya está en el carrito
         for (CarritoItem item : carrito.getItems()) {
             if (item.getProducto().getId().equals(productoId)) {
-                if (item.getCantidad() + 1 > producto.getStock()) {
-                    throw new BadRequestException("No hay suficiente stock disponible");
+                if (item.getCantidad() + cantidadSolicitada > producto.getStock()) {
+                    throw new BadRequestException("No hay suficiente stock disponible. Stock actual: "
+                            + producto.getStock() + ", ya en carrito: " + item.getCantidad());
                 }
-                item.setCantidad(item.getCantidad() + 1);
+                item.setCantidad(item.getCantidad() + cantidadSolicitada);
                 Carrito saved = carritoRepository.save(carrito);
                 return toDto(saved);
             }
         }
 
+        // Producto nuevo en el carrito
+        if (cantidadSolicitada > producto.getStock()) {
+            throw new BadRequestException("No hay suficiente stock disponible. Stock actual: " + producto.getStock());
+        }
+
         CarritoItem newItem = new CarritoItem();
         newItem.setProducto(producto);
-        newItem.setCantidad(1);
+        newItem.setCantidad(cantidadSolicitada);
         newItem.setCarrito(carrito);
         carrito.getItems().add(newItem);
         Carrito saved = carritoRepository.save(carrito);
@@ -155,10 +151,10 @@ public class CarritoService {
         for (CarritoItem itemCarrito : carrito.getItems()) {
             Long productoId = itemCarrito.getProducto().getId();
 
-            // 1. Descontar stock de forma segura (valida y resta stock)
+            // BUG-01 FIX: descontarStock ahora usa query atómica → safe for concurrent checkout
             productoService.descontarStock(productoId, itemCarrito.getCantidad());
 
-            // 2. Obtener producto actualizado de base de datos
+            // Obtener producto actualizado de base de datos para el precio final
             Producto producto = productoRepository.findById(productoId)
                     .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
 

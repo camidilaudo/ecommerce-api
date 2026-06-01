@@ -14,7 +14,7 @@ import com.uade.tpo.ecommerce.dto.DeleteResponse;
 import com.uade.tpo.ecommerce.dto.PedidoDTO;
 import com.uade.tpo.ecommerce.dto.PedidoItemDTO;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service

@@ -3,6 +3,8 @@ package com.uade.tpo.ecommerce.controller;
 import lombok.RequiredArgsConstructor;
 
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.uade.tpo.ecommerce.dto.LoginResponse;
@@ -40,13 +42,14 @@ public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
 
+    // BUG-04 FIX: ResponseEntity con status HTTP explícito
     @PostMapping("/login")
-    public LoginResponse login(@RequestBody LoginRequest request) {
-        return authenticationService.login(request);
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authenticationService.login(request));
     }
 
     @PostMapping("/register")
-    public RegisterResponse register(@Valid @RequestBody RegisterRequest request) {
-        return authenticationService.register(request);
+    public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(authenticationService.register(request));
     }
 }
