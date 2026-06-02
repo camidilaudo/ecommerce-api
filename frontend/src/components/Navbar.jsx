@@ -14,7 +14,7 @@ import { toast } from 'react-toastify';
 
 const Navbar = ({ onSearch }) => {
     const { cartCount, toggleCart } = useCart();
-    const { isAuthenticated, usuarioNombre, userRole, logout } = useAuth();
+    const { isAuthenticated, usuarioNombre, userRole, userAvatar, logout } = useAuth();
     const { favoriteItems } = useFavorites();
     const navigate = useNavigate();
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -81,9 +81,33 @@ const Navbar = ({ onSearch }) => {
                     <div className="user-menu-wrapper">
                         <button className="nav-btn" onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} aria-label="Menú de usuario" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             {isAuthenticated && <span className="user-greeting-navbar" style={{ fontSize: '13px', fontWeight: '500', color: '#1d1d1f' }}>¡Hola, {usuarioNombre}!</span>}
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                <path d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
+                            {isAuthenticated && userAvatar ? (
+                                <img
+                                    src={`/avatares/${userAvatar}`}
+                                    alt="Tu avatar"
+                                    style={{
+                                        width: '30px',
+                                        height: '30px',
+                                        borderRadius: '50%',
+                                        objectFit: 'cover',
+                                        border: '2px solid #0071e3',
+                                        boxShadow: '0 0 0 2px rgba(0, 113, 227, 0.2)',
+                                        transition: 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s',
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.transform = 'scale(1.1)';
+                                        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 113, 227, 0.35)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.transform = 'scale(1)';
+                                        e.currentTarget.style.boxShadow = '0 0 0 2px rgba(0, 113, 227, 0.2)';
+                                    }}
+                                />
+                            ) : (
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                    <path d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            )}
                         </button>
 
                         {isUserMenuOpen && (

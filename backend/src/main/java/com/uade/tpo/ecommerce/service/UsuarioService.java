@@ -21,6 +21,12 @@ public class UsuarioService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    // Lista blanca de avatares predefinidos permitidos
+    private static final java.util.Set<String> AVATARES_PERMITIDOS = java.util.Set.of(
+        "avatar1.webp", "avatar2.webp", "avatar3.webp",
+        "avatar4.webp", "avatar5.webp", "avatar6.webp"
+    );
+
     private UsuarioDTO toDto(Usuario usuario) {
         if (usuario == null) return null;
         return UsuarioDTO.builder()
@@ -32,6 +38,7 @@ public class UsuarioService {
                 .role(usuario.getRole())
                 .fechaNacimiento(usuario.getFechaNacimiento())
                 .sexo(usuario.getSexo())
+                .avatar(usuario.getAvatar())
                 .build();
     }
 
@@ -100,5 +107,20 @@ public class UsuarioService {
 
     public boolean existsByNombreUsuario(String nombreUsuario) {
         return usuarioRepository.existsByNombreUsuario(nombreUsuario);
+    }
+
+    /**
+     * Actualiza el avatar del usuario validando contra la lista blanca.
+     * @throws IllegalArgumentException si el avatar no es uno de los predefinidos.
+     */
+    public UsuarioDTO updateAvatar(Long id, String avatar) {
+        if (!AVATARES_PERMITIDOS.contains(avatar)) {
+            throw new IllegalArgumentException(
+                "Avatar inválido. Solo se permiten: " + AVATARES_PERMITIDOS);
+        }
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado."));
+        usuario.setAvatar(avatar);
+        return toDto(usuarioRepository.save(usuario));
     }
 }

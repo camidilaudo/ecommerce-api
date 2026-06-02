@@ -4,10 +4,11 @@ import './LoginPage.css'; // Usamos el CSS unificado
 import { isValidEmail, isValidDate } from '../utils/validation';
 import { handleApiResponse } from '../utils/apiHelpers';
 import { toast } from 'react-toastify';
+import AvatarPicker from '../components/AvatarPicker';
 
 /**
  * RegisterPage — Página de registro de usuario.
- * Cumple los requisitos del TPO: nombreUsuario, nombre, apellido, email, password, fechaNacimiento, sexo.
+ * Cumple los requisitos del TPO: nombreUsuario, nombre, apellido, email, password, fechaNacimiento, sexo, avatar.
  */
 const RegisterPage = () => {
     const navigate = useNavigate();
@@ -21,6 +22,7 @@ const RegisterPage = () => {
         password: '',
         fechaNacimiento: '',
         sexo: '',
+        avatar: 'avatar1.webp', // avatar por defecto
     });
 
     const [errores, setErrores] = useState({});
@@ -32,6 +34,10 @@ const RegisterPage = () => {
         if (errores[name]) {
             setErrores((prev) => ({ ...prev, [name]: '' }));
         }
+    };
+
+    const handleAvatarSelect = (filename) => {
+        setForm((prev) => ({ ...prev, avatar: filename }));
     };
 
     // Validación básica del lado del cliente antes de enviar a Spring Boot
@@ -71,7 +77,6 @@ const RegisterPage = () => {
         const erroresValidacion = validar();
         if (Object.keys(erroresValidacion).length > 0) {
             setErrores(erroresValidacion);
-            // Mostrar resumen breve
             toast.error('Por favor corregí los campos marcados');
             return;
         }
@@ -223,6 +228,13 @@ const RegisterPage = () => {
                             {errores.sexo && <span className="form-error">{errores.sexo}</span>}
                         </div>
                     </div>
+
+                    {/* Selector de avatar predefinido */}
+                    <AvatarPicker
+                        selectedAvatar={form.avatar}
+                        onSelect={handleAvatarSelect}
+                        label="Elegí tu avatar"
+                    />
 
                     <button type="submit" className="auth-submit" disabled={cargando}>
                         {cargando ? 'Registrando...' : 'Crear cuenta'}

@@ -79,6 +79,9 @@ public class Usuario implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(nullable = true)
+    private String avatar;
+
     @org.hibernate.annotations.CreationTimestamp
     @Column(name = "fecha_creacion", updatable = false)
     private java.time.LocalDateTime fechaCreacion;

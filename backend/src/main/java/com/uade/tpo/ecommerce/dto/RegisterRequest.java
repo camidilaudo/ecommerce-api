@@ -45,4 +45,7 @@ public class RegisterRequest {
 
     @NotNull(message = "El sexo es obligatorio")
     private Sexo sexo;
+
+    // Opcional: si no se elige, el frontend usará avatar1.webp como fallback visual
+    private String avatar;
 }

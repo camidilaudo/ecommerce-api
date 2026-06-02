@@ -5,6 +5,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
+import com.uade.tpo.ecommerce.model.enums.Sexo;
+
 /**
  * DTO para el caso de uso "Mi Perfil".
  * Excluye datos sensibles y el rol por requerimiento de UI.
@@ -18,4 +22,7 @@ public class UsuarioProfileResponse {
     private String nombre;
     private String apellido;
     private String email;
+    private LocalDate fechaNacimiento;
+    private Sexo sexo;
+    private String avatar;
 }

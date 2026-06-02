@@ -1,16 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './LoginPage.css'; // Reutiliza el diseño y estructura premium de los formularios
+import './LoginPage.css';
+import './ProfilePage.css';
+import { useAuth } from '../context/AuthContext';
+import AvatarPicker from '../components/AvatarPicker';
+import { toast } from 'react-toastify';
 
 /**
  * ProfilePage - Interfaz para visualizar la información de cuenta del usuario logueado.
  * Conecta con el endpoint protegido GET /api/usuarios/me inyectando el token Bearer JWT.
+ * Permite cambiar el avatar con PATCH /api/usuarios/me/avatar.
  */
 const ProfilePage = () => {
     const navigate = useNavigate();
+    const { updateAvatar } = useAuth();
+
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    // Estado local del avatar seleccionado (puede diferir del guardado hasta que se guarda)
+    const [avatarSeleccionado, setAvatarSeleccionado] = useState('avatar1.webp');
+    const [guardandoAvatar, setGuardandoAvatar] = useState(false);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -22,7 +33,7 @@ const ProfilePage = () => {
         }
 
         /**
-         * Petición asíncrona (Clase 08) para recuperar los datos reales del usuario.
+         * Petición asíncrona para recuperar los datos reales del usuario.
          */
         const fetchProfile = async () => {
             try {
@@ -42,7 +53,9 @@ const ProfilePage = () => {
                 }
 
                 const data = await response.json();
-                setUser(data); // Mapea los campos reales de la base de datos de MySQL
+                setUser(data);
+                // Inicializar avatar seleccionado con el del usuario (o fallback)
+                setAvatarSeleccionado(data.avatar || 'avatar1.webp');
 
             } catch (err) {
                 console.error("Error al consultar /api/usuarios/me:", err.message);
@@ -55,11 +68,59 @@ const ProfilePage = () => {
         fetchProfile();
     }, [navigate]);
 
+    /**
+     * Guarda el avatar seleccionado en el backend y actualiza el contexto global.
+     */
+    const handleGuardarAvatar = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        // Si el avatar no cambió, no hace nada
+        if (avatarSeleccionado === user?.avatar) {
+            toast.info('El avatar ya está guardado.');
+            return;
+        }
+
+        setGuardandoAvatar(true);
+        try {
+            const response = await fetch('http://localhost:8081/api/usuarios/me/avatar', {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ avatar: avatarSeleccionado })
+            });
+
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                throw new Error(err.message || 'Error al guardar el avatar');
+            }
+
+            // Actualizar el usuario local y el contexto global (afecta Navbar inmediatamente)
+            setUser((prev) => ({ ...prev, avatar: avatarSeleccionado }));
+            updateAvatar(avatarSeleccionado);
+            toast.success('¡Avatar actualizado correctamente!');
+
+        } catch (err) {
+            console.error("Error al actualizar avatar:", err.message);
+            toast.error(`No se pudo guardar el avatar: ${err.message}`);
+        } finally {
+            setGuardandoAvatar(false);
+        }
+    };
+
     // Estado visual de carga intermedia
     if (loading) {
         return (
-            <div style={{ padding: '100px', textAlign: 'center', color: '#86868b', fontSize: '16px' }}>
-                Cargando información de perfil...
+            <div className="auth-page">
+                <div className="auth-card auth-card--wide profile-skeleton">
+                    <div className="profile-skeleton__avatar" />
+                    <div className="profile-skeleton__line profile-skeleton__line--wide" />
+                    <div className="profile-skeleton__line" />
+                    <div className="profile-skeleton__line" />
+                    <div className="profile-skeleton__line profile-skeleton__line--narrow" />
+                </div>
             </div>
         );
     }
@@ -85,13 +146,32 @@ const ProfilePage = () => {
         );
     }
 
+    const avatarActual = user?.avatar || 'avatar1.webp';
+    const avatarCambio = avatarSeleccionado !== avatarActual;
+
     return (
         <div className="auth-page">
             <div className="auth-card auth-card--wide">
 
+                {/* Header con avatar actual */}
                 <div className="auth-header">
-                    <h2 className="auth-titulo">Mi Perfil</h2>
-                    <p>Información verificada de tu cuenta de usuario</p>
+                    <div className="profile-avatar-preview">
+                        <img
+                            src={`/avatares/${avatarActual}`}
+                            alt="Tu avatar actual"
+                            className="profile-avatar-preview__img"
+                        />
+                        <div className="profile-avatar-preview__badge">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="1">
+                                <circle cx="12" cy="12" r="10" />
+                                <polyline points="9 11 12 14 22 4" strokeWidth="2.5" stroke="white" fill="none" />
+                            </svg>
+                        </div>
+                    </div>
+                    <h2 className="auth-titulo" style={{ marginTop: '16px' }}>Mi Perfil</h2>
+                    <p style={{ color: '#86868b', fontSize: '14px', marginTop: '4px' }}>
+                        {user?.nombreUsuario && <strong>@{user.nombreUsuario}</strong>}
+                    </p>
                 </div>
 
                 <div className="auth-form">
@@ -101,7 +181,8 @@ const ProfilePage = () => {
                         <label className="form-label">Nombre de Usuario</label>
                         <input
                             type="text"
-                            value={user?.nombreUsuario || user?.username || ''}
+                            className="form-input"
+                            value={user?.nombreUsuario || ''}
                             readOnly
                         />
                     </div>
@@ -112,6 +193,7 @@ const ProfilePage = () => {
                             <label className="form-label">Nombre</label>
                             <input
                                 type="text"
+                                className="form-input"
                                 value={user?.nombre || ''}
                                 readOnly
                             />
@@ -120,6 +202,7 @@ const ProfilePage = () => {
                             <label className="form-label">Apellido</label>
                             <input
                                 type="text"
+                                className="form-input"
                                 value={user?.apellido || ''}
                                 readOnly
                             />
@@ -131,6 +214,7 @@ const ProfilePage = () => {
                         <label className="form-label">Email de Operación</label>
                         <input
                             type="email"
+                            className="form-input"
                             value={user?.email || ''}
                             readOnly
                         />
@@ -140,24 +224,47 @@ const ProfilePage = () => {
                     {user?.fechaNacimiento && (
                         <div className="form-grupo">
                             <label className="form-label">Fecha de Nacimiento</label>
-                            <input type="text" value={user.fechaNacimiento} readOnly />
+                            <input type="text" className="form-input" value={user.fechaNacimiento} readOnly />
                         </div>
                     )}
 
                     {user?.sexo && (
                         <div className="form-grupo">
                             <label className="form-label">Sexo</label>
-                            <input type="text" value={user.sexo} readOnly />
+                            <input type="text" className="form-input" value={user.sexo} readOnly />
                         </div>
                     )}
 
-                    {/* NOTA: El campo de "Rol Asignado" ha sido removido completamente de la UI */}
+                    {/* ── Sección de Cambio de Avatar ── */}
+                    <div className="profile-divider" />
+
+                    <AvatarPicker
+                        selectedAvatar={avatarSeleccionado}
+                        onSelect={setAvatarSeleccionado}
+                        label="Cambiar avatar"
+                    />
+
+                    {/* Botón Guardar Avatar — solo activo si hubo cambio */}
+                    <button
+                        type="button"
+                        className="auth-submit"
+                        onClick={handleGuardarAvatar}
+                        disabled={guardandoAvatar || !avatarCambio}
+                        style={{
+                            opacity: avatarCambio ? 1 : 0.5,
+                            cursor: avatarCambio ? 'pointer' : 'default',
+                        }}
+                    >
+                        {guardandoAvatar ? 'Guardando...' : avatarCambio ? '💾 Guardar Avatar' : 'Avatar guardado'}
+                    </button>
+
+                    <div className="profile-divider" />
 
                     {/* Botón de retorno centralizado */}
                     <button
                         className="auth-submit"
                         onClick={() => navigate('/')}
-                        style={{ background: '#000000', marginTop: '20px' }}
+                        style={{ background: '#1d1d1f', marginTop: '0' }}
                     >
                         Volver a la Tienda
                     </button>
