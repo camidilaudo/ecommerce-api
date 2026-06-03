@@ -55,7 +55,7 @@ const LoginPage = () => {
             const data = await handleApiResponse(response);
 
             // Guardamos la información de la sesión de forma persistente y reactiva
-            login(data.token, data.role || 'USER', data.nombre || '');
+            login(data.token, data.role || 'USER', data.nombre || '', data.avatar || null);
 
             toast.success('¡Bienvenido!');
             navigate('/');

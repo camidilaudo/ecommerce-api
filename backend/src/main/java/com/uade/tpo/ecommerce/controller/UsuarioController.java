@@ -1,6 +1,7 @@
 package com.uade.tpo.ecommerce.controller;
 
 import com.uade.tpo.ecommerce.dto.DeleteResponse;
+import com.uade.tpo.ecommerce.dto.UpdateAvatarRequest;
 import com.uade.tpo.ecommerce.dto.UsuarioDTO;
 import com.uade.tpo.ecommerce.dto.UsuarioProfileResponse;
 import com.uade.tpo.ecommerce.exception.UnAuthorizedException;
@@ -9,6 +10,7 @@ import com.uade.tpo.ecommerce.model.enums.Role;
 import com.uade.tpo.ecommerce.repository.UsuarioRepository;
 import com.uade.tpo.ecommerce.service.UsuarioService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
@@ -81,7 +83,7 @@ public class UsuarioController {
 
     /**
      * GET /api/usuarios/me
-     * Retorna el perfil del usuario autenticado actual a través del token JWT.
+     * Retorna el perfil completo del usuario autenticado actual a través del token JWT.
      */
     @GetMapping("/me")
     public ResponseEntity<UsuarioProfileResponse> obtenerMiPerfil(
@@ -92,8 +94,25 @@ public class UsuarioController {
                 .nombre(usuario.getNombre())
                 .apellido(usuario.getApellido())
                 .email(usuario.getEmail())
+                .fechaNacimiento(usuario.getFechaNacimiento())
+                .sexo(usuario.getSexo())
+                .avatar(usuario.getAvatar())
                 .build();
 
         return ResponseEntity.ok(perfil);
+    }
+
+    /**
+     * PATCH /api/usuarios/me/avatar
+     * Actualiza únicamente el avatar del usuario autenticado.
+     * Valida que el avatar pertenezca a la lista permitida (avatar1.webp–avatar6.webp).
+     */
+    @PatchMapping("/me/avatar")
+    public ResponseEntity<UsuarioDTO> actualizarAvatar(
+            @AuthenticationPrincipal Usuario usuario,
+            @Valid @RequestBody UpdateAvatarRequest request) {
+
+        UsuarioDTO actualizado = usuarioService.updateAvatar(usuario.getId(), request.getAvatar());
+        return ResponseEntity.ok(actualizado);
     }
 }

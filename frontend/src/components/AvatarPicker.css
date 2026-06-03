@@ -1,0 +1,112 @@
+/* ==========================================
+   AVATAR PICKER — Galería de selección
+   ========================================== */
+
+.avatar-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.avatar-picker__label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-main, #1d1d1f);
+    margin: 0;
+    margin-left: 2px;
+    letter-spacing: 0.01em;
+}
+
+/* Grid de 6 avatares en 2 filas × 3 columnas */
+.avatar-picker__grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+}
+
+/* Botón contenedor de cada avatar */
+.avatar-picker__item {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 2.5px solid transparent;
+    background: rgba(118, 118, 128, 0.08);
+    padding: 3px;
+    cursor: pointer;
+    transition:
+        border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+        box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+        background-color 0.2s;
+    outline: none;
+}
+
+.avatar-picker__item:hover {
+    transform: scale(1.08);
+    border-color: rgba(0, 113, 227, 0.4);
+    background: rgba(0, 113, 227, 0.06);
+}
+
+.avatar-picker__item:focus-visible {
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.3);
+    border-color: var(--accent-color, #0071e3);
+}
+
+/* Estado seleccionado — ring azul vibrante con sombra */
+.avatar-picker__item--selected {
+    border-color: var(--accent-color, #0071e3);
+    background: rgba(0, 113, 227, 0.08);
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.18);
+    transform: scale(1.05);
+}
+
+.avatar-picker__item--selected:hover {
+    transform: scale(1.1);
+}
+
+/* Imagen del avatar */
+.avatar-picker__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* Tick de verificación superpuesto */
+.avatar-picker__check {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 20px;
+    height: 20px;
+    background: var(--accent-color, #0071e3);
+    border-radius: 50%;
+    border: 2px solid white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+
+    animation: checkIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes checkIn {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Responsive: en pantallas muy chicas reducir a 3 columnas */
+@media (max-width: 380px) {
+    .avatar-picker__grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}

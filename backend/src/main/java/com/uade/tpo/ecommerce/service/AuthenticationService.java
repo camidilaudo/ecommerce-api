@@ -52,6 +52,7 @@ public class AuthenticationService {
             .password(passwordEncoder.encode(request.getPassword()))
             .fechaNacimiento(request.getFechaNacimiento())
             .sexo(request.getSexo())
+            .avatar(request.getAvatar())
             .role(Role.USER)
             .build();
 
@@ -107,6 +108,7 @@ public class AuthenticationService {
             .apellido(usuario.getApellido())
             .email(usuario.getEmail())
             .role(usuario.getRole().name())
+            .avatar(usuario.getAvatar())
             .build();
     }
 }

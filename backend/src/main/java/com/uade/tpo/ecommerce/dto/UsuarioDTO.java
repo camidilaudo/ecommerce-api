@@ -19,4 +19,5 @@ public class UsuarioDTO {
     private Role role;
     private LocalDate fechaNacimiento;
     private Sexo sexo;
+    private String avatar;
 }
