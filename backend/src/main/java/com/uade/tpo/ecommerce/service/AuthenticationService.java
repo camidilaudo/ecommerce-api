@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -75,12 +76,21 @@ public class AuthenticationService {
             authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
             );
+        } catch (DisabledException e) {
+            // Cuenta bloqueada — mensaje amigable
+            throw new UnAuthorizedException("Tu cuenta se encuentra bloqueada. Contactá al administrador para recuperar el acceso.");
         } catch (BadCredentialsException e) {
             throw new InvalidCredentialsException("Credenciales inválidas. Verifique su email y contraseña.");
         }
 
         // 3. Obtener el usuario de la base de datos (entidad)
         Usuario usuario = usuarioService.getUsuarioEntityByEmail(request.getEmail());
+
+        // 3b. Verificar que la cuenta no esté bloqueada — mensaje amigable para el usuario
+        if (!usuario.isActivo()) {
+            throw new com.uade.tpo.ecommerce.exception.UnAuthorizedException(
+                "Tu cuenta se encuentra bloqueada. Contactá al administrador para recuperar el acceso.");
+        }
 
         // 4. Mapear roles/authorities a un Set de Strings para el token
         Set<String> roles = usuario.getAuthorities().stream()

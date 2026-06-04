@@ -82,6 +82,10 @@ public class Usuario implements UserDetails {
     @Column(nullable = true)
     private String avatar;
 
+    @Builder.Default
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
+    private boolean activo = true;
+
     @org.hibernate.annotations.CreationTimestamp
     @Column(name = "fecha_creacion", updatable = false)
     private java.time.LocalDateTime fechaCreacion;
@@ -125,6 +129,6 @@ public class Usuario implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return this.activo;
     }
 }

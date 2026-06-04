@@ -1,0 +1,418 @@
+/* ===============================================================
+   UsersPage.css — Gestión de Usuarios Admin
+   Reutiliza los design tokens de index.css y clases de AdminPanel.css
+   =============================================================== */
+
+/* Breadcrumb */
+.users-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--color-text-muted);
+    margin-bottom: 28px;
+    animation: fadeInUp 0.3s ease both;
+}
+
+.users-breadcrumb a,
+.users-breadcrumb button {
+    background: none;
+    border: none;
+    color: var(--color-accent);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: none;
+    transition: opacity var(--transition-fast);
+    font-family: inherit;
+}
+
+.users-breadcrumb a:hover,
+.users-breadcrumb button:hover {
+    opacity: 0.7;
+    text-decoration: underline;
+}
+
+.users-breadcrumb-sep {
+    color: var(--color-border);
+    font-size: 14px;
+}
+
+.users-breadcrumb-current {
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+/* Header de la página */
+.users-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 32px;
+    gap: 16px;
+    animation: fadeInUp 0.35s ease both;
+}
+
+.users-page-title h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: 4px;
+}
+
+.users-page-title p {
+    color: var(--color-text-muted);
+    font-size: 14px;
+}
+
+/* Barra de búsqueda y controles */
+.users-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+    animation: fadeInUp 0.4s ease both;
+}
+
+.users-search-wrapper {
+    position: relative;
+    flex: 1;
+    min-width: 220px;
+    max-width: 420px;
+}
+
+.users-search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 15px;
+    pointer-events: none;
+    opacity: 0.45;
+}
+
+.users-search-input {
+    width: 100%;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 11px 14px 11px 40px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--color-text);
+    outline: none;
+    transition: all var(--transition-base);
+}
+
+.users-search-input:focus {
+    background: white;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-light);
+}
+
+.users-search-input::placeholder {
+    color: var(--color-text-muted);
+}
+
+.users-search-clear {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 2px 4px;
+    line-height: 1;
+    border-radius: 4px;
+    transition: color var(--transition-fast);
+}
+
+.users-search-clear:hover {
+    color: var(--color-text);
+}
+
+.users-count-badge {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+}
+
+/* Tabla de usuarios */
+.users-table-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    animation: fadeInUp 0.45s ease both;
+}
+
+.users-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    text-align: left;
+    min-width: 700px;
+}
+
+.users-table th {
+    padding: 13px 16px;
+    background: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.users-table th.sortable {
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.users-table th.sortable:hover {
+    color: var(--color-text);
+}
+
+.users-table th.sort-active {
+    color: var(--color-accent);
+}
+
+.sort-icon {
+    display: inline-block;
+    margin-left: 4px;
+    font-style: normal;
+    font-size: 11px;
+    opacity: 0.8;
+}
+
+.users-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--color-border-light);
+    color: var(--color-text);
+    vertical-align: middle;
+    transition: background-color var(--transition-fast);
+}
+
+.users-table tr:last-child td {
+    border-bottom: none;
+}
+
+.users-table tbody tr:hover td {
+    background-color: #fafafa;
+}
+
+.users-table .user-id {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    font-family: ui-monospace, monospace;
+    font-weight: 500;
+}
+
+.users-table .user-name {
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.users-table .user-email {
+    color: var(--color-text-secondary);
+    font-size: 13px;
+}
+
+.users-table .user-date {
+    font-size: 12.5px;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+}
+
+/* Badge de Rol */
+.role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.role-badge--admin {
+    background: rgba(0, 113, 227, 0.1);
+    color: var(--color-accent);
+}
+
+.role-badge--user {
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+}
+
+/* Badge de Estado */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-badge::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.status-badge--active {
+    background: rgba(52, 199, 89, 0.1);
+    color: #1a9a3d;
+}
+
+.status-badge--active::before {
+    background: var(--color-success);
+}
+
+.status-badge--blocked {
+    background: rgba(255, 59, 48, 0.1);
+    color: #cc2f26;
+}
+
+.status-badge--blocked::before {
+    background: var(--color-error);
+}
+
+/* Celda de acciones */
+.users-actions-cell {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.users-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all var(--transition-base);
+    white-space: nowrap;
+    font-family: inherit;
+}
+
+.users-action-btn--block {
+    background: none;
+    border-color: var(--color-error);
+    color: var(--color-error);
+}
+
+.users-action-btn--block:hover:not(:disabled) {
+    background: var(--color-error);
+    color: white;
+}
+
+.users-action-btn--unblock {
+    background: none;
+    border-color: var(--color-success);
+    color: #1a9a3d;
+}
+
+.users-action-btn--unblock:hover:not(:disabled) {
+    background: var(--color-success);
+    color: white;
+}
+
+.users-action-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Estado vacío */
+.users-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--color-text-muted);
+}
+
+.users-empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.users-empty p {
+    font-size: 15px;
+    margin-bottom: 6px;
+}
+
+.users-empty span {
+    font-size: 13px;
+}
+
+/* Skeleton loader */
+.users-skeleton-row td {
+    padding: 16px;
+}
+
+.skeleton-line {
+    background: linear-gradient(90deg, #f0f0f2 25%, #e0e0e4 50%, #f0f0f2 75%);
+    background-size: 200% 100%;
+    border-radius: 6px;
+    animation: shimmer 1.4s infinite;
+    height: 14px;
+}
+
+.skeleton-line--short {
+    width: 50px;
+}
+
+.skeleton-line--medium {
+    width: 120px;
+}
+
+.skeleton-line--long {
+    width: 180px;
+}
+
+.skeleton-line--pill {
+    width: 60px;
+    border-radius: 99px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .users-page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .users-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .users-search-wrapper {
+        max-width: 100%;
+    }
+}
