@@ -39,6 +39,8 @@ public class UsuarioService {
                 .fechaNacimiento(usuario.getFechaNacimiento())
                 .sexo(usuario.getSexo())
                 .avatar(usuario.getAvatar())
+                .activo(usuario.isActivo())
+                .fechaCreacion(usuario.getFechaCreacion())
                 .build();
     }
 
@@ -122,5 +124,39 @@ public class UsuarioService {
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado."));
         usuario.setAvatar(avatar);
         return toDto(usuarioRepository.save(usuario));
+    }
+
+    /**
+     * Bloquea o desbloquea un usuario (baja lógica).
+     * Seguridad: no permite que un admin se bloquee a sí mismo.
+     *
+     * @param id          ID del usuario a modificar
+     * @param activo      true = desbloquear, false = bloquear
+     * @param adminEmail  email del administrador que ejecuta la acción
+     */
+    public UsuarioDTO toggleActivo(Long id, boolean activo, String adminEmail) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado."));
+
+        // Prevenir que el admin se bloquee a sí mismo
+        if (usuario.getEmail().equalsIgnoreCase(adminEmail)) {
+            throw new com.uade.tpo.ecommerce.exception.BadRequestException(
+                "No podés bloquear tu propia cuenta de administrador.");
+        }
+
+        usuario.setActivo(activo);
+        return toDto(usuarioRepository.save(usuario));
+    }
+
+    /**
+     * Búsqueda filtrada de usuarios por nombre, apellido, email o nombreUsuario.
+     * Si el query está vacío, retorna todos los usuarios.
+     */
+    public List<UsuarioDTO> buscarUsuarios(String query) {
+        if (query == null || query.isBlank()) {
+            return getAllUsuarios();
+        }
+        return usuarioRepository.buscarPorQuery(query.trim())
+                .stream().map(this::toDto).collect(Collectors.toList());
     }
 }

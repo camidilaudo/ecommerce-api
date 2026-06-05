@@ -487,3 +487,40 @@
     margin: 0;
     line-height: 1.1;
 }
+
+/* Tarjeta KPI clickeable (acceso a Gestión de Usuarios) */
+.admin-kpi-card--clickable {
+    cursor: pointer;
+    position: relative;
+    outline: none;
+}
+
+.admin-kpi-card--clickable:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 40px rgba(0, 113, 227, 0.12);
+    border-color: rgba(0, 113, 227, 0.5);
+    background: rgba(0, 113, 227, 0.04);
+}
+
+.admin-kpi-card--clickable:focus-visible {
+    outline: 2px solid #0071e3;
+    outline-offset: 3px;
+}
+
+.kpi-hint {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: #0071e3;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-top: 4px;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.admin-kpi-card--clickable:hover .kpi-hint {
+    opacity: 1;
+    transform: translateY(0);
+}

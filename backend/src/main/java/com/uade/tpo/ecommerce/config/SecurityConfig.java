@@ -118,6 +118,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/usuarios").hasRole(Role.ADMIN.name())
                         .requestMatchers(HttpMethod.POST, "/api/usuarios").hasRole(Role.ADMIN.name())
                         .requestMatchers(HttpMethod.DELETE, "/api/usuarios/**").hasRole(Role.ADMIN.name())
+                        // PATCH toggle-activo: solo ADMIN
+                        .requestMatchers(HttpMethod.PATCH, "/api/usuarios/*/toggle-activo").hasRole(Role.ADMIN.name())
                         // Cualquier usuario logueado puede acceder a su GET/PUT individual
                         .requestMatchers("/api/usuarios/**").authenticated()
 

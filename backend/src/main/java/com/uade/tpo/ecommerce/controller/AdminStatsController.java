@@ -1,5 +1,6 @@
 package com.uade.tpo.ecommerce.controller;
 
+import com.uade.tpo.ecommerce.model.enums.Role;
 import com.uade.tpo.ecommerce.repository.PedidoRepository;
 import com.uade.tpo.ecommerce.repository.ProductoRepository;
 import com.uade.tpo.ecommerce.repository.UsuarioRepository;
@@ -46,10 +47,20 @@ public class AdminStatsController {
         long totalProducts = productoRepository.countByActivoTrue();
         Long totalStock = productoRepository.sumTotalStockActive();
 
+        // Stats extendidas para la pantalla de Gestión de Usuarios
+        long totalActivos = usuarioRepository.countByActivo(true);
+        long totalBloqueados = usuarioRepository.countByActivo(false);
+        long totalAdmins = usuarioRepository.countByRole(Role.ADMIN);
+        long totalClientes = usuarioRepository.countByRole(Role.USER);
+
         stats.put("totalSales", totalSales != null ? totalSales : 0.0);
         stats.put("totalUsers", totalUsers);
         stats.put("totalProducts", totalProducts);
         stats.put("totalStock", totalStock != null ? totalStock : 0L);
+        stats.put("totalActivos", totalActivos);
+        stats.put("totalBloqueados", totalBloqueados);
+        stats.put("totalAdmins", totalAdmins);
+        stats.put("totalClientes", totalClientes);
 
         return stats;
     }

@@ -5,6 +5,7 @@ import com.uade.tpo.ecommerce.model.enums.Role;
 import com.uade.tpo.ecommerce.model.enums.Sexo;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -20,4 +21,6 @@ public class UsuarioDTO {
     private LocalDate fechaNacimiento;
     private Sexo sexo;
     private String avatar;
+    private boolean activo;
+    private LocalDateTime fechaCreacion;
 }

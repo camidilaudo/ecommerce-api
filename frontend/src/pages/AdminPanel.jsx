@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './AdminPanel.css';
 import { toast } from 'react-toastify';
 import { handleApiResponse } from '../utils/apiHelpers';
+import { useAuth } from '../context/AuthContext';
 import CategoryManager from '../components/CategoryManager';
 
 /**
@@ -160,6 +161,8 @@ const EditProductForm = ({ product, onCancel, onSave, saving, categories }) => {
  */
 const AdminPanel = () => {
     const navigate = useNavigate();
+    const { userRole } = useAuth();
+    const isAdmin = userRole === 'ADMIN';
     const [productos, setProductos] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -377,11 +380,20 @@ const AdminPanel = () => {
                         <h3 className="kpi-value">${stats.totalSales.toFixed(2)}</h3>
                     </div>
                 </div>
-                <div className="admin-kpi-card">
+                <div
+                    className={`admin-kpi-card${isAdmin ? ' admin-kpi-card--clickable' : ''}`}
+                    onClick={isAdmin ? () => navigate('/admin/usuarios') : undefined}
+                    role={isAdmin ? 'button' : undefined}
+                    tabIndex={isAdmin ? 0 : undefined}
+                    onKeyDown={isAdmin ? (e) => e.key === 'Enter' && navigate('/admin/usuarios') : undefined}
+                    aria-label={isAdmin ? 'Ir a Gestión de Usuarios' : undefined}
+                    title={isAdmin ? 'Ver Gestión de Usuarios' : undefined}
+                >
                     <div className="kpi-icon">👥</div>
                     <div className="kpi-content">
                         <span className="kpi-label">Clientes Registrados</span>
                         <h3 className="kpi-value">{stats.totalUsers}</h3>
+                        {isAdmin && <span className="kpi-hint">Click para gestionar →</span>}
                     </div>
                 </div>
                 <div className="admin-kpi-card">

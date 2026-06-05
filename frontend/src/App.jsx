@@ -7,6 +7,7 @@ import ProfilePage from './pages/ProfilePage'; // Nuevo
 import OrdersPage from './pages/OrdersPage';   // Nuevo
 import ProductDetailPage from './pages/ProductDetailPage'; // Nuevo
 import Favorite from './pages/Favorite'; // Nuevo (TPG)
+import UsersPage from './pages/UsersPage'; // Gestión de Usuarios (ADMIN)
 import CartSidebar from './components/CartSidebar';
 import Navbar from './components/Navbar';
 import { useState } from 'react';
@@ -23,6 +24,7 @@ function App() {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/admin" element={<AdminPanel />} />
+                <Route path="/admin/usuarios" element={<UsersPage />} />
                 <Route path="/perfil" element={<ProfilePage />} /> {/* Nueva ruta perfil */}
                 <Route path="/pedidos" element={<OrdersPage />} /> {/* Nueva ruta pedidos */}
                 <Route path="/productos/:id" element={<ProductDetailPage />} /> {/* Nueva ruta detalle producto */}

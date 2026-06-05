@@ -1,6 +1,7 @@
 package com.uade.tpo.ecommerce.controller;
 
 import com.uade.tpo.ecommerce.dto.DeleteResponse;
+import com.uade.tpo.ecommerce.dto.ToggleEstadoRequest;
 import com.uade.tpo.ecommerce.dto.UpdateAvatarRequest;
 import com.uade.tpo.ecommerce.dto.UsuarioDTO;
 import com.uade.tpo.ecommerce.dto.UsuarioProfileResponse;
@@ -14,8 +15,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,9 +38,18 @@ public class UsuarioController {
     private final UsuarioService usuarioService;
     private final PasswordEncoder passwordEncoder;
 
-    // GET todos los usuarios (solo ADMIN — protegido por SecurityConfig)
+    /**
+     * GET /api/usuarios?search=query
+     * Lista todos los usuarios. Si se provee ?search=, filtra por nombre/apellido/email/nombreUsuario.
+     * Solo accesible por ADMIN.
+     */
     @GetMapping
-    public ResponseEntity<List<UsuarioDTO>> getAllUsuarios() {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<UsuarioDTO>> getAllUsuarios(
+            @RequestParam(required = false) String search) {
+        if (search != null && !search.isBlank()) {
+            return ResponseEntity.ok(usuarioService.buscarUsuarios(search));
+        }
         return ResponseEntity.ok(usuarioService.getAllUsuarios());
     }
 
@@ -79,6 +89,23 @@ public class UsuarioController {
     @DeleteMapping("/{id}")
     public ResponseEntity<DeleteResponse> deleteUsuarioById(@PathVariable Long id) {
         return ResponseEntity.ok(usuarioService.deleteUsuarioById(id));
+    }
+
+    /**
+     * PATCH /api/usuarios/{id}/toggle-activo
+     * Bloquea o desbloquea un usuario (baja lógica).
+     * Solo accesible por ADMIN. Previene que el admin se bloquee a sí mismo.
+     */
+    @PatchMapping("/{id}/toggle-activo")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UsuarioDTO> toggleActivo(
+            @PathVariable Long id,
+            @RequestBody ToggleEstadoRequest request,
+            @AuthenticationPrincipal Usuario adminAutenticado) {
+
+        UsuarioDTO resultado = usuarioService.toggleActivo(
+                id, request.isActivo(), adminAutenticado.getEmail());
+        return ResponseEntity.ok(resultado);
     }
 
     /**
