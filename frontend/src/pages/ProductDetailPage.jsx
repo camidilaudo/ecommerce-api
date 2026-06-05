@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
-import { useFavorites } from '../context/FavoriteContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectIsAuthenticated } from '../features/auth/authSelectors';
+import { selectFavoriteItems } from '../features/favorites/favoritesSelectors';
+import { addToCartThunk } from '../features/cart/cartThunks';
+import { toggleFavorite } from '../features/favorites/favoritesSlice';
 import { toast } from 'react-toastify';
 import './ProductDetailPage.css';
 
@@ -13,9 +15,11 @@ import './ProductDetailPage.css';
 const ProductDetailPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { addToCart } = useCart();
-    const { isAuthenticated } = useAuth();
-    const { favoriteItems, addToFavorite } = useFavorites();
+    const dispatch = useDispatch();
+
+    // Estado desde Redux
+    const isAuthenticated = useSelector(selectIsAuthenticated);
+    const favoriteItems = useSelector(selectFavoriteItems);
 
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -98,7 +102,7 @@ const ProductDetailPage = () => {
 
         setAdding(true);
         try {
-            await addToCart(product, quantity, false);
+            await dispatch(addToCartThunk(product, quantity, false));
             toast.success(`¡Agregamos ${quantity} ${quantity === 1 ? 'unidad' : 'unidades'} al carrito! 🛒`);
         } catch (err) {
             console.error(err);
@@ -190,7 +194,15 @@ const ProductDetailPage = () => {
                         <h1 className="detail-title" style={{ margin: 0 }}>{product.nombre}</h1>
                         <button 
                             className="detail-favorite-btn"
-                            onClick={() => addToFavorite(product)}
+                            onClick={() => {
+                                const isFav = favoriteItems.some(item => item.id === product.id);
+                                dispatch(toggleFavorite(product));
+                                if (isFav) {
+                                    toast.info(`"${product.nombre}" eliminado de favoritos 💔`);
+                                } else {
+                                    toast.success(`"${product.nombre}" agregado a favoritos ❤️`);
+                                }
+                            }}
                             style={{
                                 background: 'rgba(255,255,255,0.85)',
                                 border: '1px solid #e5e5e7',

@@ -1,22 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
-import { useFavorites } from '../context/FavoriteContext';
+import { useDispatch, useSelector } from 'react-redux';
+
+// Selectores — Redux como única fuente de verdad
+import { selectIsAuthenticated, selectUsuarioNombre, selectUserRole, selectUserAvatar } from '../features/auth/authSelectors';
+import { selectCartCount, selectIsCartOpen } from '../features/cart/cartSelectors';
+import { selectFavoriteCount } from '../features/favorites/favoritesSelectors';
+
+// Acciones
+import { logout } from '../features/auth/authSlice';
+import { toggleCart } from '../features/cart/cartSlice';
+import { clearCartLocal } from '../features/cart/cartSlice';
+import { clearFavorites } from '../features/favorites/favoritesSlice';
+
 import './Navbar.css';
 import useDebounce from '../hooks/useDebounce';
 import { toast } from 'react-toastify';
 
 /**
- * Navbar actualizado para búsqueda en tiempo real con debounce.
- * Llama a `onSearch` con el valor debounced cuando cambia.
+ * Navbar — Barra de navegación principal.
+ *
+ * MIGRADO: useCart() + useAuth() + useFavorites() → useSelector + useDispatch
+ * Redux es la única fuente de verdad. Cero lecturas de localStorage.
  */
-
 const Navbar = ({ onSearch }) => {
-    const { cartCount, toggleCart } = useCart();
-    const { isAuthenticated, usuarioNombre, userRole, userAvatar, logout } = useAuth();
-    const { favoriteItems } = useFavorites();
+    const dispatch = useDispatch();
     const navigate = useNavigate();
+
+    // Estado de autenticación desde Redux
+    const isAuthenticated = useSelector(selectIsAuthenticated);
+    const usuarioNombre = useSelector(selectUsuarioNombre);
+    const userRole = useSelector(selectUserRole);
+    const userAvatar = useSelector(selectUserAvatar);
+
+    // Estado del carrito desde Redux
+    const cartCount = useSelector(selectCartCount);
+
+    // Estado de favoritos desde Redux
+    const favoriteCount = useSelector(selectFavoriteCount);
+
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const [query, setQuery] = useState('');
     const debouncedQuery = useDebounce(query, 400);
@@ -25,7 +47,6 @@ const Navbar = ({ onSearch }) => {
         if (typeof onSearch === 'function') {
             onSearch(debouncedQuery);
         } else {
-            // Si no se pasó onSearch, navegar a /search?q=
             if (debouncedQuery.trim().length > 0) {
                 navigate(`/search?q=${encodeURIComponent(debouncedQuery)}`);
             }
@@ -33,7 +54,11 @@ const Navbar = ({ onSearch }) => {
     }, [debouncedQuery, onSearch, navigate]);
 
     const handleLogout = () => {
-        logout();
+        // Limpiar estado de carrito y favoritos antes del logout
+        dispatch(clearCartLocal());
+        dispatch(clearFavorites());
+        // Logout actualiza auth en el store; store.subscribe() limpia localStorage
+        dispatch(logout());
         setIsUserMenuOpen(false);
         toast.success('Sesión cerrada correctamente');
         navigate('/');
@@ -63,15 +88,15 @@ const Navbar = ({ onSearch }) => {
                 </div>
 
                 <div className="nav-actions">
-                    {/* Botón de Favoritos (TPG) */}
+                    {/* Botón de Favoritos */}
                     <Link to="/favoritos" className="nav-btn nav-favorites-btn" aria-label="Ver Favoritos" style={{ position: 'relative' }}>
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                             <path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                         </svg>
-                        {favoriteItems.length > 0 && <span className="nav-badge" style={{ backgroundColor: '#ff3b30' }}>{favoriteItems.length}</span>}
+                        {favoriteCount > 0 && <span className="nav-badge" style={{ backgroundColor: '#ff3b30' }}>{favoriteCount}</span>}
                     </Link>
 
-                    <button className="nav-btn" onClick={toggleCart} aria-label="Abrir Carrito" style={{ position: 'relative' }}>
+                    <button className="nav-btn" onClick={() => dispatch(toggleCart())} aria-label="Abrir Carrito" style={{ position: 'relative' }}>
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                             <path d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z" />
                         </svg>

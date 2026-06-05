@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import './LoginPage.css';
 import { isValidEmail } from '../utils/validation';
 import { handleApiResponse } from '../utils/apiHelpers';
 import { toast } from 'react-toastify';
-import { useAuth } from '../context/AuthContext';
+import { loginSuccess } from '../features/auth/authSlice';
 
 /**
  * LoginPage — Componente para la autenticación de usuarios.
@@ -12,7 +13,7 @@ import { useAuth } from '../context/AuthContext';
  */
 const LoginPage = () => {
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const dispatch = useDispatch();
 
     const [form, setForm] = useState({ email: '', password: '' });
     const [errores, setErrores] = useState({});
@@ -54,8 +55,13 @@ const LoginPage = () => {
 
             const data = await handleApiResponse(response);
 
-            // Guardamos la información de la sesión de forma persistente y reactiva
-            login(data.token, data.role || 'USER', data.nombre || '', data.avatar || null);
+            // Dispatch loginSuccess → store → store.subscribe() persiste en localStorage
+            dispatch(loginSuccess({
+                token: data.token,
+                userRole: data.role || 'USER',
+                usuarioNombre: data.nombre || '',
+                userAvatar: data.avatar || null,
+            }));
 
             toast.success('¡Bienvenido!');
             navigate('/');
