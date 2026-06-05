@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useFavorites } from '../context/FavoriteContext';
+import { useSelector } from 'react-redux';
+import { selectFavoriteItems } from '../features/favorites/favoritesSelectors';
 import CardProductos from '../components/CardProductos';
 import './Favorite.css';
 
@@ -10,7 +11,8 @@ import './Favorite.css';
  */
 const Favorite = () => {
     const navigate = useNavigate();
-    const { favoriteItems } = useFavorites();
+    // Favoritos desde Redux — unica fuente de verdad
+    const favoriteItems = useSelector(selectFavoriteItems);
     const [realtimeFavorites, setRealtimeFavorites] = React.useState(favoriteItems);
 
     React.useEffect(() => {

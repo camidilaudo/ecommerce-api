@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import './LoginPage.css';
 import './ProfilePage.css';
-import { useAuth } from '../context/AuthContext';
+import { selectToken } from '../features/auth/authSelectors';
+import { updateAvatar } from '../features/auth/authSlice';
 import AvatarPicker from '../components/AvatarPicker';
 import { toast } from 'react-toastify';
 
@@ -13,7 +15,9 @@ import { toast } from 'react-toastify';
  */
 const ProfilePage = () => {
     const navigate = useNavigate();
-    const { updateAvatar } = useAuth();
+    const dispatch = useDispatch();
+    // Token desde Redux — NO más localStorage.getItem('token')
+    const token = useSelector(selectToken);
 
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -24,9 +28,7 @@ const ProfilePage = () => {
     const [guardandoAvatar, setGuardandoAvatar] = useState(false);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-
-        // Redirección de seguridad: si el usuario no tiene token, se lo manda a loguearse
+        // Redirección de seguridad: si el usuario no tiene token en el store, redirigir
         if (!token) {
             navigate('/login');
             return;
@@ -72,7 +74,6 @@ const ProfilePage = () => {
      * Guarda el avatar seleccionado en el backend y actualiza el contexto global.
      */
     const handleGuardarAvatar = async () => {
-        const token = localStorage.getItem('token');
         if (!token) return;
 
         // Si el avatar no cambió, no hace nada
@@ -97,9 +98,9 @@ const ProfilePage = () => {
                 throw new Error(err.message || 'Error al guardar el avatar');
             }
 
-            // Actualizar el usuario local y el contexto global (afecta Navbar inmediatamente)
+            // Actualizar avatar en el store Redux → store.subscribe() lo persiste en localStorage
             setUser((prev) => ({ ...prev, avatar: avatarSeleccionado }));
-            updateAvatar(avatarSeleccionado);
+            dispatch(updateAvatar(avatarSeleccionado));
             toast.success('¡Avatar actualizado correctamente!');
 
         } catch (err) {

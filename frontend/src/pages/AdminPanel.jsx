@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import './AdminPanel.css';
 import { toast } from 'react-toastify';
 import { handleApiResponse } from '../utils/apiHelpers';
 import { useAuth } from '../context/AuthContext';
 import CategoryManager from '../components/CategoryManager';
+import { selectToken, selectUserRole } from '../features/auth/authSelectors';
 
 /**
  * EditProductForm - Formulario de edición con soporte para múltiples fotos dinámicas.
@@ -187,14 +189,16 @@ const AdminPanel = () => {
         totalStock: 0
     });
 
-    const token = localStorage.getItem('token');
+    // Token y rol desde Redux — NO más localStorage.getItem()
+    const token = useSelector(selectToken);
+    const storedRole = useSelector(selectUserRole);
 
     useEffect(() => {
         if (!token) {
             navigate('/login');
             return;
         }
-        const role = localStorage.getItem('userRole');
+        const role = storedRole;
         if (role !== 'ADMIN') {
             navigate('/');
             return;

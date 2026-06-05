@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { selectToken } from '../features/auth/authSelectors';
 import './OrdersPage.css';
 
 /**
@@ -8,13 +10,14 @@ import './OrdersPage.css';
  */
 const OrdersPage = () => {
     const navigate = useNavigate();
+    // Token desde Redux — NO más localStorage.getItem('token')
+    const token = useSelector(selectToken);
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedOrder, setSelectedOrder] = useState(null);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
         if (!token) {
             navigate('/login');
             return;
