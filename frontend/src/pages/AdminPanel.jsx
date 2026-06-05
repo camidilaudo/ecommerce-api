@@ -4,7 +4,6 @@ import { useSelector } from 'react-redux';
 import './AdminPanel.css';
 import { toast } from 'react-toastify';
 import { handleApiResponse } from '../utils/apiHelpers';
-import { useAuth } from '../context/AuthContext';
 import CategoryManager from '../components/CategoryManager';
 import { selectToken, selectUserRole } from '../features/auth/authSelectors';
 
@@ -163,8 +162,10 @@ const EditProductForm = ({ product, onCancel, onSave, saving, categories }) => {
  */
 const AdminPanel = () => {
     const navigate = useNavigate();
-    const { userRole } = useAuth();
-    const isAdmin = userRole === 'ADMIN';
+    // Token y rol desde Redux — NO más useAuth() ni localStorage
+    const token = useSelector(selectToken);
+    const storedRole = useSelector(selectUserRole);
+    const isAdmin = storedRole === 'ADMIN';
     const [productos, setProductos] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -189,9 +190,7 @@ const AdminPanel = () => {
         totalStock: 0
     });
 
-    // Token y rol desde Redux — NO más localStorage.getItem()
-    const token = useSelector(selectToken);
-    const storedRole = useSelector(selectUserRole);
+
 
     useEffect(() => {
         if (!token) {

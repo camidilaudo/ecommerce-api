@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { useAuth } from '../context/AuthContext';
+import { selectToken, selectUserRole } from '../features/auth/authSelectors';
 import { handleApiResponse } from '../utils/apiHelpers';
 import './UsersPage.css';
 import './AdminPanel.css';
@@ -59,7 +60,9 @@ const ITEMS_PER_PAGE = 8;
 
 const UsersPage = () => {
     const navigate = useNavigate();
-    const { token, userRole } = useAuth();
+    // Token y rol desde Redux — NO más useAuth() ni localStorage directo
+    const token = useSelector(selectToken);
+    const userRole = useSelector(selectUserRole);
 
     // ── Estado ────────────────────────────────────────────────────────────────
     const [usuarios, setUsuarios] = useState([]);
