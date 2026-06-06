@@ -189,3 +189,62 @@
 .user-dropdown button:hover {
     background-color: rgba(255, 59, 48, 0.08);
 }
+
+/* ── Botón de Accesibilidad ⚙ ─────────────────────────────────────── */
+.nav-a11y-btn {
+    color: var(--color-text-muted);
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.nav-a11y-btn:hover {
+    color: var(--color-accent);
+    background-color: var(--color-accent-light);
+}
+
+.nav-a11y-btn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+.nav-a11y-btn--active {
+    color: var(--color-accent);
+    background-color: var(--color-accent-light);
+}
+
+/* ── Dark Mode — Navbar ────────────────────────────────────────────── */
+body[data-theme="dark"] .navbar {
+    background-color: rgba(28, 28, 30, 0.88);
+    border-bottom-color: rgba(58, 58, 60, 0.8);
+}
+
+body[data-theme="dark"] .nav-btn {
+    color: var(--color-text);
+}
+
+body[data-theme="dark"] .nav-brand {
+    color: var(--color-text);
+}
+
+body[data-theme="dark"] .nav-search-input {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: var(--color-text);
+}
+
+body[data-theme="dark"] .nav-search-input:focus {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+body[data-theme="dark"] .user-dropdown {
+    background: rgba(44, 44, 46, 0.96);
+    border-color: rgba(58, 58, 60, 0.8);
+}
+
+body[data-theme="dark"] .user-dropdown a,
+body[data-theme="dark"] .user-dropdown button {
+    color: var(--color-text);
+}
+
+body[data-theme="dark"] .user-dropdown a:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: var(--color-text);
+}

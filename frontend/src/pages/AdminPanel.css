@@ -8,25 +8,25 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 40px;
-    border-bottom: 1px solid #d2d2d7;
+    border-bottom: 1px solid var(--color-border);
     padding-bottom: 20px;
 }
 
 .admin-header h2 {
     font-size: 28px;
     font-weight: 700;
-    color: #1d1d1f;
+    color: var(--color-text);
 }
 
 .admin-header p {
-    color: #86868b;
+    color: var(--color-text-muted);
     font-size: 14px;
     margin-top: 4px;
 }
 
 .btn-back-store {
-    background: #000000;
-    color: white;
+    background: var(--color-text);
+    color: var(--color-bg);
     border: none;
     padding: 10px 20px;
     border-radius: 10px;
@@ -54,11 +54,11 @@
 }
 
 .admin-card {
-    background: white;
+    background: var(--color-bg);
     border-radius: 16px;
     padding: 30px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
-    border: 1px solid #d2d2d7;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--color-border);
     margin: 5px;
 }
 
@@ -66,7 +66,7 @@
     font-size: 18px;
     font-weight: 600;
     margin-bottom: 25px;
-    color: #1d1d1f;
+    color: var(--color-text);
 }
 
 /* Formulario */
@@ -85,7 +85,7 @@
 .admin-input-group label {
     font-size: 12px;
     font-weight: 600;
-    color: #1d1d1f;
+    color: var(--color-text);
 }
 
 .admin-row {
@@ -95,8 +95,8 @@
 }
 
 .admin-form input {
-    background: #f5f5f7;
-    border: 1px solid var(--color-border, #d2d2d7);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
     border-radius: 10px;
     padding: 12px 14px;
     font-size: 14px;
@@ -106,14 +106,14 @@
 }
 
 .admin-form input:focus {
-    background: white;
-    border-color: #0071e3;
-    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+    background: var(--color-bg);
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-light);
 }
 
 .admin-submit-btn {
-    background: #0071e3;
-    color: white;
+    background: var(--color-accent);
+    color: var(--color-text-inverse);
     border: none;
     padding: 14px;
     border-radius: 10px;
@@ -142,20 +142,20 @@
 
 .admin-table th {
     padding: 12px;
-    border-bottom: 1px solid #d2d2d7;
-    color: #86868b;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-muted);
     font-weight: 500;
 }
 
 .admin-table td {
     padding: 14px 12px;
-    border-bottom: 1px solid #f5f5f7;
-    color: #1d1d1f;
+    border-bottom: 1px solid var(--color-bg-secondary);
+    color: var(--color-text);
     transition: background-color 0.15s ease;
 }
 
 .admin-table tr:hover td {
-    background-color: #fafafa;
+    background-color: var(--color-bg-tertiary);
 }
 
 .table-name-cell {
@@ -163,14 +163,14 @@
 }
 
 .stock-out {
-    color: #ff3b30;
+    color: var(--color-error);
     font-weight: 600;
 }
 
 .admin-delete-btn {
     background: none;
-    border: 1px solid #ff3b30;
-    color: #ff3b30;
+    border: 1px solid var(--color-error);
+    color: var(--color-error);
     padding: 6px 12px;
     border-radius: 6px;
     cursor: pointer;
@@ -180,14 +180,14 @@
 }
 
 .admin-delete-btn:hover {
-    background: #ff3b30;
-    color: white;
+    background: var(--color-error);
+    color: var(--color-text-inverse);
 }
 
 .admin-edit-btn {
     background: none;
-    border: 1px solid #0071e3;
-    color: #0071e3;
+    border: 1px solid var(--color-accent);
+    color: var(--color-accent);
     padding: 6px 12px;
     border-radius: 6px;
     cursor: pointer;
@@ -197,14 +197,14 @@
 }
 
 .admin-edit-btn:hover {
-    background: #0071e3;
-    color: white;
+    background: var(--color-accent);
+    color: var(--color-text-inverse);
 }
 
 .admin-edit-cancel-btn {
     background: none;
-    border: 1px solid #86868b;
-    color: #86868b;
+    border: 1px solid var(--color-text-muted);
+    color: var(--color-text-muted);
     padding: 6px 12px;
     border-radius: 6px;
     cursor: pointer;
@@ -214,8 +214,8 @@
 }
 
 .admin-edit-cancel-btn:hover {
-    background: #86868b;
-    color: white;
+    background: var(--color-text-muted);
+    color: var(--color-bg);
 }
 
 .actions-cell {
@@ -231,8 +231,8 @@
 }
 
 .admin-edit-submit-btn {
-    background: #0071e3;
-    color: white;
+    background: var(--color-accent);
+    color: var(--color-text-inverse);
     border: none;
     padding: 6px 12px;
     border-radius: 6px;
@@ -243,8 +243,8 @@
 }
 
 .admin-edit-submit-btn:hover {
-    background: #2b91f7;
-    color: white;
+    background: var(--color-accent-hover);
+    color: var(--color-text-inverse);
 }
 
 .pagination-controls {
@@ -254,13 +254,13 @@
     gap: 15px;
     margin-top: 25px;
     padding-top: 20px;
-    border-top: 1px solid #d2d2d7;
+    border-top: 1px solid var(--color-border);
 }
 
 .pagination-btn {
-    background: #f5f5f7;
-    color: #1d1d1f;
-    border: 1px solid #d2d2d7;
+    background: var(--color-bg-secondary);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
     padding: 8px 16px;
     border-radius: 8px;
     cursor: pointer;
@@ -270,7 +270,7 @@
 }
 
 .pagination-btn:hover:not(:disabled) {
-    background: #e5e5e7;
+    background: var(--color-bg-tertiary);
 }
 
 .pagination-btn:disabled {
@@ -280,13 +280,13 @@
 
 .pagination-info {
     font-size: 14px;
-    color: #86868b;
+    color: var(--color-text-muted);
     font-weight: 500;
 }
 
 .admin-loading, .admin-empty {
     text-align: center;
-    color: #86868b;
+    color: var(--color-text-muted);
     padding: 40px 0;
 }
 
@@ -297,8 +297,8 @@
 }
 
 .admin-edit-form input {
-    background: #f5f5f7;
-    border: 1px solid var(--color-border, #d2d2d7);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
     border-radius: 10px;
     padding: 12px 14px;
     font-size: 14px;
@@ -308,22 +308,22 @@
 }
 
 .admin-edit-form input:focus {
-    background: white;
-    border-color: #0071e3;
-    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+    background: var(--color-bg);
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-light);
 }
 
 /* Categorías */
 .categories-list {
     margin-top: 20px;
     padding-top: 20px;
-    border-top: 1px solid #d2d2d7;
+    border-top: 1px solid var(--color-border);
 }
 
 .categories-list h4 {
     font-size: 14px;
     font-weight: 600;
-    color: #1d1d1f;
+    color: var(--color-text);
     margin-bottom: 15px;
 }
 
@@ -341,10 +341,10 @@
     justify-content: space-between;
     align-items: center;
     padding: 12px;
-    background: #f5f5f7;
+    background: var(--color-bg-secondary);
     border-radius: 8px;
     font-size: 14px;
-    color: #1d1d1f;
+    color: var(--color-text);
 }
 
 .category-item span {
@@ -359,22 +359,22 @@
 /* Multi-select */
 .admin-form select,
 .admin-edit-form select {
-    background: #f5f5f7;
-    border: 1px solid var(--color-border, #d2d2d7);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
     border-radius: 10px;
     padding: 12px 14px;
     font-size: 14px;
     outline: none;
     transition: all 0.2s;
-    color: #1d1d1f;
+    color: var(--color-text);
     font-family: inherit;
 }
 
 .admin-form select:focus,
 .admin-edit-form select:focus {
-    background: white;
-    border-color: #0071e3;
-    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+    background: var(--color-bg);
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-light);
 }
 
 .admin-form select[multiple],
@@ -385,15 +385,15 @@
 .admin-form select[multiple] option,
 .admin-edit-form select[multiple] option {
     padding: 8px;
-    background: white;
-    color: #1d1d1f;
+    background: var(--color-bg);
+    color: var(--color-text);
     font-size: 14px;
 }
 
 .admin-form select[multiple] option:checked,
 .admin-edit-form select[multiple] option:checked {
-    background: #0071e3;
-    color: white;
+    background: var(--color-accent);
+    color: var(--color-text-inverse);
 }
 
 @media (max-width: 900px) {
@@ -409,7 +409,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--color-overlay);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     display: flex;
@@ -436,30 +436,30 @@
 }
 
 .admin-kpi-card {
-    background: rgba(255, 255, 255, 0.7);
+    background: var(--color-bg-secondary);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(210, 210, 215, 0.6);
+    border: 1px solid var(--color-border-light);
     border-radius: 16px;
     padding: 24px;
     display: flex;
     align-items: center;
     gap: 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    box-shadow: var(--shadow-sm);
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .admin-kpi-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
-    border-color: rgba(0, 113, 227, 0.3);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-accent);
 }
 
 .kpi-icon {
     font-size: 32px;
     width: 60px;
     height: 60px;
-    background: rgba(0, 113, 227, 0.08);
+    background: var(--color-accent-light);
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -475,7 +475,7 @@
 .kpi-label {
     font-size: 12.5px;
     font-weight: 600;
-    color: #86868b;
+    color: var(--color-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.02em;
 }
@@ -483,7 +483,7 @@
 .kpi-value {
     font-size: 24px;
     font-weight: 700;
-    color: #1d1d1f;
+    color: var(--color-text);
     margin: 0;
     line-height: 1.1;
 }
@@ -497,13 +497,13 @@
 
 .admin-kpi-card--clickable:hover {
     transform: translateY(-6px);
-    box-shadow: 0 16px 40px rgba(0, 113, 227, 0.12);
-    border-color: rgba(0, 113, 227, 0.5);
-    background: rgba(0, 113, 227, 0.04);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-accent);
+    background: var(--color-bg-tertiary);
 }
 
 .admin-kpi-card--clickable:focus-visible {
-    outline: 2px solid #0071e3;
+    outline: 2px solid var(--color-accent);
     outline-offset: 3px;
 }
 
@@ -511,7 +511,7 @@
     display: block;
     font-size: 10.5px;
     font-weight: 600;
-    color: #0071e3;
+    color: var(--color-accent);
     text-transform: uppercase;
     letter-spacing: 0.04em;
     margin-top: 4px;

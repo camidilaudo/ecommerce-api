@@ -87,16 +87,16 @@ const HomePage = ({ searchQuery }) => {
                     gap: '16px',
                     padding: '16px 24px',
                     borderRadius: '16px',
-                    background: 'rgba(255, 255, 255, 0.8)',
+                    background: 'var(--color-bg-secondary)',
                     backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.03)',
+                    border: '1px solid var(--color-border)',
+                    boxShadow: 'var(--shadow-sm)',
                     flexWrap: 'wrap'
                 }}>
-                    <span style={{ fontWeight: '600', fontSize: '14px', color: '#1d1d1f' }}>Filtrar por Precio:</span>
+                    <span style={{ fontWeight: '600', fontSize: '14px', color: 'var(--color-text)' }}>Filtrar por Precio:</span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <label style={{ fontSize: '12px', color: '#86868b' }}>Mínimo ($)</label>
+                            <label style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>Mínimo ($)</label>
                             <input
                                 type="number"
                                 placeholder="0"
@@ -106,8 +106,9 @@ const HomePage = ({ searchQuery }) => {
                                     width: '100px',
                                     padding: '8px 12px',
                                     borderRadius: '10px',
-                                    border: '1px solid rgba(0, 0, 0, 0.1)',
-                                    background: 'rgba(250, 250, 250, 0.8)',
+                                    border: '1px solid var(--color-border)',
+                                    background: 'var(--color-bg)',
+                                    color: 'var(--color-text)',
                                     fontSize: '13px',
                                     outline: 'none',
                                     transition: 'border 0.2s'
@@ -115,7 +116,7 @@ const HomePage = ({ searchQuery }) => {
                             />
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <label style={{ fontSize: '12px', color: '#86868b' }}>Máximo ($)</label>
+                            <label style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>Máximo ($)</label>
                             <input
                                 type="number"
                                 placeholder="Sin límite"
@@ -125,8 +126,9 @@ const HomePage = ({ searchQuery }) => {
                                     width: '120px',
                                     padding: '8px 12px',
                                     borderRadius: '10px',
-                                    border: '1px solid rgba(0, 0, 0, 0.1)',
-                                    background: 'rgba(250, 250, 250, 0.8)',
+                                    border: '1px solid var(--color-border)',
+                                    background: 'var(--color-bg)',
+                                    color: 'var(--color-text)',
                                     fontSize: '13px',
                                     outline: 'none',
                                     transition: 'border 0.2s'
@@ -139,7 +141,7 @@ const HomePage = ({ searchQuery }) => {
                                 style={{
                                     background: 'none',
                                     border: 'none',
-                                    color: '#0071e3',
+                                    color: 'var(--color-accent)',
                                     cursor: 'pointer',
                                     fontSize: '13px',
                                     fontWeight: '500',

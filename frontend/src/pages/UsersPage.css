@@ -107,7 +107,7 @@
 }
 
 .users-search-input:focus {
-    background: white;
+    background: var(--color-bg);
     border-color: var(--color-accent);
     box-shadow: 0 0 0 3px var(--color-accent-light);
 }
@@ -145,7 +145,7 @@
 
 /* Tabla de usuarios */
 .users-table-card {
-    background: white;
+    background: var(--color-bg);
     border-radius: var(--radius-lg);
     border: 1px solid var(--color-border);
     box-shadow: var(--shadow-sm);
@@ -213,7 +213,7 @@
 }
 
 .users-table tbody tr:hover td {
-    background-color: #fafafa;
+    background-color: var(--color-bg-tertiary);
 }
 
 .users-table .user-id {
@@ -282,8 +282,8 @@
 }
 
 .status-badge--active {
-    background: rgba(52, 199, 89, 0.1);
-    color: #1a9a3d;
+    background: var(--color-success-bg);
+    color: var(--color-success-text);
 }
 
 .status-badge--active::before {
@@ -291,8 +291,8 @@
 }
 
 .status-badge--blocked {
-    background: rgba(255, 59, 48, 0.1);
-    color: #cc2f26;
+    background: var(--color-error-bg);
+    color: var(--color-error-text);
 }
 
 .status-badge--blocked::before {
@@ -329,18 +329,18 @@
 
 .users-action-btn--block:hover:not(:disabled) {
     background: var(--color-error);
-    color: white;
+    color: var(--color-text-inverse);
 }
 
 .users-action-btn--unblock {
     background: none;
     border-color: var(--color-success);
-    color: #1a9a3d;
+    color: var(--color-success-text);
 }
 
 .users-action-btn--unblock:hover:not(:disabled) {
     background: var(--color-success);
-    color: white;
+    color: var(--color-text-inverse);
 }
 
 .users-action-btn:disabled {
@@ -376,7 +376,7 @@
 }
 
 .skeleton-line {
-    background: linear-gradient(90deg, #f0f0f2 25%, #e0e0e4 50%, #f0f0f2 75%);
+    background: linear-gradient(90deg, var(--color-skeleton-bg) 25%, var(--color-skeleton-shine) 50%, var(--color-skeleton-bg) 75%);
     background-size: 200% 100%;
     border-radius: 6px;
     animation: shimmer 1.4s infinite;

@@ -1,14 +1,14 @@
 .hero {
-    background-color: #37474F;
+    background-color: var(--color-bg);
     padding: 6rem 2rem 5rem;
     text-align: center;
 }
 
 .hero-badge {
     display: inline-block;
-    background: rgba(176, 190, 197, 0.15);
-    color: #90A4AE;
-    border: 1px solid rgba(176, 190, 197, 0.25);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
     padding: 6px 16px;
     border-radius: 20px;
     font-size: 12px;
@@ -19,7 +19,7 @@
 }
 
 .hero-title {
-    color: #CFD8DC;
+    color: var(--color-text);
     font-size: 54px;
     font-weight: 700;
     line-height: 1.15;
@@ -31,12 +31,12 @@
 
 /* Palabra destacada */
 .hero-title em {
-    color: #90A4AE;
+    color: var(--color-accent);
     font-style: normal;
 }
 
 .hero-subtitle {
-    color: #90A4AE;
+    color: var(--color-text-muted);
     font-size: 17px;
     line-height: 1.65;
     max-width: 480px;
@@ -51,8 +51,8 @@
 }
 
 .hero-btn-primary {
-    background: #546E7A;
-    color: #CFD8DC;
+    background: var(--color-accent);
+    color: var(--color-text-inverse);
     border: none;
     padding: 14px 34px;
     border-radius: 8px;
@@ -63,14 +63,14 @@
 }
 
 .hero-btn-primary:hover {
-    background: #455A64;
+    background: var(--color-accent-hover);
     transform: translateY(-2px);
 }
 
 .hero-btn-ghost {
     background: transparent;
-    color: #B0BEC5;
-    border: 1px solid #546E7A;
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
     padding: 14px 34px;
     border-radius: 8px;
     font-size: 15px;
@@ -80,8 +80,8 @@
 }
 
 .hero-btn-ghost:hover {
-    border-color: #90A4AE;
-    color: #CFD8DC;
+    border-color: var(--color-text);
+    color: var(--color-text);
 }
 
 /* ── RESPONSIVE ── */

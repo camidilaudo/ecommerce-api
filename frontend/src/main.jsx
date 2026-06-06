@@ -6,20 +6,17 @@ import { store } from './app/store';
 import { selectIsAuthenticated, selectUsuarioNombre } from './features/auth/authSelectors';
 import { loadFavorites } from './features/favorites/favoritesSlice';
 import { fetchCart } from './features/cart/cartThunks';
+import { AccessibilityProvider } from './context/AccessibilityContext';
 import './index.css';
 import App from './App.jsx';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 /**
- * AppInitializer — Componente interno que reemplaza la lógica reactiva
- * de CartContext y FavoriteContext que dependía del token/usuario.
+ * AppInitializer — Componente interno que sincroniza el carrito y favoritos
+ * con el store Redux cuando cambia el estado de autenticación.
  *
- * Responsabilidades:
- * 1. Cargar el carrito desde el backend cuando el usuario inicia/cierra sesión (DT-05 fix).
- * 2. Cargar los favoritos desde localStorage cuando cambia el usuario activo.
- *
- * Se ejecuta DENTRO del Provider para tener acceso al store.
+ * Se ejecuta DENTRO del Provider de Redux para tener acceso al store.
  * No renderiza nada propio — es un efecto puro.
  */
 const AppInitializer = ({ children }) => {
@@ -27,15 +24,13 @@ const AppInitializer = ({ children }) => {
     const isAuthenticated = useSelector(selectIsAuthenticated);
     const usuarioNombre = useSelector(selectUsuarioNombre);
 
-    // DT-05 fix: recargar carrito cuando cambia el estado de autenticación.
-    // DT-04 fix: si el usuario cierra sesión (isAuthenticated = false),
-    //            fetchCart detecta la ausencia de token y limpia el carrito local.
+    // DT-05: recargar carrito al cambiar sesión.
+    // DT-04: fetchCart limpia el carrito local si no hay token.
     useEffect(() => {
         dispatch(fetchCart());
     }, [isAuthenticated, dispatch]);
 
-    // Cargar favoritos desde localStorage cuando cambia el usuario activo.
-    // Replica el useEffect([usuarioNombre, isAuthenticated]) del FavoriteContext original.
+    // Cargar favoritos del usuario activo desde localStorage.
     useEffect(() => {
         const storageKey = isAuthenticated && usuarioNombre
             ? `favorites_${usuarioNombre}`
@@ -59,16 +54,27 @@ const AppInitializer = ({ children }) => {
 createRoot(document.getElementById('root')).render(
     <StrictMode>
         {/*
-         * Provider reemplaza a AuthProvider + FavoriteProvider + CartProvider.
-         * Un solo Provider expone el store global a toda la aplicación.
+         * Árbol de providers — orden de afuera hacia adentro:
+         *
+         * 1. AccessibilityProvider (Context API) — preferencias de UI (tema,
+         *    fuente, contraste, movimiento). Independiente de Redux por diseño:
+         *    representa configuración de interfaz, no estado de negocio.
+         *
+         * 2. Provider (Redux) — estado de negocio: auth, cart, favorites.
+         *
+         * 3. BrowserRouter — enrutamiento con React Router.
+         *
+         * 4. AppInitializer — efectos de sincronización post-login/logout.
          */}
-        <Provider store={store}>
-            <BrowserRouter>
-                <AppInitializer>
-                    <App />
-                    <ToastContainer position="top-right" autoClose={4000} />
-                </AppInitializer>
-            </BrowserRouter>
-        </Provider>
+        <AccessibilityProvider>
+            <Provider store={store}>
+                <BrowserRouter>
+                    <AppInitializer>
+                        <App />
+                        <ToastContainer position="top-right" autoClose={4000} />
+                    </AppInitializer>
+                </BrowserRouter>
+            </Provider>
+        </AccessibilityProvider>
     </StrictMode>,
 );

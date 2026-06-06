@@ -3,15 +3,15 @@
    ========================================== */
 
 .card-producto {
-  background: #ffffff;
+  background: var(--color-bg);
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), 0 2px 8px rgba(0, 0, 0, 0.01);
+  box-shadow: var(--shadow-sm);
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease;
   display: flex;
   flex-direction: column;
   height: 100%;
-  border: 1px solid #f5f5f7;
+  border: 1px solid var(--color-border-light);
 
   /* Stagger animation — el delay se pasa como style desde el padre */
   animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -19,8 +19,8 @@
 
 .card-producto:hover {
   transform: translateY(-6px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.02);
-  border-color: #e5e5e7;
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-border);
 }
 
 .producto-imagen-container {
@@ -28,7 +28,7 @@
   width: 100%;
   height: 220px;
   overflow: hidden;
-  background: #f5f5f7;
+  background: var(--color-bg-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -50,10 +50,10 @@
   position: absolute;
   top: 12px;
   right: 12px;
-  background: rgba(29, 29, 31, 0.75);
+  background: var(--color-overlay);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  color: #ffffff;
+  color: var(--color-text-inverse);
   padding: 5px 12px;
   border-radius: 20px;
   font-size: 11px;
@@ -72,7 +72,7 @@
 .producto-nombre {
   font-size: 16px;
   font-weight: 600;
-  color: #1d1d1f;
+  color: var(--color-text);
   margin: 0 0 8px 0;
   line-height: 1.35;
   max-height: 2.7rem;
@@ -86,7 +86,7 @@
 
 .producto-descripcion {
   font-size: 13.5px;
-  color: #86868b;
+  color: var(--color-text-muted);
   margin: 0 0 12px 0;
   line-height: 1.45;
   max-height: 2.9rem;
@@ -103,9 +103,9 @@
 
 .stars {
   font-size: 13px;
-  color: #ff9500;
+  color: var(--color-warning);
   font-weight: 600;
-  background: #f5f5f7;
+  background: var(--color-bg-secondary);
   padding: 4px 10px;
   border-radius: 8px;
 }
@@ -115,20 +115,20 @@
 }
 
 .en-stock {
-  color: #1a7f37;
+  color: var(--color-success-text);
   font-size: 13px;
   font-weight: 600;
-  background: #e6f6ec;
+  background: var(--color-success-bg);
   padding: 4px 10px;
   border-radius: 8px;
   display: inline-block;
 }
 
 .sin-stock {
-  color: #d11a2a;
+  color: var(--color-error-text);
   font-size: 13px;
   font-weight: 600;
-  background: #fdf2f2;
+  background: var(--color-error-bg);
   padding: 4px 10px;
   border-radius: 8px;
   display: inline-block;
@@ -140,18 +140,18 @@
   align-items: center;
   margin-top: auto;
   padding-top: 16px;
-  border-top: 1px solid #f5f5f7;
+  border-top: 1px solid var(--color-border-light);
 }
 
 .producto-precio {
   font-size: 20px;
   font-weight: 700;
-  color: #1d1d1f;
+  color: var(--color-text);
 }
 
 .btn-agregar {
-  background: #0071e3;
-  color: #ffffff;
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
   border: none;
   padding: 10px 20px;
   border-radius: 10px;
@@ -159,13 +159,13 @@
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
   font-size: 14px;
-  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.15);
+  box-shadow: var(--shadow-accent);
 }
 
 .btn-agregar:hover:not(:disabled) {
-  background: #0077ed;
+  background: var(--color-accent-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 113, 227, 0.25);
+  box-shadow: var(--shadow-accent);
 }
 
 .btn-agregar:active:not(:disabled) {
@@ -173,8 +173,8 @@
 }
 
 .btn-agregar:disabled {
-  background: #a1a1a6;
-  color: #ffffff;
+  background: var(--color-text-muted);
+  color: var(--color-text-inverse);
   box-shadow: none;
   cursor: not-allowed;
 }
@@ -187,15 +187,15 @@
 }
 
 .producto-nombre-link:hover .producto-nombre {
-  color: #0071e3;
+  color: var(--color-accent);
   text-decoration: none;
 }
 
 /* Micro-animación de feedback de compra */
 .btn-agregar.agregado-exito {
-  background: #34c759 !important;
-  color: #ffffff !important;
-  border-color: #34c759 !important;
-  box-shadow: 0 4px 12px rgba(52, 199, 89, 0.25) !important;
+  background: var(--color-success) !important;
+  color: var(--color-text-inverse) !important;
+  border-color: var(--color-success) !important;
+  box-shadow: var(--shadow-sm) !important;
   transform: scale(1.04) translateY(-1px) !important;
 }
