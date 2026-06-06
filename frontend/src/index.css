@@ -20,8 +20,16 @@
   --color-border: #d2d2d7;
   --color-border-light: #e5e5e7;
   --color-success: #34c759;
+  --color-success-text: #1a7f37;
+  --color-success-bg: rgba(52, 199, 89, 0.15);
   --color-error: #ff3b30;
+  --color-error-text: #cc2f26;
+  --color-error-bg: rgba(255, 59, 48, 0.12);
   --color-warning: #ff9500;
+  --color-text-inverse: #ffffff;
+  --color-overlay: rgba(0, 0, 0, 0.4);
+  --color-skeleton-bg: #f0f0f2;
+  --color-skeleton-shine: #e0e0e4;
   --accent-color: #0071e3; /* backwards compat */
 
   /* Border Radius */
@@ -134,3 +142,127 @@ body {
   50%  { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
+
+/* ============================================================
+   SISTEMA DE ACCESIBILIDAD — AccessibilityContext
+   Las preferencias del usuario se aplican mediante data attributes
+   en <body>. Los componentes consumen las variables; nunca leen
+   localStorage directamente.
+
+   Flujo:
+     localStorage → AccessibilityContext → body[data-*] → CSS variables → UI
+   ============================================================ */
+
+/* ── DARK MODE ────────────────────────────────────────────────────── */
+body[data-theme="dark"] {
+  --color-bg:            #1c1c1e;
+  --color-bg-secondary:  #2c2c2e;
+  --color-bg-tertiary:   #3a3a3c;
+  --color-text:          #f5f5f7;
+  --color-text-muted:    #98989d;
+  --color-text-secondary:#aeaeb2;
+  --color-border:        #3a3a3c;
+  --color-border-light:  #2c2c2e;
+  --color-accent-light:  rgba(10, 132, 255, 0.18);
+  --shadow-sm:  0 4px 20px rgba(0, 0, 0, 0.25), 0 2px 8px rgba(0, 0, 0, 0.15);
+  --shadow-md:  0 8px 30px rgba(0, 0, 0, 0.35), 0 4px 12px rgba(0, 0, 0, 0.2);
+  --shadow-lg:  0 20px 60px rgba(0, 0, 0, 0.5);
+  
+  --color-success-text: #34c759;
+  --color-success-bg: rgba(52, 199, 89, 0.2);
+  --color-error-text: #ff6961;
+  --color-error-bg: rgba(255, 59, 48, 0.2);
+  
+  --color-text-inverse: #ffffff;
+  --color-overlay: rgba(0, 0, 0, 0.6);
+  --color-skeleton-bg: #2c2c2e;
+  --color-skeleton-shine: #3a3a3c;
+}
+
+/* ── TAMAÑO DE FUENTE ────────────────────────────────────────────── */
+
+body[data-font-size="small"] {
+  font-size: 14px;
+  zoom: 0.9;
+}
+
+body[data-font-size="normal"] {
+  font-size: 16px;
+  zoom: 1;
+}
+
+body[data-font-size="large"] {
+  font-size: 18px;
+  zoom: 1.1;
+}
+
+body[data-font-size="extra-large"] {
+  font-size: 20px;
+  zoom: 1.2;
+}
+
+/* ── ALTO CONTRASTE ─────────────────────────────────────────────── */
+body[data-contrast="high"] {
+  --color-text:          #000000;
+  --color-bg:            #ffffff;
+  --color-border:        #000000;
+  --color-accent:        #0000cc;
+  --color-accent-hover:  #0000aa;
+  --color-text-muted:    #333333;
+  --color-text-secondary:#222222;
+  --color-error:         #cc0000;
+  --color-success:       #006600;
+  
+  --color-success-text:  #005500;
+  --color-success-bg:    #e6f6ec;
+  --color-error-text:    #aa0000;
+  --color-error-bg:      #ffe6e6;
+  
+  --color-text-inverse:  #ffffff;
+  --color-skeleton-bg:   #e0e0e0;
+  --color-skeleton-shine:#cccccc;
+}
+
+body[data-theme="dark"][data-contrast="high"] {
+  --color-text:          #ffffff;
+  --color-bg:            #000000;
+  --color-bg-secondary:  #0a0a0a;
+  --color-border:        #ffffff;
+  --color-accent:        #5599ff;
+  --color-text-muted:    #cccccc;
+  --color-text-secondary:#eeeeee;
+
+  --color-success-text:  #66ff66;
+  --color-success-bg:    #003300;
+  --color-error-text:    #ff9999;
+  --color-error-bg:      #440000;
+  
+  --color-text-inverse:  #000000;
+  --color-skeleton-bg:   #333333;
+  --color-skeleton-shine:#555555;
+}
+
+/* ── REDUCCIÓN DE MOVIMIENTO ─────────────────────────────────────── */
+/*
+  Dos fuentes de reducción de movimiento:
+  1. La preferencia del sistema operativo (prefers-reduced-motion)
+  2. La preferencia explícita del usuario en el panel
+  Ambas son respetadas — la más restrictiva gana.
+*/
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+body[data-motion="reduced"] *,
+body[data-motion="reduced"] *::before,
+body[data-motion="reduced"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}

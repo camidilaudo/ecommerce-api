@@ -338,7 +338,7 @@ const ProductDetailPage = () => {
                 <h2 style={{
                     fontSize: '22px',
                     fontWeight: '700',
-                    color: '#1d1d1f',
+                    color: 'var(--color-text)',
                     marginBottom: '20px',
                     letterSpacing: '-0.5px'
                 }}>
@@ -348,7 +348,7 @@ const ProductDetailPage = () => {
                 {loadingRelated ? (
                     <div style={{ display: 'flex', gap: '16px' }}>
                         {[1, 2, 3, 4].map(i => (
-                            <div key={i} style={{ flex: 1, height: '240px', background: '#f5f5f7', borderRadius: '12px', animation: 'pulse 1.5s infinite' }} />
+                            <div key={i} style={{ flex: 1, height: '240px', background: 'var(--color-skeleton-bg)', borderRadius: '12px', animation: 'pulse 1.5s infinite' }} />
                         ))}
                     </div>
                 ) : relatedProducts.length > 0 ? (
@@ -367,9 +367,9 @@ const ProductDetailPage = () => {
                                         window.scrollTo({ top: 0, behavior: 'smooth' });
                                     }}
                                     style={{
-                                        background: 'rgba(255, 255, 255, 0.7)',
+                                        background: 'var(--color-bg-secondary)',
                                         backdropFilter: 'blur(20px)',
-                                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                                        border: '1px solid var(--color-border)',
                                         borderRadius: '16px',
                                         padding: '16px',
                                         cursor: 'pointer',
@@ -389,7 +389,7 @@ const ProductDetailPage = () => {
                                         aspectRatio: '1',
                                         borderRadius: '12px',
                                         overflow: 'hidden',
-                                        background: '#f5f5f7',
+                                        background: 'var(--color-bg-tertiary)',
                                         marginBottom: '12px',
                                         display: 'flex',
                                         alignItems: 'center',
@@ -401,13 +401,13 @@ const ProductDetailPage = () => {
                                             style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                                         />
                                     </div>
-                                    <span style={{ fontSize: '11px', color: '#86868b', textTransform: 'uppercase', fontWeight: '600' }}>
+                                    <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', textTransform: 'uppercase', fontWeight: '600' }}>
                                         {item.categoria}
                                     </span>
                                     <h3 style={{
                                         fontSize: '15px',
                                         fontWeight: '600',
-                                        color: '#1d1d1f',
+                                        color: 'var(--color-text)',
                                         margin: '4px 0 8px 0',
                                         whiteSpace: 'nowrap',
                                         overflow: 'hidden',
@@ -415,7 +415,7 @@ const ProductDetailPage = () => {
                                     }}>
                                         {item.nombre}
                                     </h3>
-                                    <span style={{ fontSize: '16px', fontWeight: '700', color: '#1d1d1f' }}>
+                                    <span style={{ fontSize: '16px', fontWeight: '700', color: 'var(--color-text)' }}>
                                         ${item.precio.toFixed(2)}
                                     </span>
                                 </div>
@@ -423,7 +423,7 @@ const ProductDetailPage = () => {
                         })}
                     </div>
                 ) : (
-                    <p style={{ color: '#86868b', fontSize: '14px' }}>No hay otros productos recomendados en esta categoría.</p>
+                    <p style={{ color: 'var(--color-text-muted)', fontSize: '14px' }}>No hay otros productos recomendados en esta categoría.</p>
                 )}
             </div>
         </div>

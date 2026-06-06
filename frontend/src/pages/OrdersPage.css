@@ -11,7 +11,7 @@
 .orders-title {
     font-size: 32px;
     font-weight: 700;
-    color: #1d1d1f;
+    color: var(--color-text);
     margin-bottom: 24px;
     letter-spacing: -0.02em;
 }
@@ -24,34 +24,34 @@
 
 /* Tarjeta de Pedido */
 .order-card {
-    border: 1px solid #d2d2d7;
+    border: 1px solid var(--color-border);
     border-radius: 16px;
     padding: 20px 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #ffffff;
+    background-color: var(--color-bg);
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    box-shadow: var(--shadow-xs);
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .order-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-    border-color: #86868b;
+    box-shadow: var(--shadow-sm);
+    border-color: var(--color-border-light);
 }
 
 .order-info h4 {
     font-size: 18px;
     font-weight: 600;
-    color: #1d1d1f;
+    color: var(--color-text);
     margin: 0 0 6px 0;
 }
 
 .order-date {
     font-size: 14px;
-    color: #86868b;
+    color: var(--color-text-muted);
     margin: 0;
 }
 
@@ -63,7 +63,7 @@
     display: block;
     font-size: 18px;
     font-weight: 700;
-    color: #1d1d1f;
+    color: var(--color-text);
     margin-bottom: 4px;
 }
 
@@ -74,8 +74,8 @@
     letter-spacing: 0.05em;
     padding: 4px 8px;
     border-radius: 12px;
-    background: #e6f6ec;
-    color: #1a7f37;
+    background: var(--color-success-bg);
+    color: var(--color-success-text);
 }
 
 /* ==========================================
@@ -88,7 +88,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--color-overlay);
     backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
@@ -98,12 +98,12 @@
 }
 
 .order-detail-modal {
-    background: #ffffff;
+    background: var(--color-bg);
     width: 90%;
     max-width: 600px;
     border-radius: 24px;
     padding: 32px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-lg);
     max-height: 85vh;
     overflow-y: auto;
     position: relative;
@@ -114,7 +114,7 @@
     position: absolute;
     top: 24px;
     right: 24px;
-    background: #f5f5f7;
+    background: var(--color-bg-secondary);
     border: none;
     width: 32px;
     height: 32px;
@@ -124,12 +124,12 @@
     align-items: center;
     justify-content: center;
     font-size: 14px;
-    color: #48484a;
+    color: var(--color-text-secondary);
     transition: background-color 0.2s ease;
 }
 
 .modal-close-x:hover {
-    background: #e5e5e7;
+    background: var(--color-bg-tertiary);
 }
 
 .modal-header {
@@ -139,13 +139,13 @@
 .modal-header h3 {
     font-size: 24px;
     font-weight: 700;
-    color: #1d1d1f;
+    color: var(--color-text);
     margin: 0 0 8px 0;
 }
 
 .modal-meta {
     font-size: 14px;
-    color: #86868b;
+    color: var(--color-text-muted);
     margin: 0;
     display: flex;
     flex-direction: column;
@@ -154,14 +154,14 @@
 
 .modal-divider {
     height: 1px;
-    background: #e5e5e7;
+    background: var(--color-border-light);
     margin: 20px 0;
 }
 
 .items-section-title {
     font-size: 16px;
     font-weight: 600;
-    color: #1d1d1f;
+    color: var(--color-text);
     margin-bottom: 16px;
 }
 
@@ -181,19 +181,19 @@
 .item-details h5 {
     font-size: 15px;
     font-weight: 600;
-    color: #1d1d1f;
+    color: var(--color-text);
     margin: 0 0 2px 0;
 }
 
 .item-qty-price {
     font-size: 13.5px;
-    color: #86868b;
+    color: var(--color-text-muted);
 }
 
 .item-subtotal {
     font-size: 15px;
     font-weight: 600;
-    color: #1d1d1f;
+    color: var(--color-text);
 }
 
 .modal-footer {
@@ -206,13 +206,13 @@
 .modal-total-label {
     font-size: 16px;
     font-weight: 600;
-    color: #86868b;
+    color: var(--color-text-muted);
 }
 
 .modal-total-value {
     font-size: 24px;
     font-weight: 700;
-    color: #1d1d1f;
+    color: var(--color-text);
 }
 
 /* ==========================================

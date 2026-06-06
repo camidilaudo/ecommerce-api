@@ -3,7 +3,7 @@
   padding: 3rem 2rem;
   max-width: 1100px;
   margin: 0 auto;
-  border-top: 1px solid #CFD8DC;
+  border-top: 1px solid var(--color-border);
 }
 
 .product-list-header {
@@ -17,17 +17,17 @@
   font-size: 22px;
   font-weight: 700;
   letter-spacing: -0.3px;
-  color: #37474F;
+  color: var(--color-text);
 }
 
 .product-list-count {
   font-size: 14px;
-  color: #90A4AE;
+  color: var(--color-text-muted);
 }
 
 .product-list-empty {
   text-align: center;
-  color: #90A4AE;
+  color: var(--color-text-muted);
   padding: 6rem 0;
   font-size: 18px;
   animation: fadeInUp 0.5s ease-out both;
@@ -51,10 +51,10 @@
   /* Gradiente animado de fondo */
   background: linear-gradient(
     135deg,
-    #f0f4ff 0%,
-    #f5f5f7 30%,
-    #e8f0fe 60%,
-    #f5f0ff 100%
+    var(--color-bg-secondary) 0%,
+    var(--color-bg-tertiary) 30%,
+    var(--color-bg-secondary) 60%,
+    var(--color-bg-tertiary) 100%
   );
   background-size: 300% 300%;
   animation: gradientShift 8s ease infinite;
@@ -68,7 +68,7 @@
   right: -60px;
   width: 320px;
   height: 320px;
-  background: radial-gradient(circle, rgba(0, 113, 227, 0.07) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--color-accent-light) 0%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
 }
@@ -80,7 +80,7 @@
   left: -40px;
   width: 280px;
   height: 280px;
-  background: radial-gradient(circle, rgba(88, 86, 214, 0.06) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--color-accent-light) 0%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
 }
@@ -94,13 +94,13 @@
   font-size: 48px;
   font-weight: 800;
   letter-spacing: -1.5px;
-  color: #1d1d1f;
+  color: var(--color-text);
   line-height: 1.1;
   animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .home-hero p {
-  color: #86868b;
+  color: var(--color-text-muted);
   font-size: 20px;
   margin-top: 12px;
   font-weight: 400;
@@ -122,14 +122,14 @@
   padding: 10px 24px;
   cursor: pointer;
   border-radius: 8px;
-  border: 1px solid #d2d2d7;
-  background: white;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
   font-weight: 600;
   transition: background 0.2s, transform 0.15s;
 }
 
 .btn-retry:hover {
-  background: #f5f5f7;
+  background: var(--color-bg-secondary);
   transform: translateY(-1px);
 }
 

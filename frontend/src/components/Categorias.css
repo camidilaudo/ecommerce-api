@@ -2,25 +2,25 @@
 .pill {
   padding: 10px 24px;
   border-radius: 20px;
-  border: 1px solid #e5e5e7;
-  background: #f5f5f7;
+  border: 1px solid var(--color-border-light);
+  background: var(--color-bg-secondary);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
-  color: #515154;
+  color: var(--color-text-secondary);
 }
 .pill.active {
-  background: #1d1d1f;
-  color: #ffffff;
-  border-color: #1d1d1f;
+  background: var(--color-text);
+  color: var(--color-bg);
+  border-color: var(--color-text);
   box-shadow: 0 4px 12px rgba(29, 29, 31, 0.15);
 }
 .pill:hover:not(.active) {
-  background: #e8e8ed;
-  color: #1d1d1f;
-  border-color: #d2d2d7;
+  background: var(--color-bg-tertiary);
+  color: var(--color-text);
+  border-color: var(--color-border);
   transform: translateY(-1px);
 }
 
@@ -41,13 +41,13 @@
     font-size: 22px;
     font-weight: 700;
     letter-spacing: -0.3px;
-    color: #37474F;
+    color: var(--color-text);
 }
 
 .categorias-limpiar {
     background: none;
     border: none;
-    color: #546E7A;
+    color: var(--color-text-secondary);
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
@@ -56,7 +56,7 @@
 }
 
 .categorias-limpiar:hover {
-    color: #37474F;
+    color: var(--color-text);
     text-decoration: underline;
 }
 
@@ -71,7 +71,7 @@
 
     /* Scrollbar discreta */
     scrollbar-width: thin;
-    scrollbar-color: #B0BEC5 transparent;
+    scrollbar-color: var(--color-border) transparent;
 }
 
 .categorias-carrusel::-webkit-scrollbar {
@@ -79,7 +79,7 @@
 }
 
 .categorias-carrusel::-webkit-scrollbar-thumb {
-    background: #B0BEC5;
+    background: var(--color-border);
     border-radius: 2px;
 }
 
@@ -88,8 +88,8 @@
     flex: 0 0 150px;           /* ancho fijo, no encoge */
     scroll-snap-align: start;
 
-    background: #ffffff;
-    border: 1.5px solid #CFD8DC;
+    background: var(--color-bg);
+    border: 1.5px solid var(--color-border-light);
     border-radius: 12px;
     padding: 1.25rem 0.75rem;
     text-align: center;
@@ -103,21 +103,21 @@
 }
 
 .categoria-card:hover {
-    border-color: #546E7A;
-    background: #F4F6F7;
+    border-color: var(--color-border);
+    background: var(--color-bg-tertiary);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(55, 71, 79, 0.1);
 }
 
 /* Tarjeta activa */
 .categoria-card--activa {
-    border-color: #37474F;
-    background: #CFD8DC;
-    box-shadow: 0 4px 12px rgba(55, 71, 79, 0.15);
+    border-color: var(--color-text);
+    background: var(--color-border-light);
+    box-shadow: var(--shadow-sm);
 }
 
 .categoria-card--activa .categoria-nombre {
-    color: #37474F;
+    color: var(--color-text);
 }
 
 .categoria-icono {
@@ -128,11 +128,11 @@
 .categoria-nombre {
     font-size: 13px;
     font-weight: 600;
-    color: #546E7A;
+    color: var(--color-text-secondary);
     white-space: nowrap;
 }
 
 .categoria-cantidad {
     font-size: 11px;
-    color: #90A4AE;
+    color: var(--color-text-muted);
 }

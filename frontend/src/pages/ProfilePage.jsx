@@ -133,8 +133,8 @@ const ProfilePage = () => {
                 <div className="auth-card">
                     <div className="auth-header">
                         <h2 className="auth-titulo">Error de Integración</h2>
-                        <p style={{ color: '#ff3b30', marginTop: '12px', fontSize: '14px' }}>{error}</p>
-                        <p style={{ fontSize: '13px', color: '#86868b', marginTop: '15px', lineHeight: '1.4' }}>
+                        <p style={{ color: 'var(--color-error)', marginTop: '12px', fontSize: '14px' }}>{error}</p>
+                        <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', marginTop: '15px', lineHeight: '1.4' }}>
                             Asegurate de que tu controlador en Spring Boot responda correctamente en la ruta
                             <code> GET /api/usuarios/me</code> procesando el token enviado en la cabecera.
                         </p>
@@ -170,7 +170,7 @@ const ProfilePage = () => {
                         </div>
                     </div>
                     <h2 className="auth-titulo" style={{ marginTop: '16px' }}>Mi Perfil</h2>
-                    <p style={{ color: '#86868b', fontSize: '14px', marginTop: '4px' }}>
+                    <p style={{ color: 'var(--color-text-muted)', fontSize: '14px', marginTop: '4px' }}>
                         {user?.nombreUsuario && <strong>@{user.nombreUsuario}</strong>}
                     </p>
                 </div>
@@ -265,7 +265,7 @@ const ProfilePage = () => {
                     <button
                         className="auth-submit"
                         onClick={() => navigate('/')}
-                        style={{ background: '#1d1d1f', marginTop: '0' }}
+                        style={{ background: 'var(--color-text)', color: 'var(--color-bg)', marginTop: '0' }}
                     >
                         Volver a la Tienda
                     </button>
