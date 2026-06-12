@@ -1,47 +1,41 @@
 import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import Categorias from '../components/Categorias';
 import ProductList from '../components/ProductList';
 import SkeletonCard from '../components/SkeletonCard';
+import { fetchProducts } from '../features/products/productsSlice';
+import {
+    selectProducts,
+    selectProductsLoading,
+    selectProductsError,
+} from '../features/products/productsSelectors';
 import '../components/ProductList.css'; // Importamos el CSS donde ahora vive .home-hero
 
 /**
  * HomePage - Punto de entrada del catálogo.
- * Utiliza useEffect para consumir el endpoint GET /api/productos de Spring Boot.
+ * El catálogo vive en productsSlice (Redux); acá solo quedan los
+ * filtros de UI (categoría, búsqueda, rango de precios).
  */
 const HomePage = ({ searchQuery }) => {
-    const [products, setProducts] = useState([]);
+    const dispatch = useDispatch();
+
+    // Catálogo desde Redux — única fuente de verdad
+    const products = useSelector(selectProducts);
+    const loading = useSelector(selectProductsLoading);
+    const error = useSelector(selectProductsError);
+
     const [category, setCategory] = useState('Todos');
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    
+
     // Filtros de precio
     const [minPrice, setMinPrice] = useState('');
     const [maxPrice, setMaxPrice] = useState('');
 
-    // useEffect: Vigilante de carga inicial (Clase 08)
+    // Carga inicial: solo si el catálogo no está cacheado en el store
     useEffect(() => {
-        const fetchProducts = async () => {
-            try {
-                setLoading(true);
-                // Llamada a la API real
-                const response = await fetch('http://localhost:8081/api/productos');
-
-                if (!response.ok) {
-                    throw new Error('Error de comunicación con el servidor');
-                }
-
-                const data = await response.json();
-                setProducts(data);
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                // Suavizamos la transición del Skeleton
-                setTimeout(() => setLoading(false), 800);
-            }
-        };
-
-        fetchProducts();
-    }, []);
+        if (products.length === 0) {
+            dispatch(fetchProducts());
+        }
+    }, [dispatch, products.length]);
 
     // Lógica de filtrado (Categoría + Búsqueda Navbar + Rango de Precios)
     const filtered = products.filter(p => {
@@ -55,8 +49,10 @@ const HomePage = ({ searchQuery }) => {
         return matchCat && matchSearch && matchMin && matchMax;
     });
 
-    // Manejo de Error sin CSS en línea
-    if (error) return (
+    // Manejo de Error sin CSS en línea.
+    // Solo bloquea la vista si el catálogo no llegó a cargarse:
+    // el error del slice es global y pudo originarse en otra operación.
+    if (error && products.length === 0) return (
         <div className="status-container">
             <h2>Error de conexión</h2>
             <p>{error}</p>
@@ -156,7 +152,8 @@ const HomePage = ({ searchQuery }) => {
             </div>
 
             <main className="container">
-                {loading ? (
+                {/* Skeleton también en el primer render, antes de que dispare el dispatch */}
+                {loading || (products.length === 0 && !error) ? (
                     <div className="products-grid">
                         {[1, 2, 3, 4, 5, 6].map(i => <SkeletonCard key={i} />)}
                     </div>

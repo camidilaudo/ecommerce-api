@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import './AdminPanel.css';
 import { toast } from 'react-toastify';
 import { handleApiResponse } from '../utils/apiHelpers';
 import CategoryManager from '../components/CategoryManager';
 import { selectToken, selectUserRole } from '../features/auth/authSelectors';
+import {
+    fetchProducts,
+    createProduct,
+    updateProduct,
+    deleteProduct,
+} from '../features/products/productsSlice';
+import { selectProducts, selectProductsLoading } from '../features/products/productsSelectors';
 
 /**
  * EditProductForm - Formulario de edición con soporte para múltiples fotos dinámicas.
@@ -162,13 +169,18 @@ const EditProductForm = ({ product, onCancel, onSave, saving, categories }) => {
  */
 const AdminPanel = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     // Token y rol desde Redux — NO más useAuth() ni localStorage
     const token = useSelector(selectToken);
     const storedRole = useSelector(selectUserRole);
     const isAdmin = storedRole === 'ADMIN';
-    const [productos, setProductos] = useState([]);
+
+    // Inventario desde productsSlice — única fuente de verdad
+    const productos = useSelector(selectProducts);
+    const loading = useSelector(selectProductsLoading);
+
+    // Categorías y stats quedan locales: fuera del scope de productsSlice
     const [categories, setCategories] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [form, setForm] = useState({
         nombre: '',
         descripcion: '',
@@ -192,20 +204,6 @@ const AdminPanel = () => {
 
 
 
-    useEffect(() => {
-        if (!token) {
-            navigate('/login');
-            return;
-        }
-        const role = storedRole;
-        if (role !== 'ADMIN') {
-            navigate('/');
-            return;
-        }
-        fetchProducts();
-        fetchCategories();
-    }, [token, navigate]);
-
     const fetchStats = async () => {
         try {
             const response = await fetch('http://localhost:8081/api/admin/stats', {
@@ -222,20 +220,19 @@ const AdminPanel = () => {
         }
     };
 
-    const fetchProducts = async () => {
-        try {
-            setLoading(true);
-            const response = await fetch('http://localhost:8081/api/productos');
-            const data = await handleApiResponse(response);
-            setProductos(data || []);
-            setCurrentPage(1);
-            fetchStats();
-        } catch (err) {
-            console.error('Error Admin:', err.message);
-            toast.error(`No se pudo sincronizar catálogo: ${err.message}`);
-        } finally {
-            setLoading(false);
-        }
+    /**
+     * Re-sincroniza inventario (via productsSlice) + stats, y resetea la página.
+     * Reemplaza al viejo fetchProducts local con useState.
+     */
+    const refreshProducts = () => {
+        dispatch(fetchProducts())
+            .unwrap()
+            .catch((err) => {
+                console.error('Error Admin:', err);
+                toast.error(`No se pudo sincronizar catálogo: ${err}`);
+            });
+        setCurrentPage(1);
+        fetchStats();
     };
 
     const fetchCategories = async () => {
@@ -247,6 +244,21 @@ const AdminPanel = () => {
             console.error('Error fetching categories:', err.message);
         }
     };
+
+    useEffect(() => {
+        if (!token) {
+            navigate('/login');
+            return;
+        }
+        const role = storedRole;
+        if (role !== 'ADMIN') {
+            navigate('/');
+            return;
+        }
+        refreshProducts();
+        fetchCategories();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [token, navigate]);
 
     // Funciones dinámicas para imágenes en el alta
     const handleImageChange = (index, value) => {
@@ -289,40 +301,25 @@ const AdminPanel = () => {
                 imagen: validImages[0]
             };
 
-            const res = await fetch('http://localhost:8081/api/productos', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify(payload)
-            });
-
-            await handleApiResponse(res);
+            await dispatch(createProduct(payload)).unwrap();
             toast.success('Producto publicado con éxito');
             setForm({ nombre: '', descripcion: '', precio: '', stock: '', categoriaIds: [], imagenes: [''] });
-            fetchProducts();
+            refreshProducts();
         } catch (err) {
             console.error(err);
-            toast.error(`No se pudo dar de alta el producto: ${err.message}`);
+            toast.error(`No se pudo dar de alta el producto: ${err}`);
         }
     };
 
     const handleDelete = async (id) => {
         if (!window.confirm('¿Estás seguro de eliminar este producto del catálogo?')) return;
         try {
-            const res = await fetch(`http://localhost:8081/api/productos/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            await handleApiResponse(res);
+            await dispatch(deleteProduct(id)).unwrap();
             toast.success('Producto eliminado');
-            fetchProducts();
+            refreshProducts();
         } catch (err) {
             console.error(err);
-            toast.error(`No se pudo eliminar el artículo: ${err.message}`);
+            toast.error(`No se pudo eliminar el artículo: ${err}`);
         }
     };
 
@@ -332,21 +329,13 @@ const AdminPanel = () => {
     const handleSaveEdit = async (updated) => {
         setIsSaving(true);
         try {
-            const res = await fetch(`http://localhost:8081/api/productos/${updated.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify(updated)
-            });
-            await handleApiResponse(res);
+            await dispatch(updateProduct({ id: updated.id, data: updated })).unwrap();
             toast.success('Producto actualizado correctamente');
-            fetchProducts();
+            refreshProducts();
             closeEdit();
         } catch (err) {
             console.error(err);
-            toast.error(`No se pudo actualizar: ${err.message}`);
+            toast.error(`No se pudo actualizar: ${err}`);
         } finally {
             setIsSaving(false);
         }

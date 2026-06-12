@@ -1,62 +1,56 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { selectFavoriteItems } from '../features/favorites/favoritesSelectors';
+import { selectProducts } from '../features/products/productsSelectors';
+import { fetchProducts } from '../features/products/productsSlice';
 import CardProductos from '../components/CardProductos';
 import './Favorite.css';
 
 /**
  * Favorite - Página de Favoritos (Trabajo Práctico Grupal TPG).
  * Permite visualizar de manera persistente los productos favoritos del usuario.
+ *
+ * El stock/precio real se obtiene cruzando favoritos con el catálogo de
+ * productsSlice (antes hacía su propio fetch a /api/productos con useState).
  */
 const Favorite = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     // Favoritos desde Redux — unica fuente de verdad
     const favoriteItems = useSelector(selectFavoriteItems);
-    const [realtimeFavorites, setRealtimeFavorites] = React.useState(favoriteItems);
+    const products = useSelector(selectProducts);
 
+    // Refresca el catálogo al entrar para mostrar stock/precios reales
     React.useEffect(() => {
-        // Carga inmediata desde el context local para evitar Cumulative Layout Shift (CLS)
-        setRealtimeFavorites(favoriteItems);
+        dispatch(fetchProducts());
+    }, [dispatch]);
 
-        const refreshStock = async () => {
-            if (favoriteItems.length === 0) return;
+    // Cruzar IDs para inyectar stock, precios y datos reales en caliente,
+    // filtrando los productos que ya no existen en el catálogo activo.
+    // Mientras el catálogo no cargó, se muestran los favoritos locales (evita CLS).
+    const realtimeFavorites = React.useMemo(() => {
+        if (products.length === 0) return favoriteItems;
 
-            try {
-                const response = await fetch('http://localhost:8081/api/productos');
-                if (response.ok) {
-                    const freshProducts = await response.json();
-                    
-                    // Cruzar IDs para inyectar stock, precios y datos reales en caliente, filtrando los eliminados
-                    const merged = favoriteItems
-                        .map(favItem => {
-                            const fresh = freshProducts.find(p => p.id === favItem.id);
-                            if (fresh) {
-                                return {
-                                    ...favItem,
-                                    stock: fresh.stock,
-                                    precio: fresh.precio,
-                                    nombre: fresh.nombre,
-                                    imagen: fresh.imagen,
-                                    descripcion: fresh.descripcion,
-                                    categoria: fresh.categoria,
-                                    rating: fresh.rating
-                                };
-                            }
-                            // Retornar null para los productos que ya no existen en el catálogo activo (eliminados o deactivados)
-                            return null;
-                        })
-                        .filter(item => item !== null);
-
-                    setRealtimeFavorites(merged);
+        return favoriteItems
+            .map(favItem => {
+                const fresh = products.find(p => p.id === favItem.id);
+                if (fresh) {
+                    return {
+                        ...favItem,
+                        stock: fresh.stock,
+                        precio: fresh.precio,
+                        nombre: fresh.nombre,
+                        imagen: fresh.imagen,
+                        descripcion: fresh.descripcion,
+                        categoria: fresh.categoria,
+                        rating: fresh.rating
+                    };
                 }
-            } catch (err) {
-                console.error("Error actualizando stock real en favoritos:", err);
-            }
-        };
-
-        refreshStock();
-    }, [favoriteItems]);
+                return null;
+            })
+            .filter(item => item !== null);
+    }, [favoriteItems, products]);
 
     return (
         <div className="favorite-page page container">

@@ -33,3 +33,6 @@ build/
 .vscode/
 logs.txt
 frontend/node_modules/
+
+# Seed script
+seed.js

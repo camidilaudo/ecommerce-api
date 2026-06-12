@@ -88,7 +88,7 @@
     padding: 50px 40px;
     width: 100%;
     max-width: 440px;
-        var(--shadow-md);
+    box-shadow: var(--shadow-md);
     border: 1px solid var(--color-border-light);
 
     /* Animación de entrada */

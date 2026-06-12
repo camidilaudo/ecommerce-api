@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 import { selectFavoriteItems } from '../features/favorites/favoritesSelectors';
 
 // Acciones y thunks
-import { addToCartThunk } from '../features/cart/cartThunks';
+import { addToCart } from '../features/cart/cartThunks';
 import { toggleFavorite } from '../features/favorites/favoritesSlice';
 
 import './CardProductos.css';
@@ -32,7 +32,11 @@ const CardProductos = ({ product, index = 0 }) => {
     const delay = `${Math.min(index, 12) * 60}ms`;
 
     const handleAgregar = () => {
-        dispatch(addToCartThunk(product));
+        // El toast es efecto de UI: vive acá, no en el thunk (createAsyncThunk)
+        dispatch(addToCart({ product }))
+            .unwrap()
+            .then(() => toast.success(`¡"${product.nombre}" agregado al carrito! 🛒`))
+            .catch((err) => toast.error(err));
         setAgregado(true);
         setTimeout(() => setAgregado(false), 1500);
     };

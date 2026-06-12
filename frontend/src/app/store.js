@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import authReducer from '../features/auth/authSlice';
 import cartReducer from '../features/cart/cartSlice';
 import favoritesReducer from '../features/favorites/favoritesSlice';
+import productsReducer from '../features/products/productsSlice';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HIDRATACIÓN INICIAL (Tarea 4)
@@ -40,6 +41,7 @@ export const store = configureStore({
         auth: authReducer,
         cart: cartReducer,
         favorites: favoritesReducer,
+        products: productsReducer,
         // Futuras slices: orders, notifications, wishlist, dashboard...
     },
     preloadedState,

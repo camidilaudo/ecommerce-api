@@ -3,25 +3,20 @@ import { useDispatch, useSelector } from 'react-redux';
 
 // Selectores — Redux como única fuente de verdad
 import { selectCart, selectCartTotal, selectIsCartOpen } from '../features/cart/cartSelectors';
-import { selectToken } from '../features/auth/authSelectors';
 
 // Acciones y thunks
-import { toggleCart, closeCart } from '../features/cart/cartSlice';
-import { removeFromCartThunk, clearCartThunk, checkoutThunk } from '../features/cart/cartThunks';
+import { toggleCart } from '../features/cart/cartSlice';
+import { removeFromCart, clearCart, checkout } from '../features/cart/cartThunks';
 
 import './CartSidebar.css';
 import { toast } from 'react-toastify';
-import { handleApiResponse } from '../utils/apiHelpers';
 
 /**
  * CartSidebar — Panel lateral del carrito de compras.
  *
- * MIGRADO:
- * - useCart() → useSelector + useDispatch
- * - localStorage.getItem('token') → useSelector(selectToken)   ← fuente de verdad única
- *
- * El token ya no se lee desde localStorage directamente.
- * Todos los datos vienen del store Redux.
+ * Los thunks son createAsyncThunk: el componente hace dispatch + .unwrap()
+ * y se encarga de los toasts (efectos de UI). El estado de negocio
+ * (items, loading, error) lo gestiona cartSlice via extraReducers.
  */
 const CartSidebar = () => {
     const dispatch = useDispatch();
@@ -31,12 +26,23 @@ const CartSidebar = () => {
     const cartTotal = useSelector(selectCartTotal);
     const isCartOpen = useSelector(selectIsCartOpen);
 
-    // Token desde Redux — NO más localStorage.getItem('token')
-    const token = useSelector(selectToken);
-
     const [loadingCheckout, setLoadingCheckout] = useState(false);
 
     if (!isCartOpen) return null;
+
+    const handleRemove = (productId) => {
+        dispatch(removeFromCart(productId))
+            .unwrap()
+            .then(() => toast.info('Producto removido del carrito.'))
+            .catch((err) => toast.error(err));
+    };
+
+    const handleClear = () => {
+        dispatch(clearCart())
+            .unwrap()
+            .then(() => toast.info('Carrito vaciado.'))
+            .catch((err) => toast.error(err));
+    };
 
     const handleCheckout = async () => {
         if (cart.length === 0) {
@@ -44,12 +50,12 @@ const CartSidebar = () => {
         }
         setLoadingCheckout(true);
         try {
-            // checkoutThunk obtiene el token internamente desde getState()
-            const body = await dispatch(checkoutThunk());
+            // .unwrap(): resuelve con el payload o lanza el valor de rejectWithValue
+            const body = await dispatch(checkout()).unwrap();
             toast.success(body?.mensaje || 'Compra realizada con éxito');
         } catch (err) {
             console.error('Checkout error:', err);
-            toast.error(`Error al finalizar compra: ${err.message}`);
+            toast.error(`Error al finalizar compra: ${err}`);
         } finally {
             setLoadingCheckout(false);
         }
@@ -65,7 +71,7 @@ const CartSidebar = () => {
                             <button
                                 onClick={() => {
                                     if (window.confirm('¿Estás seguro de que querés vaciar todo el carrito?')) {
-                                        dispatch(clearCartThunk());
+                                        handleClear();
                                     }
                                 }}
                                 style={{
@@ -102,7 +108,7 @@ const CartSidebar = () => {
                                 <div className="item-info">
                                     <h4>{item.nombre}</h4>
                                     <p>{item.quantity} x ${item.precio}</p>
-                                    <button className="remove-btn" onClick={() => dispatch(removeFromCartThunk(item.id))}>Eliminar</button>
+                                    <button className="remove-btn" onClick={() => handleRemove(item.id)}>Eliminar</button>
                                 </div>
                             </div>
                         ))

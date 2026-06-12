@@ -3,14 +3,28 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectIsAuthenticated } from '../features/auth/authSelectors';
 import { selectFavoriteItems } from '../features/favorites/favoritesSelectors';
-import { addToCartThunk } from '../features/cart/cartThunks';
+import { addToCart } from '../features/cart/cartThunks';
 import { toggleFavorite } from '../features/favorites/favoritesSlice';
+import {
+    fetchProductById,
+    fetchProductsByCategory,
+    clearSelectedProduct,
+} from '../features/products/productsSlice';
+import {
+    selectSelectedProduct,
+    selectRelatedProducts,
+    selectProductsLoading,
+    selectProductsLoadingRelated,
+    selectProductsError,
+} from '../features/products/productsSelectors';
 import { toast } from 'react-toastify';
 import './ProductDetailPage.css';
 
 /**
  * ProductDetailPage - Vista de Detalle del Producto.
  * Permite ver fotos ampliadas, descripción, stock real y agregar cantidades seleccionadas al carrito.
+ * Los datos (producto, recomendados, loading, error) viven en productsSlice;
+ * acá solo queda estado de UI (imagen seleccionada, cantidad, adding).
  */
 const ProductDetailPage = () => {
     const { id } = useParams();
@@ -20,74 +34,34 @@ const ProductDetailPage = () => {
     // Estado desde Redux
     const isAuthenticated = useSelector(selectIsAuthenticated);
     const favoriteItems = useSelector(selectFavoriteItems);
+    const product = useSelector(selectSelectedProduct);
+    const loading = useSelector(selectProductsLoading);
+    const error = useSelector(selectProductsError);
+    const relatedProducts = useSelector(selectRelatedProducts);
+    const loadingRelated = useSelector(selectProductsLoadingRelated);
 
-    const [product, setProduct] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [selectedImage, setSelectedImage] = useState('');
+    // Estado de UI puro — se mantiene local.
+    // selectedImage guarda el id del producto para invalidarse sola al navegar
+    // a otro detalle (la imagen visible se deriva en render, sin useEffect).
+    const [selectedImage, setSelectedImage] = useState(null);
     const [quantity, setQuantity] = useState(1);
     const [adding, setAdding] = useState(false);
 
-    // Productos recomendados
-    const [relatedProducts, setRelatedProducts] = useState([]);
-    const [loadingRelated, setLoadingRelated] = useState(false);
-
+    // Carga del detalle; al desmontar se limpia para evitar el flash
+    // del producto anterior cuando se navega a otro detalle.
     useEffect(() => {
-        const fetchProductDetail = async () => {
-            try {
-                setLoading(true);
-                const response = await fetch(`http://localhost:8081/api/productos/${id}`);
-                if (!response.ok) {
-                    if (response.status === 404) {
-                        throw new Error('El artículo solicitado no existe.');
-                    }
-                    throw new Error('Error al conectar con el servidor.');
-                }
-                const data = await response.json();
-                setProduct(data);
-                
-                // Inicializar imagen seleccionada
-                if (data.imagenes && data.imagenes.length > 0) {
-                    setSelectedImage(data.imagenes[0]);
-                } else if (data.imagen) {
-                    setSelectedImage(data.imagen);
-                } else {
-                    setSelectedImage('https://via.placeholder.com/600x600?text=Sin+Imagen');
-                }
-            } catch (err) {
-                console.error(err);
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
+        dispatch(fetchProductById(id));
+        return () => {
+            dispatch(clearSelectedProduct());
         };
+    }, [id, dispatch]);
 
-        fetchProductDetail();
-    }, [id]);
-
-    // Fetch de productos recomendados de la misma categoría
+    // Fetch de productos recomendados de la misma categoría.
+    // El extraReducer excluye el producto actual y limita a 4 sugerencias.
     useEffect(() => {
         if (!product || !product.categoriaIds || product.categoriaIds.length === 0) return;
-        
-        const fetchRelated = async () => {
-            try {
-                setLoadingRelated(true);
-                const response = await fetch(`http://localhost:8081/api/productos/categoria/${product.categoriaIds[0]}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    // Filtrar el propio producto y limitar a 4 sugerencias
-                    const filtered = data.filter(p => p.id !== product.id).slice(0, 4);
-                    setRelatedProducts(filtered);
-                }
-            } catch (err) {
-                console.error("Error fetching related products:", err);
-            } finally {
-                setLoadingRelated(false);
-            }
-        };
-
-        fetchRelated();
-    }, [product?.id]);
+        dispatch(fetchProductsByCategory(product.categoriaIds[0]));
+    }, [product, dispatch]);
 
     const handleAddToCart = async () => {
         if (!product) return;
@@ -102,10 +76,12 @@ const ProductDetailPage = () => {
 
         setAdding(true);
         try {
-            await dispatch(addToCartThunk(product, quantity, false));
+            // .unwrap(): lanza el mensaje de rejectWithValue si la operación falla
+            await dispatch(addToCart({ product, quantity })).unwrap();
             toast.success(`¡Agregamos ${quantity} ${quantity === 1 ? 'unidad' : 'unidades'} al carrito! 🛒`);
         } catch (err) {
             console.error(err);
+            toast.error(err);
         } finally {
             setAdding(false);
         }
@@ -136,7 +112,8 @@ const ProductDetailPage = () => {
         );
     }
 
-    if (error) {
+    // El error del slice es global: solo aplica acá si el detalle no llegó a cargar
+    if (error && !product) {
         return (
             <div className="product-detail-page page container status-container">
                 <h2>Error de Carga</h2>
@@ -155,6 +132,12 @@ const ProductDetailPage = () => {
         ? product.imagenes.filter(img => img.trim() !== '')
         : (product.imagen ? [product.imagen] : ['https://via.placeholder.com/600x600?text=Sin+Imagen']);
 
+    // Imagen visible: la elegida por el usuario (si corresponde a este producto)
+    // o la primera de la galería como default.
+    const mainImage = selectedImage && selectedImage.productId === product.id
+        ? selectedImage.url
+        : imagesList[0];
+
     return (
         <div className="product-detail-page page container">
             <button className="btn-back" onClick={() => navigate(-1)}>
@@ -169,15 +152,15 @@ const ProductDetailPage = () => {
                 {/* Panel Izquierdo: Galería de Fotos */}
                 <div className="gallery-section">
                     <div className="main-image-container">
-                        <img src={selectedImage} alt={product.nombre} className="main-product-image" />
+                        <img src={mainImage} alt={product.nombre} className="main-product-image" />
                     </div>
                     {imagesList.length > 1 && (
                         <div className="thumbnails-container">
                             {imagesList.map((img, idx) => (
                                 <button
                                     key={idx}
-                                    className={`thumb-btn ${selectedImage === img ? 'active' : ''}`}
-                                    onClick={() => setSelectedImage(img)}
+                                    className={`thumb-btn ${mainImage === img ? 'active' : ''}`}
+                                    onClick={() => setSelectedImage({ productId: product.id, url: img })}
                                 >
                                     <img src={img} alt={`Miniatura ${idx + 1}`} />
                                 </button>

@@ -12,6 +12,12 @@ export const selectCart = (state) => state.cart.items;
 /** Retorna si el sidebar del carrito está abierto */
 export const selectIsCartOpen = (state) => state.cart.isCartOpen;
 
+/** Retorna si hay una operación async del carrito en curso */
+export const selectCartLoading = (state) => state.cart.loading;
+
+/** Retorna el mensaje del último error de una operación async (null si no hay) */
+export const selectCartError = (state) => state.cart.error;
+
 /**
  * Retorna la cantidad total de unidades en el carrito.
  * Equivale al `cartCount` del CartContext original.
