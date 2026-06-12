@@ -33,6 +33,3 @@ build/
 .vscode/
 logs.txt
 frontend/node_modules/
-
-# Startup script
-start.sh
