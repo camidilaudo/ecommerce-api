@@ -1,50 +1,55 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { selectToken } from '../features/auth/authSelectors';
+import { useDispatch, useSelector } from 'react-redux';
+import FocusLock from 'react-focus-lock';
+import { fetchOrders } from '../features/orders/ordersSlice';
+import {
+    selectOrders,
+    selectOrdersLoading,
+    selectOrdersError,
+} from '../features/orders/ordersSelectors';
+import usePageTitle from '../hooks/usePageTitle';
 import './OrdersPage.css';
 
 /**
- * OrdersPage - Historial de pedidos y detalle interactivo.
- * Consume de forma real el endpoint GET /api/pedidos de Spring Boot.
+ * OrdersPage — Historial de pedidos via Redux Toolkit.
  */
 const OrdersPage = () => {
+    usePageTitle('Mis Pedidos');
     const navigate = useNavigate();
-    // Token desde Redux — NO más localStorage.getItem('token')
-    const token = useSelector(selectToken);
-    const [orders, setOrders] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const dispatch = useDispatch();
+
+    // Datos y estados de carga desde Redux
+    const orders = useSelector(selectOrders);
+    const loading = useSelector(selectOrdersLoading);
+    const error = useSelector(selectOrdersError);
+
+    // Estado de UI local — no pertenece al store
     const [selectedOrder, setSelectedOrder] = useState(null);
 
+    // Carga los pedidos al montar — PrivateRoute garantiza token
     useEffect(() => {
-        if (!token) {
-            navigate('/login');
-            return;
-        }
+        dispatch(fetchOrders());
+    }, [dispatch]);
 
-        const fetchOrders = async () => {
-            try {
-                const response = await fetch('http://localhost:8081/api/pedidos', {
-                    method: 'GET',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (!response.ok) throw new Error('Error al traer pedidos');
-                const data = await response.json();
-                
-                // Ordenar por ID descendente (más nuevos primero)
-                const sorted = (data || []).sort((a, b) => b.id - a.id);
-                setOrders(sorted);
-            } catch (err) {
-                console.error(err.message);
-                setError('No se pudo conectar con el servidor. Verificá que el backend esté corriendo.');
-            } finally {
-                setLoading(false);
+    // Efecto para modal de orden
+    useEffect(() => {
+        if (!selectedOrder) return;
+
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                setSelectedOrder(null);
             }
         };
 
-        fetchOrders();
-    }, [navigate]);
+        document.addEventListener('keydown', handleKeyDown);
+        document.body.style.overflow = 'hidden';
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+            document.body.style.overflow = '';
+        };
+    }, [selectedOrder]);
 
     // Formatear Fecha y Hora del ISO String retornado por el Backend
     const formatDateTime = (isoString) => {
@@ -86,8 +91,8 @@ const OrdersPage = () => {
             ) : (
                 <div className="orders-list">
                     {orders.map(order => (
-                        <div 
-                            key={order.id} 
+                        <div
+                            key={order.id}
                             className="order-card"
                             onClick={() => setSelectedOrder(order)}
                         >
@@ -106,46 +111,48 @@ const OrdersPage = () => {
 
             {/* Modal de Detalle de Pedido */}
             {selectedOrder && (
-                <div className="modal-backdrop" onClick={() => setSelectedOrder(null)}>
-                    <div className="order-detail-modal" onClick={e => e.stopPropagation()}>
-                        <button className="modal-close-x" onClick={() => setSelectedOrder(null)}>✕</button>
-                        
-                        <div className="modal-header">
-                            <h3>Detalle de Compra</h3>
-                            <div className="modal-meta">
-                                <span><strong>Pedido:</strong> #{selectedOrder.id}</span>
-                                <span><strong>Fecha y hora:</strong> {formatDateTime(selectedOrder.fechaCreacion)}</span>
+                <div className="modal-backdrop" onClick={() => setSelectedOrder(null)} role="dialog" aria-modal="true" aria-label="Detalle del pedido">
+                    <FocusLock returnFocus>
+                        <div className="order-detail-modal" onClick={e => e.stopPropagation()}>
+                            <button className="modal-close-x" onClick={() => setSelectedOrder(null)} aria-label="Cerrar detalle">✕</button>
+
+                            <div className="modal-header">
+                                <h3>Detalle de Compra</h3>
+                                <div className="modal-meta">
+                                    <span><strong>Pedido:</strong> #{selectedOrder.id}</span>
+                                    <span><strong>Fecha y hora:</strong> {formatDateTime(selectedOrder.fechaCreacion)}</span>
+                                </div>
+                            </div>
+
+                            <div className="modal-divider"></div>
+
+                            <h4 className="items-section-title">Artículos Comprados</h4>
+                            <div className="order-items-list">
+                                {selectedOrder.items && selectedOrder.items.length > 0 ? (
+                                    selectedOrder.items.map(item => (
+                                        <div key={item.id} className="order-item-row">
+                                            <div className="item-details">
+                                                <h5>{item.productoNombre || `Producto #${item.productoId}`}</h5>
+                                                <span className="item-qty-price">{item.cantidad} x ${item.precioUnitario.toFixed(2)}</span>
+                                            </div>
+                                            <span className="item-subtotal">
+                                                ${(item.cantidad * item.precioUnitario).toFixed(2)}
+                                            </span>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p style={{ color: '#86868b', fontSize: '14px', margin: 0 }}>No hay ítems registrados en este pedido.</p>
+                                )}
+                            </div>
+
+                            <div className="modal-divider"></div>
+
+                            <div className="modal-footer">
+                                <span className="modal-total-label">Total del Pedido:</span>
+                                <span className="modal-total-value">${selectedOrder.total.toFixed(2)}</span>
                             </div>
                         </div>
-
-                        <div className="modal-divider"></div>
-
-                        <h4 className="items-section-title">Artículos Comprados</h4>
-                        <div className="order-items-list">
-                            {selectedOrder.items && selectedOrder.items.length > 0 ? (
-                                selectedOrder.items.map(item => (
-                                    <div key={item.id} className="order-item-row">
-                                        <div className="item-details">
-                                            <h5>{item.productoNombre || `Producto #${item.productoId}`}</h5>
-                                            <span className="item-qty-price">{item.cantidad} x ${item.precioUnitario.toFixed(2)}</span>
-                                        </div>
-                                        <span className="item-subtotal">
-                                            ${(item.cantidad * item.precioUnitario).toFixed(2)}
-                                        </span>
-                                    </div>
-                                ))
-                            ) : (
-                                <p style={{ color: '#86868b', fontSize: '14px', margin: 0 }}>No hay ítems registrados en este pedido.</p>
-                            )}
-                        </div>
-
-                        <div className="modal-divider"></div>
-
-                        <div className="modal-footer">
-                            <span className="modal-total-label">Total del Pedido:</span>
-                            <span className="modal-total-value">${selectedOrder.total.toFixed(2)}</span>
-                        </div>
-                    </div>
+                    </FocusLock>
                 </div>
             )}
         </div>

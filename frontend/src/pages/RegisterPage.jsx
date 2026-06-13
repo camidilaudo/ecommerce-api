@@ -1,17 +1,28 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import './LoginPage.css'; // Usamos el CSS unificado
 import { isValidEmail, isValidDate } from '../utils/validation';
-import { handleApiResponse } from '../utils/apiHelpers';
 import { toast } from 'react-toastify';
 import AvatarPicker from '../components/AvatarPicker';
+import { registerThunk } from '../features/auth/authSlice';
+import { selectLoadingRegister } from '../features/auth/authSelectors';
+import usePageTitle from '../hooks/usePageTitle';
 
 /**
- * RegisterPage — Página de registro de usuario.
- * Cumple los requisitos del TPO: nombreUsuario, nombre, apellido, email, password, fechaNacimiento, sexo, avatar.
+ * RegisterPage — Registro de usuario via Redux Toolkit.
+ *
+ * El fetch POST /api/auth/register fue migrado a registerThunk (createAsyncThunk).
+ * El estado de carga vive en Redux (auth.loadingRegister).
+ * Tras el registro exitoso, redirige a /login.
  */
 const RegisterPage = () => {
+    usePageTitle('Registrarse');
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    // Estado de carga desde Redux — no se usa useState(cargando)
+    const loadingRegister = useSelector(selectLoadingRegister);
 
     // Estado del formulario mapeado al DTO RegisterRequest
     const [form, setForm] = useState({
@@ -26,7 +37,6 @@ const RegisterPage = () => {
     });
 
     const [errores, setErrores] = useState({});
-    const [cargando, setCargando] = useState(false);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -69,7 +79,7 @@ const RegisterPage = () => {
         return err;
     };
 
-    // Controlador del envío que consume la API mediante async/await
+    // Controlador del envío que despacha registerThunk
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -81,24 +91,14 @@ const RegisterPage = () => {
             return;
         }
 
-        setCargando(true);
-
         try {
-            const response = await fetch('http://localhost:8081/api/auth/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(form),
-            });
-
-            await handleApiResponse(response);
-
+            // registerThunk hace el POST y gestiona loading/error en Redux
+            await dispatch(registerThunk(form)).unwrap();
             toast.success(`Usuario ${form.nombreUsuario} creado correctamente`);
             navigate('/login');
         } catch (err) {
-            console.error('Error crítico de integración de Auth:', err.message);
-            toast.error(`Error al registrar usuario: ${err.message}`);
-        } finally {
-            setCargando(false);
+            // El mensaje ya viene formateado desde registerThunk.rejected
+            toast.error(`Error al registrar usuario: ${err}`);
         }
     };
 
@@ -236,8 +236,8 @@ const RegisterPage = () => {
                         label="Elegí tu avatar"
                     />
 
-                    <button type="submit" className="auth-submit" disabled={cargando}>
-                        {cargando ? 'Registrando...' : 'Crear cuenta'}
+                    <button type="submit" className="auth-submit" disabled={loadingRegister}>
+                        {loadingRegister ? 'Registrando...' : 'Crear cuenta'}
                     </button>
                 </form>
             </div>

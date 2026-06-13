@@ -3,80 +3,60 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import './LoginPage.css';
 import './ProfilePage.css';
-import { selectToken } from '../features/auth/authSelectors';
-import { updateAvatar } from '../features/auth/authSlice';
+import { fetchProfileThunk, updateAvatarThunk } from '../features/auth/authSlice';
+import {
+    selectProfile,
+    selectLoadingProfile,
+    selectErrorProfile,
+} from '../features/auth/authSelectors';
 import AvatarPicker from '../components/AvatarPicker';
 import { toast } from 'react-toastify';
+import usePageTitle from '../hooks/usePageTitle';
 
 /**
- * ProfilePage - Interfaz para visualizar la información de cuenta del usuario logueado.
- * Conecta con el endpoint protegido GET /api/usuarios/me inyectando el token Bearer JWT.
- * Permite cambiar el avatar con PATCH /api/usuarios/me/avatar.
+ * ProfilePage — Perfil del usuario autenticado via Redux Toolkit.
+ *
+ * Migración de fetch directo a thunks:
+ * - GET /api/usuarios/me   → fetchProfileThunk  → auth.profile en Redux
+ * - PATCH /api/usuarios/me/avatar → updateAvatarThunk → auth.userAvatar + auth.profile.avatar
+ *
+ * El acceso a esta ruta está protegido por PrivateRoute (requiere token).
+ * Si el token expira durante la sesión, authFetch detecta el 401,
+ * hace logout y redirige a /login automáticamente.
  */
 const ProfilePage = () => {
+    usePageTitle('Mi Perfil');
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    // Token desde Redux — NO más localStorage.getItem('token')
-    const token = useSelector(selectToken);
 
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    // Perfil y estados de carga/error desde Redux
+    const user = useSelector(selectProfile);
+    const loading = useSelector(selectLoadingProfile);
+    const error = useSelector(selectErrorProfile);
 
-    // Estado local del avatar seleccionado (puede diferir del guardado hasta que se guarda)
+    // Estado local de UI — el avatar seleccionado puede diferir del guardado
     const [avatarSeleccionado, setAvatarSeleccionado] = useState('avatar1.webp');
     const [guardandoAvatar, setGuardandoAvatar] = useState(false);
 
+    // Carga el perfil al montar — PrivateRoute garantiza que hay token
     useEffect(() => {
-        // Redirección de seguridad: si el usuario no tiene token en el store, redirigir
-        if (!token) {
-            navigate('/login');
-            return;
+        dispatch(fetchProfileThunk());
+    }, [dispatch]);
+
+    // Sincroniza el selector visual con el avatar real del usuario
+    // cuando el perfil llega desde el backend
+    useEffect(() => {
+        if (user?.avatar) {
+            setAvatarSeleccionado(user.avatar);
         }
-
-        /**
-         * Petición asíncrona para recuperar los datos reales del usuario.
-         */
-        const fetchProfile = async () => {
-            try {
-                setLoading(true);
-                setError(null);
-
-                const response = await fetch('http://localhost:8081/api/usuarios/me', {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error('El servidor rechazó la solicitud o el endpoint no está implementado');
-                }
-
-                const data = await response.json();
-                setUser(data);
-                // Inicializar avatar seleccionado con el del usuario (o fallback)
-                setAvatarSeleccionado(data.avatar || 'avatar1.webp');
-
-            } catch (err) {
-                console.error("Error al consultar /api/usuarios/me:", err.message);
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchProfile();
-    }, [navigate]);
+    }, [user?.avatar]);
 
     /**
-     * Guarda el avatar seleccionado en el backend y actualiza el contexto global.
+     * Guarda el avatar seleccionado en el backend vía updateAvatarThunk.
+     * El thunk actualiza auth.userAvatar y auth.profile.avatar en Redux.
+     * store.subscribe() en store.js persiste auth.userAvatar en localStorage.
      */
     const handleGuardarAvatar = async () => {
-        if (!token) return;
-
-        // Si el avatar no cambió, no hace nada
         if (avatarSeleccionado === user?.avatar) {
             toast.info('El avatar ya está guardado.');
             return;
@@ -84,34 +64,16 @@ const ProfilePage = () => {
 
         setGuardandoAvatar(true);
         try {
-            const response = await fetch('http://localhost:8081/api/usuarios/me/avatar', {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ avatar: avatarSeleccionado })
-            });
-
-            if (!response.ok) {
-                const err = await response.json().catch(() => ({}));
-                throw new Error(err.message || 'Error al guardar el avatar');
-            }
-
-            // Actualizar avatar en el store Redux → store.subscribe() lo persiste en localStorage
-            setUser((prev) => ({ ...prev, avatar: avatarSeleccionado }));
-            dispatch(updateAvatar(avatarSeleccionado));
+            await dispatch(updateAvatarThunk(avatarSeleccionado)).unwrap();
             toast.success('¡Avatar actualizado correctamente!');
-
         } catch (err) {
-            console.error("Error al actualizar avatar:", err.message);
-            toast.error(`No se pudo guardar el avatar: ${err.message}`);
+            toast.error(`No se pudo guardar el avatar: ${err}`);
         } finally {
             setGuardandoAvatar(false);
         }
     };
 
-    // Estado visual de carga intermedia
+    // ── Estado de carga ────────────────────────────────────────────────────────
     if (loading) {
         return (
             <div className="auth-page">
@@ -126,8 +88,8 @@ const ProfilePage = () => {
         );
     }
 
-    // Si ocurre un error de red o de endpoint, se le notifica limpiamente al alumno
-    if (error) {
+    // ── Estado de error ────────────────────────────────────────────────────────
+    if (error && !user) {
         return (
             <div className="auth-page">
                 <div className="auth-card">

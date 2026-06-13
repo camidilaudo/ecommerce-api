@@ -1,5 +1,16 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { selectToken } from '../auth/authSelectors';
+import { authFetch } from '../../utils/authFetch';
+
+/**
+ * cartThunks.js — Thunks del carrito de compras.
+ *
+ * Todos los thunks usan authFetch en lugar de fetch directo.
+ * authFetch adjunta automáticamente el Bearer token del store y detecta
+ * respuestas 401 (token expirado), haciendo logout + redirect a /login.
+ *
+ * Convención: los thunks siempre rechazan con rejectWithValue(string),
+ * así los componentes pueden hacer .unwrap().catch(toast.error).
+ */
 
 const API_BASE = 'http://localhost:8081/api/carrito';
 
@@ -31,24 +42,20 @@ const extractErrorMessage = async (response, fallback) => {
  * fetchCart — Carga el carrito desde el backend.
  *
  * Se dispara desde AppInitializer en main.jsx cuando cambia la sesión.
- * DT-04 fix: si no hay token, resuelve con [] para limpiar el carrito local.
- * DT-05 fix: se re-dispara cuando el usuario hace login/logout.
- *
- * Los toasts viven en los componentes (via .unwrap()), no acá:
- * el thunk solo resuelve con el payload o rechaza con un mensaje (string).
+ * Si no hay token, resuelve con [] para limpiar el carrito local.
+ * Si el token está expirado (401), authFetch hace logout + redirect automático.
  */
 export const fetchCart = createAsyncThunk(
     'cart/fetchCart',
-    async (_, { getState, rejectWithValue }) => {
-        const token = selectToken(getState());
+    async (_, thunkAPI) => {
+        const { getState, rejectWithValue } = thunkAPI;
+        const token = getState().auth.token;
 
-        // DT-04: sin sesión activa → carrito local vacío
+        // Sin sesión activa → carrito local vacío
         if (!token) return [];
 
         try {
-            const response = await fetch(API_BASE, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
+            const response = await authFetch(API_BASE, {}, thunkAPI);
 
             if (!response.ok) {
                 return rejectWithValue(
@@ -56,8 +63,7 @@ export const fetchCart = createAsyncThunk(
                 );
             }
 
-            const data = await response.json();
-            return mapBackendCartToFrontend(data);
+            return mapBackendCartToFrontend(await response.json());
         } catch (err) {
             return rejectWithValue(err.message);
         }
@@ -67,28 +73,26 @@ export const fetchCart = createAsyncThunk(
 /**
  * addToCart — Agrega un producto al carrito persistente.
  *
- * BUG-06 fix: una sola request POST con ?cantidad=N.
  * @param {object} arg — { product, quantity = 1 }
  */
 export const addToCart = createAsyncThunk(
     'cart/addToCart',
-    async ({ product, quantity = 1 }, { getState, rejectWithValue }) => {
-        const token = selectToken(getState());
+    async ({ product, quantity = 1 }, thunkAPI) => {
+        const { getState, rejectWithValue } = thunkAPI;
+        const token = getState().auth.token;
 
         if (!token) {
             return rejectWithValue('Por favor, iniciá sesión para poder agregar productos al carrito.');
         }
 
         try {
-            const response = await fetch(
+            const response = await authFetch(
                 `${API_BASE}/agregar/${product.id}?cantidad=${quantity}`,
                 {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
+                    headers: { 'Content-Type': 'application/json' },
+                },
+                thunkAPI
             );
 
             if (!response.ok) {
@@ -97,8 +101,7 @@ export const addToCart = createAsyncThunk(
                 );
             }
 
-            const cartData = await response.json();
-            return mapBackendCartToFrontend(cartData);
+            return mapBackendCartToFrontend(await response.json());
         } catch (err) {
             return rejectWithValue(err.message);
         }
@@ -111,15 +114,17 @@ export const addToCart = createAsyncThunk(
  */
 export const removeFromCart = createAsyncThunk(
     'cart/removeFromCart',
-    async (productId, { getState, rejectWithValue }) => {
-        const token = selectToken(getState());
+    async (productId, thunkAPI) => {
+        const { getState, rejectWithValue } = thunkAPI;
+        const token = getState().auth.token;
         if (!token) return rejectWithValue('Sesión no válida.');
 
         try {
-            const response = await fetch(`${API_BASE}/eliminar/${productId}`, {
-                method: 'DELETE',
-                headers: { Authorization: `Bearer ${token}` },
-            });
+            const response = await authFetch(
+                `${API_BASE}/eliminar/${productId}`,
+                { method: 'DELETE' },
+                thunkAPI
+            );
 
             if (!response.ok) {
                 return rejectWithValue(
@@ -127,8 +132,7 @@ export const removeFromCart = createAsyncThunk(
                 );
             }
 
-            const data = await response.json();
-            return mapBackendCartToFrontend(data);
+            return mapBackendCartToFrontend(await response.json());
         } catch (err) {
             return rejectWithValue(err.message);
         }
@@ -137,19 +141,20 @@ export const removeFromCart = createAsyncThunk(
 
 /**
  * clearCart — Vacía el carrito en la base de datos y en el store.
- * Sin token resuelve igual: el fulfilled deja items = [] (mismo efecto local).
  */
 export const clearCart = createAsyncThunk(
     'cart/clearCart',
-    async (_, { getState, rejectWithValue }) => {
-        const token = selectToken(getState());
+    async (_, thunkAPI) => {
+        const { getState, rejectWithValue } = thunkAPI;
+        const token = getState().auth.token;
         if (!token) return null;
 
         try {
-            const response = await fetch(`${API_BASE}/vaciar`, {
-                method: 'DELETE',
-                headers: { Authorization: `Bearer ${token}` },
-            });
+            const response = await authFetch(
+                `${API_BASE}/vaciar`,
+                { method: 'DELETE' },
+                thunkAPI
+            );
 
             if (!response.ok) {
                 return rejectWithValue(
@@ -172,18 +177,20 @@ export const clearCart = createAsyncThunk(
  */
 export const checkout = createAsyncThunk(
     'cart/checkout',
-    async (_, { getState, rejectWithValue }) => {
-        const token = selectToken(getState());
+    async (_, thunkAPI) => {
+        const { getState, rejectWithValue } = thunkAPI;
+        const token = getState().auth.token;
         if (!token) return rejectWithValue('Sesión no válida.');
 
         try {
-            const response = await fetch(`${API_BASE}/checkout`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
+            const response = await authFetch(
+                `${API_BASE}/checkout`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                 },
-            });
+                thunkAPI
+            );
 
             if (!response.ok) {
                 return rejectWithValue(

@@ -9,6 +9,8 @@
  * 4. Testabilidad: los selectores son funciones puras fácilmente testeables.
  */
 
+// ── Sesión activa ─────────────────────────────────────────────────────────────
+
 /** Retorna el JWT token actual (null si no autenticado) */
 export const selectToken = (state) => state.auth.token;
 
@@ -26,3 +28,30 @@ export const selectIsAuthenticated = (state) => state.auth.isAuthenticated;
 
 /** Selector derivado: true si el usuario autenticado tiene rol ADMIN */
 export const selectIsAdmin = (state) => state.auth.userRole === 'ADMIN';
+
+// ── loginThunk ────────────────────────────────────────────────────────────────
+
+/** Retorna true mientras loginThunk está en curso */
+export const selectLoadingLogin = (state) => state.auth.loadingLogin;
+
+/** Retorna el mensaje de error del último intento de login (null si no hay) */
+export const selectErrorLogin = (state) => state.auth.errorLogin;
+
+// ── registerThunk ─────────────────────────────────────────────────────────────
+
+/** Retorna true mientras registerThunk está en curso */
+export const selectLoadingRegister = (state) => state.auth.loadingRegister;
+
+/** Retorna el mensaje de error del último intento de registro (null si no hay) */
+export const selectErrorRegister = (state) => state.auth.errorRegister;
+
+// ── fetchProfileThunk ─────────────────────────────────────────────────────────
+
+/** Retorna el objeto de perfil completo del usuario (null si no se cargó aún) */
+export const selectProfile = (state) => state.auth.profile;
+
+/** Retorna true mientras fetchProfileThunk está en curso */
+export const selectLoadingProfile = (state) => state.auth.loadingProfile;
+
+/** Retorna el mensaje de error del último intento de cargar el perfil */
+export const selectErrorProfile = (state) => state.auth.errorProfile;

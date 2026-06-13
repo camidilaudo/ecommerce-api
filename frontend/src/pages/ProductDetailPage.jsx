@@ -18,6 +18,7 @@ import {
     selectProductsError,
 } from '../features/products/productsSelectors';
 import { toast } from 'react-toastify';
+import usePageTitle from '../hooks/usePageTitle';
 import './ProductDetailPage.css';
 
 /**
@@ -40,6 +41,9 @@ const ProductDetailPage = () => {
     const relatedProducts = useSelector(selectRelatedProducts);
     const loadingRelated = useSelector(selectProductsLoadingRelated);
 
+    // Título dinámico: cambia automáticamente cuando el producto carga del store
+    usePageTitle(product?.nombre || 'Detalle de Producto');
+
     // Estado de UI puro — se mantiene local.
     // selectedImage guarda el id del producto para invalidarse sola al navegar
     // a otro detalle (la imagen visible se deriva en render, sin useEffect).
@@ -58,10 +62,11 @@ const ProductDetailPage = () => {
 
     // Fetch de productos recomendados de la misma categoría.
     // El extraReducer excluye el producto actual y limita a 4 sugerencias.
+    const categoryId = product?.categoriaIds?.[0];
     useEffect(() => {
-        if (!product || !product.categoriaIds || product.categoriaIds.length === 0) return;
-        dispatch(fetchProductsByCategory(product.categoriaIds[0]));
-    }, [product, dispatch]);
+        if (!categoryId) return;
+        dispatch(fetchProductsByCategory(categoryId));
+    }, [categoryId, dispatch]);
 
     const handleAddToCart = async () => {
         if (!product) return;

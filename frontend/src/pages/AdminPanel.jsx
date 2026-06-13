@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import FocusLock from 'react-focus-lock';
 import './AdminPanel.css';
 import { toast } from 'react-toastify';
-import { handleApiResponse } from '../utils/apiHelpers';
 import CategoryManager from '../components/CategoryManager';
 import { selectToken, selectUserRole } from '../features/auth/authSelectors';
 import {
@@ -13,6 +13,11 @@ import {
     deleteProduct,
 } from '../features/products/productsSlice';
 import { selectProducts, selectProductsLoading } from '../features/products/productsSelectors';
+import { fetchAdminStats } from '../features/users/usersSlice';
+import { selectAdminStats } from '../features/users/usersSelectors';
+import { fetchCategories } from '../features/categories/categoriesSlice';
+import { selectCategories } from '../features/categories/categoriesSelectors';
+import usePageTitle from '../hooks/usePageTitle';
 
 /**
  * EditProductForm - Formulario de edición con soporte para múltiples fotos dinámicas.
@@ -168,6 +173,7 @@ const EditProductForm = ({ product, onCancel, onSave, saving, categories }) => {
  * AdminPanel - Panel Principal de Gestión de Productos.
  */
 const AdminPanel = () => {
+    usePageTitle('Panel de Administración');
     const navigate = useNavigate();
     const dispatch = useDispatch();
     // Token y rol desde Redux — NO más useAuth() ni localStorage
@@ -179,8 +185,12 @@ const AdminPanel = () => {
     const productos = useSelector(selectProducts);
     const loading = useSelector(selectProductsLoading);
 
-    // Categorías y stats quedan locales: fuera del scope de productsSlice
-    const [categories, setCategories] = useState([]);
+    // Stats desde usersSlice — fuente compartida con UsersPage (sin fetch duplicado)
+    const stats = useSelector(selectAdminStats);
+
+    // Categorías desde categoriesSlice — fuente compartida con CategoryManager y Categorias
+    const categories = useSelector(selectCategories);
+
     const [form, setForm] = useState({
         nombre: '',
         descripcion: '',
@@ -195,34 +205,12 @@ const AdminPanel = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 6;
 
-    const [stats, setStats] = useState({
-        totalSales: 0.0,
-        totalUsers: 0,
-        totalProducts: 0,
-        totalStock: 0
-    });
-
-
-
-    const fetchStats = async () => {
-        try {
-            const response = await fetch('http://localhost:8081/api/admin/stats', {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setStats(data);
-            }
-        } catch (err) {
-            console.error('Error fetching admin stats:', err.message);
-        }
+    const fetchStats = () => {
+        dispatch(fetchAdminStats());
     };
 
     /**
      * Re-sincroniza inventario (via productsSlice) + stats, y resetea la página.
-     * Reemplaza al viejo fetchProducts local con useState.
      */
     const refreshProducts = () => {
         dispatch(fetchProducts())
@@ -235,30 +223,31 @@ const AdminPanel = () => {
         fetchStats();
     };
 
-    const fetchCategories = async () => {
-        try {
-            const response = await fetch('http://localhost:8081/api/categorias');
-            const data = await handleApiResponse(response);
-            setCategories(data || []);
-        } catch (err) {
-            console.error('Error fetching categories:', err.message);
-        }
-    };
-
     useEffect(() => {
-        if (!token) {
-            navigate('/login');
-            return;
-        }
-        const role = storedRole;
-        if (role !== 'ADMIN') {
-            navigate('/');
-            return;
-        }
+        // AdminRoute garantiza que hay token y rol ADMIN antes de renderizar este componente.
         refreshProducts();
-        fetchCategories();
+        dispatch(fetchCategories());
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [token, navigate]);
+    }, []);
+
+    // Efecto para modal de edición
+    useEffect(() => {
+        if (!editingProduct) return;
+
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                closeEdit();
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        document.body.style.overflow = 'hidden';
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+            document.body.style.overflow = '';
+        };
+    }, [editingProduct]);
 
     // Funciones dinámicas para imágenes en el alta
     const handleImageChange = (index, value) => {
@@ -304,7 +293,7 @@ const AdminPanel = () => {
             await dispatch(createProduct(payload)).unwrap();
             toast.success('Producto publicado con éxito');
             setForm({ nombre: '', descripcion: '', precio: '', stock: '', categoriaIds: [], imagenes: [''] });
-            refreshProducts();
+            fetchStats();
         } catch (err) {
             console.error(err);
             toast.error(`No se pudo dar de alta el producto: ${err}`);
@@ -316,7 +305,7 @@ const AdminPanel = () => {
         try {
             await dispatch(deleteProduct(id)).unwrap();
             toast.success('Producto eliminado');
-            refreshProducts();
+            fetchStats();
         } catch (err) {
             console.error(err);
             toast.error(`No se pudo eliminar el artículo: ${err}`);
@@ -331,7 +320,7 @@ const AdminPanel = () => {
         try {
             await dispatch(updateProduct({ id: updated.id, data: updated })).unwrap();
             toast.success('Producto actualizado correctamente');
-            refreshProducts();
+            fetchStats();
             closeEdit();
         } catch (err) {
             console.error(err);
@@ -363,13 +352,13 @@ const AdminPanel = () => {
                 </button>
             </header>
 
-            {/* Dashboard de Estadísticas y KPIs */}
+            {/* Dashboard de Estadísticas y KPIs — stats viene de usersSlice (fetchAdminStats) */}
             <div className="admin-kpi-grid">
                 <div className="admin-kpi-card">
                     <div className="kpi-icon">💰</div>
                     <div className="kpi-content">
                         <span className="kpi-label">Facturación Total</span>
-                        <h3 className="kpi-value">${stats.totalSales.toFixed(2)}</h3>
+                        <h3 className="kpi-value">${(stats?.totalSales ?? 0).toFixed(2)}</h3>
                     </div>
                 </div>
                 <div
@@ -384,7 +373,7 @@ const AdminPanel = () => {
                     <div className="kpi-icon">👥</div>
                     <div className="kpi-content">
                         <span className="kpi-label">Clientes Registrados</span>
-                        <h3 className="kpi-value">{stats.totalUsers}</h3>
+                        <h3 className="kpi-value">{stats?.totalUsers ?? 0}</h3>
                         {isAdmin && <span className="kpi-hint">Click para gestionar →</span>}
                     </div>
                 </div>
@@ -392,14 +381,14 @@ const AdminPanel = () => {
                     <div className="kpi-icon">🛍️</div>
                     <div className="kpi-content">
                         <span className="kpi-label">Publicaciones</span>
-                        <h3 className="kpi-value">{stats.totalProducts}</h3>
+                        <h3 className="kpi-value">{stats?.totalProducts ?? 0}</h3>
                     </div>
                 </div>
                 <div className="admin-kpi-card">
                     <div className="kpi-icon">📦</div>
                     <div className="kpi-content">
                         <span className="kpi-label">Stock General</span>
-                        <h3 className="kpi-value">{stats.totalStock} u</h3>
+                        <h3 className="kpi-value">{stats?.totalStock ?? 0} u</h3>
                     </div>
                 </div>
             </div>
@@ -486,7 +475,7 @@ const AdminPanel = () => {
                         </form>
                     </div>
 
-                    <CategoryManager token={token} />
+                    <CategoryManager />
                 </div>
 
                 <div className="admin-card">
@@ -549,11 +538,13 @@ const AdminPanel = () => {
             </div>
 
             {editingProduct && (
-                <div className="modal-overlay" onClick={closeEdit}>
-                    <div className="admin-card" onClick={(e) => e.stopPropagation()}>
-                        <h3>Editar Producto</h3>
-                        <EditProductForm product={editingProduct} onCancel={closeEdit} onSave={handleSaveEdit} saving={isSaving} categories={categories} />
-                    </div>
+                <div className="modal-overlay" onClick={closeEdit} role="dialog" aria-modal="true" aria-label="Editar Producto">
+                    <FocusLock returnFocus>
+                        <div className="admin-card" onClick={(e) => e.stopPropagation()}>
+                            <h3>Editar Producto</h3>
+                            <EditProductForm key={editingProduct.id} product={editingProduct} onCancel={closeEdit} onSave={handleSaveEdit} saving={isSaving} categories={categories} />
+                        </div>
+                    </FocusLock>
                 </div>
             )}
         </div>

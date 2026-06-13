@@ -5,6 +5,7 @@ import { selectFavoriteItems } from '../features/favorites/favoritesSelectors';
 import { selectProducts } from '../features/products/productsSelectors';
 import { fetchProducts } from '../features/products/productsSlice';
 import CardProductos from '../components/CardProductos';
+import usePageTitle from '../hooks/usePageTitle';
 import './Favorite.css';
 
 /**
@@ -15,6 +16,7 @@ import './Favorite.css';
  * productsSlice (antes hacía su propio fetch a /api/productos con useState).
  */
 const Favorite = () => {
+    usePageTitle('Favoritos');
     const navigate = useNavigate();
     const dispatch = useDispatch();
     // Favoritos desde Redux — unica fuente de verdad
@@ -23,8 +25,10 @@ const Favorite = () => {
 
     // Refresca el catálogo al entrar para mostrar stock/precios reales
     React.useEffect(() => {
-        dispatch(fetchProducts());
-    }, [dispatch]);
+        if (products.length === 0) {
+            dispatch(fetchProducts());
+        }
+    }, [dispatch, products.length]);
 
     // Cruzar IDs para inyectar stock, precios y datos reales en caliente,
     // filtrando los productos que ya no existen en el catálogo activo.

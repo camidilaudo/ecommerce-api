@@ -1,23 +1,35 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import './LoginPage.css';
 import { isValidEmail } from '../utils/validation';
-import { handleApiResponse } from '../utils/apiHelpers';
 import { toast } from 'react-toastify';
-import { loginSuccess } from '../features/auth/authSlice';
+import { loginThunk } from '../features/auth/authSlice';
+import { selectLoadingLogin } from '../features/auth/authSelectors';
+import usePageTitle from '../hooks/usePageTitle';
 
 /**
- * LoginPage — Componente para la autenticación de usuarios.
- * Conecta con el endpoint POST /api/auth/login de Spring Boot.
+ * LoginPage — Autenticación de usuarios via Redux Toolkit.
+ *
+ * El fetch POST /api/auth/login fue migrado a loginThunk (createAsyncThunk).
+ * El estado de carga y error viven en Redux (auth.loadingLogin, auth.errorLogin).
+ * Tras el login exitoso, redirige al destino original (location.state.from)
+ * o al home si no hay destino guardado.
  */
 const LoginPage = () => {
+    usePageTitle('Iniciar sesión');
     const navigate = useNavigate();
+    const location = useLocation();
     const dispatch = useDispatch();
+
+    // Destino de redirección post-login (guardado por PrivateRoute / AdminRoute)
+    const from = location.state?.from?.pathname || '/';
+
+    // Estado de carga desde Redux — no se usa useState(cargando)
+    const loadingLogin = useSelector(selectLoadingLogin);
 
     const [form, setForm] = useState({ email: '', password: '' });
     const [errores, setErrores] = useState({});
-    const [cargando, setCargando] = useState(false);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -44,32 +56,16 @@ const LoginPage = () => {
             return;
         }
 
-        setCargando(true);
-
         try {
-            const response = await fetch('http://localhost:8081/api/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(form),
-            });
-
-            const data = await handleApiResponse(response);
-
-            // Dispatch loginSuccess → store → store.subscribe() persiste en localStorage
-            dispatch(loginSuccess({
-                token: data.token,
-                userRole: data.role || 'USER',
-                usuarioNombre: data.nombre || '',
-                userAvatar: data.avatar || null,
-            }));
-
+            // loginThunk hace el fetch, setea token/rol/nombre en Redux
+            // y store.subscribe() persiste en localStorage automáticamente.
+            await dispatch(loginThunk(form)).unwrap();
             toast.success('¡Bienvenido!');
-            navigate('/');
+            // Redirigir al destino original o al home
+            navigate(from, { replace: true });
         } catch (err) {
-            console.error('Error en Login:', err.message);
-            toast.error(`Error al iniciar sesión: ${err.message}`);
-        } finally {
-            setCargando(false);
+            // El mensaje ya viene formateado desde loginThunk.rejected
+            toast.error(`Error al iniciar sesión: ${err}`);
         }
     };
 
@@ -120,8 +116,8 @@ const LoginPage = () => {
                         {errores.password && <span className="form-error">{errores.password}</span>}
                     </div>
 
-                    <button type="submit" className="auth-submit" disabled={cargando}>
-                        {cargando ? 'Verificando...' : 'Iniciar sesión'}
+                    <button type="submit" className="auth-submit" disabled={loadingLogin}>
+                        {loadingLogin ? 'Verificando...' : 'Iniciar sesión'}
                     </button>
                 </form>
             </div>

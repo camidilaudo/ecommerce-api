@@ -1,34 +1,37 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchCategories } from '../features/categories/categoriesSlice';
+import {
+    selectCategoryNames,
+    selectCategoriesLoading,
+} from '../features/categories/categoriesSelectors';
 import './Categorias.css';
 
+/**
+ * Categorias — Pills de filtro de categorías en la HomePage.
+ *
+ * Migración: fetch local → categoriesSlice (Redux).
+ * Evita un fetch duplicado cuando AdminPanel o CategoryManager
+ * ya cargaron las categorías en el mismo ciclo de vida de la app.
+ *
+ * El selector selectCategoryNames incluye 'Todos' al inicio,
+ * replicando el comportamiento anterior de ['Todos', ...data.map(cat => cat.nombre)].
+ */
 const Categorias = ({ activeCategory, onCategoryChange }) => {
-    const [categories, setCategories] = useState(['Todos']);
-    const [loading, setLoading] = useState(true);
+    const dispatch = useDispatch();
+
+    // categorías (con 'Todos' prepended) y estado de carga desde Redux
+    const categories = useSelector(selectCategoryNames);
+    const loading = useSelector(selectCategoriesLoading);
 
     useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                setLoading(true);
-                const response = await fetch('http://localhost:8081/api/categorias');
-                if (!response.ok) {
-                    throw new Error('Error fetching categories');
-                }
-                const data = await response.json();
-                // Agregar 'Todos' al inicio de la lista
-                setCategories(['Todos', ...data.map(cat => cat.nombre)]);
-            } catch (err) {
-                console.error('Error fetching categories:', err);
-                // Fallback a categorías vacías
-                setCategories(['Todos']);
-            } finally {
-                setLoading(false);
-            }
-        };
+        // Solo fetch si el catálogo no está en cache (solo está 'Todos')
+        if (categories.length <= 1) {
+            dispatch(fetchCategories());
+        }
+    }, [dispatch, categories.length]);
 
-        fetchCategories();
-    }, []);
-
-    if (loading) {
+    if (loading && categories.length <= 1) {
         return (
             <div className="categories-pills container">
                 <p style={{ color: '#86868b', fontSize: '14px' }}>Cargando categorías...</p>
