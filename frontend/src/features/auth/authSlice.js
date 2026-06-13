@@ -1,26 +1,180 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { authFetch } from '../../utils/authFetch';
+
+const API_BASE = 'http://localhost:8081';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THUNKS — Autenticación
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * loginThunk — POST /api/auth/login
+ *
+ * Migra el fetch directo de LoginPage.jsx a Redux Toolkit.
+ * El fulfilled handler setea token, rol, nombre y avatar en el store
+ * sin necesidad de hacer dispatch(loginSuccess()) desde el componente.
+ *
+ * Payload: { email, password }
+ * Fulfills: { token, role, nombre, avatar } (shape del backend Spring Boot)
+ */
+export const loginThunk = createAsyncThunk(
+    'auth/login',
+    async (credentials, { rejectWithValue }) => {
+        try {
+            const response = await fetch(`${API_BASE}/api/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(credentials),
+            });
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                return rejectWithValue(
+                    errData.message || errData.error || 'Credenciales inválidas. Verificá tu email y contraseña.'
+                );
+            }
+            return await response.json();
+        } catch (err) {
+            return rejectWithValue(err.message);
+        }
+    }
+);
+
+/**
+ * registerThunk — POST /api/auth/register
+ *
+ * Migra el fetch directo de RegisterPage.jsx a Redux Toolkit.
+ * El fulfilled no modifica el estado de auth (el registro no inicia sesión),
+ * solo resuelve para que el componente pueda navegar a /login.
+ *
+ * Payload: { nombreUsuario, nombre, apellido, email, password, fechaNacimiento, sexo, avatar }
+ */
+export const registerThunk = createAsyncThunk(
+    'auth/register',
+    async (userData, { rejectWithValue }) => {
+        try {
+            const response = await fetch(`${API_BASE}/api/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData),
+            });
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                return rejectWithValue(
+                    errData.message || errData.error || `Error ${response.status}: no se pudo completar el registro.`
+                );
+            }
+            return await response.json().catch(() => ({ success: true }));
+        } catch (err) {
+            return rejectWithValue(err.message);
+        }
+    }
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THUNKS — Perfil de usuario
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * fetchProfileThunk — GET /api/usuarios/me
+ *
+ * Carga el perfil completo del usuario autenticado y lo guarda en auth.profile.
+ * Usa authFetch → detecta 401 → dispatch logout → redirect /login.
+ * ProfilePage lee auth.profile via useSelector(selectProfile).
+ */
+export const fetchProfileThunk = createAsyncThunk(
+    'auth/fetchProfile',
+    async (_, thunkAPI) => {
+        const { rejectWithValue } = thunkAPI;
+        try {
+            const response = await authFetch(
+                `${API_BASE}/api/usuarios/me`,
+                { headers: { 'Content-Type': 'application/json' } },
+                thunkAPI
+            );
+            if (!response.ok) {
+                return rejectWithValue('Error al cargar el perfil de usuario.');
+            }
+            return await response.json();
+        } catch (err) {
+            return rejectWithValue(err.message);
+        }
+    }
+);
+
+/**
+ * updateAvatarThunk — PATCH /api/usuarios/me/avatar
+ *
+ * Actualiza el avatar en el backend y en Redux (auth.userAvatar + auth.profile.avatar).
+ * Usa authFetch → detecta 401 → dispatch logout → redirect /login.
+ *
+ * Payload: string con el nombre del archivo (ej: "avatar3.webp")
+ * Fulfills: el mismo string (para actualizar el store sin un segundo fetch)
+ */
+export const updateAvatarThunk = createAsyncThunk(
+    'auth/updateAvatar',
+    async (avatar, thunkAPI) => {
+        const { rejectWithValue } = thunkAPI;
+        try {
+            const response = await authFetch(
+                `${API_BASE}/api/usuarios/me/avatar`,
+                {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ avatar }),
+                },
+                thunkAPI
+            );
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                return rejectWithValue(errData.message || 'Error al guardar el avatar.');
+            }
+            return avatar;
+        } catch (err) {
+            return rejectWithValue(err.message);
+        }
+    }
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SLICE
+// ─────────────────────────────────────────────────────────────────────────────
 
 /**
  * authSlice — Estado global de autenticación.
  *
- * IMPORTANTE: Los reducers son completamente puros.
- * No existe ningún efecto secundario (localStorage, fetch, etc.) aquí.
- * La sincronización con localStorage ocurre en store.js via store.subscribe().
+ * Los reducers síncronos (loginSuccess, logout, updateAvatar) se mantienen
+ * para compatibilidad con código existente.
  *
- * Estado inicial: se hidrata desde localStorage en store.js (preloadedState).
+ * Los thunks (loginThunk, registerThunk, fetchProfileThunk, updateAvatarThunk)
+ * gestionan su propio estado de loading/error via extraReducers.
+ *
+ * La sincronización con localStorage ocurre en store.js via store.subscribe().
  */
 const authSlice = createSlice({
     name: 'auth',
     initialState: {
+        // ── Sesión activa ──────────────────────────────────────────────────
         token: null,
         userRole: 'USER',
         usuarioNombre: '',
         userAvatar: null,
         isAuthenticated: false,
+
+        // ── Perfil completo (GET /api/usuarios/me) ─────────────────────────
+        profile: null,
+        loadingProfile: false,
+        errorProfile: null,
+
+        // ── Estados async de autenticación ─────────────────────────────────
+        loadingLogin: false,
+        errorLogin: null,
+        loadingRegister: false,
+        errorRegister: null,
     },
     reducers: {
         /**
-         * loginSuccess — Se dispara cuando el backend devuelve un JWT válido.
+         * loginSuccess — Reducer síncrono mantenido para compatibilidad.
+         * Puede usarse cuando el token llega por un mecanismo externo al thunk.
          * Payload esperado: { token, userRole, usuarioNombre, userAvatar }
          */
         loginSuccess(state, action) {
@@ -35,6 +189,8 @@ const authSlice = createSlice({
         /**
          * logout — Resetea completamente el estado de autenticación.
          * La limpieza de localStorage ocurre en store.subscribe().
+         * También se dispara desde authFetch via { type: 'auth/logout' }
+         * cuando el servidor responde 401.
          */
         logout(state) {
             state.token = null;
@@ -42,16 +198,83 @@ const authSlice = createSlice({
             state.usuarioNombre = '';
             state.userAvatar = null;
             state.isAuthenticated = false;
+            state.profile = null;
+            state.errorLogin = null;
+            state.errorRegister = null;
         },
 
         /**
          * updateAvatar — Actualiza solo el avatar sin forzar un re-login.
-         * Usado desde ProfilePage tras un PATCH exitoso al backend.
+         * Mantenido para compatibilidad. Preferir updateAvatarThunk para
+         * sincronizar con el backend al mismo tiempo.
          * Payload: string con el nombre del archivo (ej: "avatar3.webp")
          */
         updateAvatar(state, action) {
             state.userAvatar = action.payload;
+            if (state.profile) {
+                state.profile = { ...state.profile, avatar: action.payload };
+            }
         },
+    },
+    extraReducers: (builder) => {
+        builder
+            // ── loginThunk ────────────────────────────────────────────────
+            .addCase(loginThunk.pending, (state) => {
+                state.loadingLogin = true;
+                state.errorLogin = null;
+            })
+            .addCase(loginThunk.fulfilled, (state, action) => {
+                const { token, role, nombre, avatar } = action.payload;
+                state.token = token;
+                state.userRole = role || 'USER';
+                state.usuarioNombre = nombre || '';
+                state.userAvatar = avatar || null;
+                state.isAuthenticated = true;
+                state.loadingLogin = false;
+                state.errorLogin = null;
+            })
+            .addCase(loginThunk.rejected, (state, action) => {
+                state.loadingLogin = false;
+                state.errorLogin = action.payload || action.error.message;
+            })
+
+            // ── registerThunk ─────────────────────────────────────────────
+            .addCase(registerThunk.pending, (state) => {
+                state.loadingRegister = true;
+                state.errorRegister = null;
+            })
+            .addCase(registerThunk.fulfilled, (state) => {
+                state.loadingRegister = false;
+                state.errorRegister = null;
+            })
+            .addCase(registerThunk.rejected, (state, action) => {
+                state.loadingRegister = false;
+                state.errorRegister = action.payload || action.error.message;
+            })
+
+            // ── fetchProfileThunk ─────────────────────────────────────────
+            .addCase(fetchProfileThunk.pending, (state) => {
+                state.loadingProfile = true;
+                state.errorProfile = null;
+            })
+            .addCase(fetchProfileThunk.fulfilled, (state, action) => {
+                state.profile = action.payload;
+                state.loadingProfile = false;
+            })
+            .addCase(fetchProfileThunk.rejected, (state, action) => {
+                state.loadingProfile = false;
+                state.errorProfile = action.payload || action.error.message;
+            })
+
+            // ── updateAvatarThunk ─────────────────────────────────────────
+            // No tiene pending/rejected propios: el componente gestiona el
+            // estado del botón con useState(guardandoAvatar) y .unwrap().
+            .addCase(updateAvatarThunk.fulfilled, (state, action) => {
+                state.userAvatar = action.payload;
+                if (state.profile) {
+                    state.profile = { ...state.profile, avatar: action.payload };
+                }
+            });
     },
 });
 

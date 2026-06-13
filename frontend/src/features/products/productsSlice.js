@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { selectToken } from '../auth/authSelectors';
+import { authFetch } from '../../utils/authFetch';
 
 /**
  * productsSlice — Estado global del catálogo de productos.
@@ -89,17 +89,14 @@ export const fetchProductsByCategory = createAsyncThunk(
 /** Alta de producto (Admin). */
 export const createProduct = createAsyncThunk(
     'products/create',
-    async (productData, { getState, rejectWithValue }) => {
-        const token = selectToken(getState());
+    async (productData, thunkAPI) => {
+        const { rejectWithValue } = thunkAPI;
         try {
-            const response = await fetch(API_BASE, {
+            const response = await authFetch(API_BASE, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(productData),
-            });
+            }, thunkAPI);
             if (!response.ok) {
                 return rejectWithValue(
                     await extractErrorMessage(response, 'No se pudo dar de alta el producto.')
@@ -115,17 +112,14 @@ export const createProduct = createAsyncThunk(
 /** Modificación de producto (Admin). */
 export const updateProduct = createAsyncThunk(
     'products/update',
-    async ({ id, data }, { getState, rejectWithValue }) => {
-        const token = selectToken(getState());
+    async ({ id, data }, thunkAPI) => {
+        const { rejectWithValue } = thunkAPI;
         try {
-            const response = await fetch(`${API_BASE}/${id}`, {
+            const response = await authFetch(`${API_BASE}/${id}`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
-            });
+            }, thunkAPI);
             if (!response.ok) {
                 return rejectWithValue(
                     await extractErrorMessage(response, 'No se pudo actualizar el producto.')
@@ -141,13 +135,12 @@ export const updateProduct = createAsyncThunk(
 /** Baja de producto (Admin). El payload útil es action.meta.arg (el id). */
 export const deleteProduct = createAsyncThunk(
     'products/delete',
-    async (id, { getState, rejectWithValue }) => {
-        const token = selectToken(getState());
+    async (id, thunkAPI) => {
+        const { rejectWithValue } = thunkAPI;
         try {
-            const response = await fetch(`${API_BASE}/${id}`, {
+            const response = await authFetch(`${API_BASE}/${id}`, {
                 method: 'DELETE',
-                headers: { Authorization: `Bearer ${token}` },
-            });
+            }, thunkAPI);
             if (!response.ok) {
                 return rejectWithValue(
                     await extractErrorMessage(response, 'No se pudo eliminar el artículo.')
