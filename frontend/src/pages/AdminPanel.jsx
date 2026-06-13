@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import FocusLock from 'react-focus-lock';
 import './AdminPanel.css';
 import { toast } from 'react-toastify';
 import CategoryManager from '../components/CategoryManager';
@@ -229,6 +230,25 @@ const AdminPanel = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    // Efecto para modal de edición
+    useEffect(() => {
+        if (!editingProduct) return;
+
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                closeEdit();
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        document.body.style.overflow = 'hidden';
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+            document.body.style.overflow = '';
+        };
+    }, [editingProduct]);
+
     // Funciones dinámicas para imágenes en el alta
     const handleImageChange = (index, value) => {
         const newImages = [...form.imagenes];
@@ -273,7 +293,7 @@ const AdminPanel = () => {
             await dispatch(createProduct(payload)).unwrap();
             toast.success('Producto publicado con éxito');
             setForm({ nombre: '', descripcion: '', precio: '', stock: '', categoriaIds: [], imagenes: [''] });
-            refreshProducts();
+            fetchStats();
         } catch (err) {
             console.error(err);
             toast.error(`No se pudo dar de alta el producto: ${err}`);
@@ -285,7 +305,7 @@ const AdminPanel = () => {
         try {
             await dispatch(deleteProduct(id)).unwrap();
             toast.success('Producto eliminado');
-            refreshProducts();
+            fetchStats();
         } catch (err) {
             console.error(err);
             toast.error(`No se pudo eliminar el artículo: ${err}`);
@@ -300,7 +320,7 @@ const AdminPanel = () => {
         try {
             await dispatch(updateProduct({ id: updated.id, data: updated })).unwrap();
             toast.success('Producto actualizado correctamente');
-            refreshProducts();
+            fetchStats();
             closeEdit();
         } catch (err) {
             console.error(err);
@@ -518,11 +538,13 @@ const AdminPanel = () => {
             </div>
 
             {editingProduct && (
-                <div className="modal-overlay" onClick={closeEdit}>
-                    <div className="admin-card" onClick={(e) => e.stopPropagation()}>
-                        <h3>Editar Producto</h3>
-                        <EditProductForm product={editingProduct} onCancel={closeEdit} onSave={handleSaveEdit} saving={isSaving} categories={categories} />
-                    </div>
+                <div className="modal-overlay" onClick={closeEdit} role="dialog" aria-modal="true" aria-label="Editar Producto">
+                    <FocusLock returnFocus>
+                        <div className="admin-card" onClick={(e) => e.stopPropagation()}>
+                            <h3>Editar Producto</h3>
+                            <EditProductForm key={editingProduct.id} product={editingProduct} onCancel={closeEdit} onSave={handleSaveEdit} saving={isSaving} categories={categories} />
+                        </div>
+                    </FocusLock>
                 </div>
             )}
         </div>

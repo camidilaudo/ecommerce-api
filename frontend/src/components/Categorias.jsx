@@ -25,9 +25,11 @@ const Categorias = ({ activeCategory, onCategoryChange }) => {
     const loading = useSelector(selectCategoriesLoading);
 
     useEffect(() => {
-        // Solo fetch si el catálogo no está en cache
-        dispatch(fetchCategories());
-    }, [dispatch]);
+        // Solo fetch si el catálogo no está en cache (solo está 'Todos')
+        if (categories.length <= 1) {
+            dispatch(fetchCategories());
+        }
+    }, [dispatch, categories.length]);
 
     if (loading && categories.length <= 1) {
         return (

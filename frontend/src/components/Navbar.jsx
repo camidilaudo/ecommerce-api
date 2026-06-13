@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -41,6 +41,24 @@ const Navbar = ({ onSearch }) => {
     const [isA11yOpen, setIsA11yOpen] = useState(false);
     const [query, setQuery] = useState('');
     const debouncedQuery = useDebounce(query, 400);
+    const userMenuRef = useRef(null);
+
+    // Cerrar menú al clickear afuera
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+                setIsUserMenuOpen(false);
+            }
+        };
+
+        if (isUserMenuOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isUserMenuOpen]);
 
     useEffect(() => {
         if (typeof onSearch === 'function') {
@@ -144,8 +162,8 @@ const Navbar = ({ onSearch }) => {
                             )}
                         </button>
 
-                        {/* ── Usuario ─────────────────────────────────────── */}
-                        <div className="user-menu-wrapper">
+                        {/* ── Menú de Usuario 👤 ─────────────────────────── */}
+                        <div className="user-menu-wrapper" ref={userMenuRef}>
                             <button
                                 className="nav-btn"
                                 onClick={handleToggleUserMenu}

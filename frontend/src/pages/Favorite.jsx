@@ -25,8 +25,10 @@ const Favorite = () => {
 
     // Refresca el catálogo al entrar para mostrar stock/precios reales
     React.useEffect(() => {
-        dispatch(fetchProducts());
-    }, [dispatch]);
+        if (products.length === 0) {
+            dispatch(fetchProducts());
+        }
+    }, [dispatch, products.length]);
 
     // Cruzar IDs para inyectar stock, precios y datos reales en caliente,
     // filtrando los productos que ya no existen en el catálogo activo.

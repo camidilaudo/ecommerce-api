@@ -106,8 +106,7 @@ export const fetchAdminStats = createAsyncThunk(
                 thunkAPI
             );
             if (!response.ok) {
-                // No usamos rejectWithValue aquí: stats no críticas
-                return null;
+                return rejectWithValue('Error al cargar estadísticas');
             }
             return await response.json();
         } catch (err) {

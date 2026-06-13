@@ -62,10 +62,11 @@ const ProductDetailPage = () => {
 
     // Fetch de productos recomendados de la misma categoría.
     // El extraReducer excluye el producto actual y limita a 4 sugerencias.
+    const categoryId = product?.categoriaIds?.[0];
     useEffect(() => {
-        if (!product || !product.categoriaIds || product.categoriaIds.length === 0) return;
-        dispatch(fetchProductsByCategory(product.categoriaIds[0]));
-    }, [product, dispatch]);
+        if (!categoryId) return;
+        dispatch(fetchProductsByCategory(categoryId));
+    }, [categoryId, dispatch]);
 
     const handleAddToCart = async () => {
         if (!product) return;
