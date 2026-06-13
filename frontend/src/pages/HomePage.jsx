@@ -9,6 +9,7 @@ import {
     selectProductsLoading,
     selectProductsError,
 } from '../features/products/productsSelectors';
+import usePageTitle from '../hooks/usePageTitle';
 import '../components/ProductList.css'; // Importamos el CSS donde ahora vive .home-hero
 
 /**
@@ -17,6 +18,7 @@ import '../components/ProductList.css'; // Importamos el CSS donde ahora vive .h
  * filtros de UI (categoría, búsqueda, rango de precios).
  */
 const HomePage = ({ searchQuery }) => {
+    usePageTitle('Inicio');
     const dispatch = useDispatch();
 
     // Catálogo desde Redux — única fuente de verdad

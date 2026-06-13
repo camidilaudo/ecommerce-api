@@ -7,6 +7,7 @@ import {
     selectOrdersLoading,
     selectOrdersError,
 } from '../features/orders/ordersSelectors';
+import usePageTitle from '../hooks/usePageTitle';
 import './OrdersPage.css';
 
 /**
@@ -20,6 +21,7 @@ import './OrdersPage.css';
  * selectedOrder sigue siendo estado local: es UI puro (qué modal está abierto).
  */
 const OrdersPage = () => {
+    usePageTitle('Mis Pedidos');
     const navigate = useNavigate();
     const dispatch = useDispatch();
 

@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import AvatarPicker from '../components/AvatarPicker';
 import { registerThunk } from '../features/auth/authSlice';
 import { selectLoadingRegister } from '../features/auth/authSelectors';
+import usePageTitle from '../hooks/usePageTitle';
 
 /**
  * RegisterPage — Registro de usuario via Redux Toolkit.
@@ -16,6 +17,7 @@ import { selectLoadingRegister } from '../features/auth/authSelectors';
  * Tras el registro exitoso, redirige a /login.
  */
 const RegisterPage = () => {
+    usePageTitle('Registrarse');
     const navigate = useNavigate();
     const dispatch = useDispatch();
 

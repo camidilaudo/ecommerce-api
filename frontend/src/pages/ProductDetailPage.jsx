@@ -18,6 +18,7 @@ import {
     selectProductsError,
 } from '../features/products/productsSelectors';
 import { toast } from 'react-toastify';
+import usePageTitle from '../hooks/usePageTitle';
 import './ProductDetailPage.css';
 
 /**
@@ -39,6 +40,9 @@ const ProductDetailPage = () => {
     const error = useSelector(selectProductsError);
     const relatedProducts = useSelector(selectRelatedProducts);
     const loadingRelated = useSelector(selectProductsLoadingRelated);
+
+    // Título dinámico: cambia automáticamente cuando el producto carga del store
+    usePageTitle(product?.nombre || 'Detalle de Producto');
 
     // Estado de UI puro — se mantiene local.
     // selectedImage guarda el id del producto para invalidarse sola al navegar

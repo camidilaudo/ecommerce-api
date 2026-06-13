@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import './AdminPanel.css';
 import { toast } from 'react-toastify';
-import { handleApiResponse } from '../utils/apiHelpers';
 import CategoryManager from '../components/CategoryManager';
 import { selectToken, selectUserRole } from '../features/auth/authSelectors';
 import {
@@ -15,6 +14,9 @@ import {
 import { selectProducts, selectProductsLoading } from '../features/products/productsSelectors';
 import { fetchAdminStats } from '../features/users/usersSlice';
 import { selectAdminStats } from '../features/users/usersSelectors';
+import { fetchCategories } from '../features/categories/categoriesSlice';
+import { selectCategories } from '../features/categories/categoriesSelectors';
+import usePageTitle from '../hooks/usePageTitle';
 
 /**
  * EditProductForm - Formulario de edición con soporte para múltiples fotos dinámicas.
@@ -170,6 +172,7 @@ const EditProductForm = ({ product, onCancel, onSave, saving, categories }) => {
  * AdminPanel - Panel Principal de Gestión de Productos.
  */
 const AdminPanel = () => {
+    usePageTitle('Panel de Administración');
     const navigate = useNavigate();
     const dispatch = useDispatch();
     // Token y rol desde Redux — NO más useAuth() ni localStorage
@@ -184,7 +187,9 @@ const AdminPanel = () => {
     // Stats desde usersSlice — fuente compartida con UsersPage (sin fetch duplicado)
     const stats = useSelector(selectAdminStats);
 
-    const [categories, setCategories] = useState([]);
+    // Categorías desde categoriesSlice — fuente compartida con CategoryManager y Categorias
+    const categories = useSelector(selectCategories);
+
     const [form, setForm] = useState({
         nombre: '',
         descripcion: '',
@@ -217,20 +222,10 @@ const AdminPanel = () => {
         fetchStats();
     };
 
-    const fetchCategories = async () => {
-        try {
-            const response = await fetch('http://localhost:8081/api/categorias');
-            const data = await handleApiResponse(response);
-            setCategories(data || []);
-        } catch (err) {
-            console.error('Error fetching categories:', err.message);
-        }
-    };
-
     useEffect(() => {
         // AdminRoute garantiza que hay token y rol ADMIN antes de renderizar este componente.
         refreshProducts();
-        fetchCategories();
+        dispatch(fetchCategories());
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -460,7 +455,7 @@ const AdminPanel = () => {
                         </form>
                     </div>
 
-                    <CategoryManager token={token} />
+                    <CategoryManager />
                 </div>
 
                 <div className="admin-card">

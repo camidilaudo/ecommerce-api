@@ -9,6 +9,7 @@ import {
     selectActionLoadingId,
     selectAdminStats,
 } from '../features/users/usersSelectors';
+import usePageTitle from '../hooks/usePageTitle';
 import './UsersPage.css';
 import './AdminPanel.css';
 
@@ -77,6 +78,7 @@ const ITEMS_PER_PAGE = 8;
  * La guardia de rol (AdminRoute) reemplaza el useEffect de redirect manual.
  */
 const UsersPage = () => {
+    usePageTitle('Gestión de Usuarios');
     const navigate = useNavigate();
     const dispatch = useDispatch();
 

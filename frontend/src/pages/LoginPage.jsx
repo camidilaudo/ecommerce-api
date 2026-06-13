@@ -6,6 +6,7 @@ import { isValidEmail } from '../utils/validation';
 import { toast } from 'react-toastify';
 import { loginThunk } from '../features/auth/authSlice';
 import { selectLoadingLogin } from '../features/auth/authSelectors';
+import usePageTitle from '../hooks/usePageTitle';
 
 /**
  * LoginPage — Autenticación de usuarios via Redux Toolkit.
@@ -16,6 +17,7 @@ import { selectLoadingLogin } from '../features/auth/authSelectors';
  * o al home si no hay destino guardado.
  */
 const LoginPage = () => {
+    usePageTitle('Iniciar sesión');
     const navigate = useNavigate();
     const location = useLocation();
     const dispatch = useDispatch();

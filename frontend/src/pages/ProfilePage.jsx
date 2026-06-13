@@ -11,6 +11,7 @@ import {
 } from '../features/auth/authSelectors';
 import AvatarPicker from '../components/AvatarPicker';
 import { toast } from 'react-toastify';
+import usePageTitle from '../hooks/usePageTitle';
 
 /**
  * ProfilePage — Perfil del usuario autenticado via Redux Toolkit.
@@ -24,6 +25,7 @@ import { toast } from 'react-toastify';
  * hace logout y redirige a /login automáticamente.
  */
 const ProfilePage = () => {
+    usePageTitle('Mi Perfil');
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
