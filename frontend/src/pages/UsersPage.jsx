@@ -1,13 +1,16 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { selectToken, selectUserRole } from '../features/auth/authSelectors';
-import { handleApiResponse } from '../utils/apiHelpers';
+import { fetchUsers, toggleUserActive, fetchAdminStats } from '../features/users/usersSlice';
+import {
+    selectUsers,
+    selectUsersLoading,
+    selectActionLoadingId,
+    selectAdminStats,
+} from '../features/users/usersSelectors';
 import './UsersPage.css';
 import './AdminPanel.css';
-
-const API_BASE = 'http://localhost:8081';
 
 // ── Utilidades ──────────────────────────────────────────────────────────────
 
@@ -58,95 +61,82 @@ const StatsKpiCard = ({ icon, label, value, colorClass }) => (
 
 const ITEMS_PER_PAGE = 8;
 
+/**
+ * UsersPage — Gestión de usuarios via Redux Toolkit.
+ *
+ * Migraciones:
+ *   - fetchUsuarios (useCallback + fetch) → dispatch(fetchUsers(search))
+ *   - fetchStats    (useCallback + fetch) → dispatch(fetchAdminStats())
+ *   - handleToggleActivo (fetch + setUsuarios) → dispatch(toggleUserActive(u))
+ *   - useState(usuarios/loading/stats)    → selectores Redux
+ *   - useState(actionLoadingId)           → selectActionLoadingId
+ *
+ * La búsqueda con debounce, ordenamiento y paginación siguen siendo estado
+ * local: son estado de UI, no de negocio — no pertenecen al store.
+ *
+ * La guardia de rol (AdminRoute) reemplaza el useEffect de redirect manual.
+ */
 const UsersPage = () => {
     const navigate = useNavigate();
-    // Token y rol desde Redux — NO más useAuth() ni localStorage directo
-    const token = useSelector(selectToken);
-    const userRole = useSelector(selectUserRole);
+    const dispatch = useDispatch();
 
-    // ── Estado ────────────────────────────────────────────────────────────────
-    const [usuarios, setUsuarios] = useState([]);
-    const [stats, setStats] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [actionLoadingId, setActionLoadingId] = useState(null);
+    // ── Datos desde Redux ───────────────────────────────────────────────────
+    const usuarios = useSelector(selectUsers);
+    const loading = useSelector(selectUsersLoading);
+    const actionLoadingId = useSelector(selectActionLoadingId);
+    const stats = useSelector(selectAdminStats);
 
+    // ── Estado de UI local ──────────────────────────────────────────────────
     const [searchValue, setSearchValue] = useState('');
     const [sortKey, setSortKey] = useState('id');
     const [sortDir, setSortDir] = useState('asc');
     const [currentPage, setCurrentPage] = useState(1);
-
     const debounceRef = useRef(null);
 
-    // ── Guardia de rol ────────────────────────────────────────────────────────
+    // ── Carga inicial — AdminRoute garantiza que hay token y rol ADMIN ──────
     useEffect(() => {
-        if (!token) {
-            navigate('/login');
-            return;
-        }
-        if (userRole !== 'ADMIN') {
-            toast.error('Acceso restringido. Se requiere rol ADMIN.');
-            navigate('/');
-        }
-    }, [token, userRole, navigate]);
+        dispatch(fetchUsers());
+        dispatch(fetchAdminStats());
+    }, [dispatch]);
 
-    // ── Carga de datos ────────────────────────────────────────────────────────
-    const fetchUsuarios = useCallback(async (search = '') => {
-        try {
-            setLoading(true);
-            const url = search.trim()
-                ? `${API_BASE}/api/usuarios?search=${encodeURIComponent(search.trim())}`
-                : `${API_BASE}/api/usuarios`;
-
-            const res = await fetch(url, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            const data = await handleApiResponse(res);
-            setUsuarios(data || []);
-            setCurrentPage(1);
-        } catch (err) {
-            toast.error(`No se pudo cargar la lista de usuarios: ${err.message}`);
-        } finally {
-            setLoading(false);
-        }
-    }, [token]);
-
-    const fetchStats = useCallback(async () => {
-        try {
-            const res = await fetch(`${API_BASE}/api/admin/stats`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setStats(data);
-            }
-        } catch {
-            // Stats no críticas — falla silenciosamente
-        }
-    }, [token]);
-
-    useEffect(() => {
-        if (userRole === 'ADMIN') {
-            fetchUsuarios();
-            fetchStats();
-        }
-    }, [userRole, fetchUsuarios, fetchStats]);
-
-    // ── Búsqueda con debounce ─────────────────────────────────────────────────
+    // ── Búsqueda con debounce ───────────────────────────────────────────────
     const handleSearchChange = (e) => {
         const val = e.target.value;
         setSearchValue(val);
         if (debounceRef.current) clearTimeout(debounceRef.current);
         debounceRef.current = setTimeout(() => {
-            fetchUsuarios(val);
+            dispatch(fetchUsers(val));
+            setCurrentPage(1);
         }, 400);
     };
 
     const handleClearSearch = () => {
         setSearchValue('');
-        fetchUsuarios('');
+        dispatch(fetchUsers(''));
+        setCurrentPage(1);
     };
 
-    // ── Ordenamiento ──────────────────────────────────────────────────────────
+    // ── Bloquear / Desbloquear ──────────────────────────────────────────────
+    const handleToggleActivo = async (usuario) => {
+        const confirmMsg = usuario.activo
+            ? `¿Bloqueás la cuenta de ${usuario.nombre} ${usuario.apellido}? No podrá iniciar sesión.`
+            : `¿Desbloqueás la cuenta de ${usuario.nombre} ${usuario.apellido}?`;
+
+        if (!window.confirm(confirmMsg)) return;
+
+        try {
+            await dispatch(toggleUserActive(usuario)).unwrap();
+            const verb = usuario.activo ? 'bloqueado' : 'desbloqueado';
+            toast.success(`Usuario ${usuario.nombre} ${usuario.apellido} ${verb} exitosamente.`);
+            // Refrescar stats para que los KPI reflejen el cambio
+            dispatch(fetchAdminStats());
+        } catch (err) {
+            const accion = usuario.activo ? 'bloquear' : 'desbloquear';
+            toast.error(`No se pudo ${accion} al usuario: ${err}`);
+        }
+    };
+
+    // ── Ordenamiento ────────────────────────────────────────────────────────
     const handleSort = (key) => {
         if (sortKey === key) {
             setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
@@ -173,58 +163,20 @@ const UsersPage = () => {
         return 0;
     });
 
-    // ── Paginación ────────────────────────────────────────────────────────────
+    // ── Paginación ──────────────────────────────────────────────────────────
     const totalPages = Math.max(1, Math.ceil(sortedUsuarios.length / ITEMS_PER_PAGE));
     const paginatedUsuarios = sortedUsuarios.slice(
         (currentPage - 1) * ITEMS_PER_PAGE,
         currentPage * ITEMS_PER_PAGE
     );
 
-    // ── Bloquear / Desbloquear ────────────────────────────────────────────────
-    const handleToggleActivo = async (usuario) => {
-        const accion = usuario.activo ? 'bloquear' : 'desbloquear';
-        const confirmMsg = usuario.activo
-            ? `¿Bloqueás la cuenta de ${usuario.nombre} ${usuario.apellido}? No podrá iniciar sesión.`
-            : `¿Desbloqueás la cuenta de ${usuario.nombre} ${usuario.apellido}?`;
-
-        if (!window.confirm(confirmMsg)) return;
-
-        setActionLoadingId(usuario.id);
-        try {
-            const res = await fetch(`${API_BASE}/api/usuarios/${usuario.id}/toggle-activo`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ activo: !usuario.activo }),
-            });
-            await handleApiResponse(res);
-
-            const verb = usuario.activo ? 'bloqueado' : 'desbloqueado';
-            toast.success(`Usuario ${usuario.nombre} ${usuario.apellido} ${verb} exitosamente.`);
-
-            // Actualizar estado local sin recargar toda la lista
-            setUsuarios((prev) =>
-                prev.map((u) =>
-                    u.id === usuario.id ? { ...u, activo: !u.activo } : u
-                )
-            );
-            fetchStats();
-        } catch (err) {
-            toast.error(`No se pudo ${accion} al usuario: ${err.message}`);
-        } finally {
-            setActionLoadingId(null);
-        }
-    };
-
-    // ── Icono de sort ─────────────────────────────────────────────────────────
+    // ── Icono de sort ───────────────────────────────────────────────────────
     const SortIcon = ({ col }) => {
         if (sortKey !== col) return <i className="sort-icon">↕</i>;
         return <i className="sort-icon">{sortDir === 'asc' ? '↑' : '↓'}</i>;
     };
 
-    // ── Render ────────────────────────────────────────────────────────────────
+    // ── Render ──────────────────────────────────────────────────────────────
     return (
         <div className="admin-page container">
 

@@ -3,6 +3,8 @@ import authReducer from '../features/auth/authSlice';
 import cartReducer from '../features/cart/cartSlice';
 import favoritesReducer from '../features/favorites/favoritesSlice';
 import productsReducer from '../features/products/productsSlice';
+import ordersReducer from '../features/orders/ordersSlice';
+import usersReducer from '../features/users/usersSlice';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HIDRATACIÓN INICIAL (Tarea 4)
@@ -42,7 +44,8 @@ export const store = configureStore({
         cart: cartReducer,
         favorites: favoritesReducer,
         products: productsReducer,
-        // Futuras slices: orders, notifications, wishlist, dashboard...
+        orders: ordersReducer,
+        users: usersReducer,
     },
     preloadedState,
 });

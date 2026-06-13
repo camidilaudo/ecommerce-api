@@ -13,6 +13,8 @@ import {
     deleteProduct,
 } from '../features/products/productsSlice';
 import { selectProducts, selectProductsLoading } from '../features/products/productsSelectors';
+import { fetchAdminStats } from '../features/users/usersSlice';
+import { selectAdminStats } from '../features/users/usersSelectors';
 
 /**
  * EditProductForm - Formulario de edición con soporte para múltiples fotos dinámicas.
@@ -179,7 +181,9 @@ const AdminPanel = () => {
     const productos = useSelector(selectProducts);
     const loading = useSelector(selectProductsLoading);
 
-    // Categorías y stats quedan locales: fuera del scope de productsSlice
+    // Stats desde usersSlice — fuente compartida con UsersPage (sin fetch duplicado)
+    const stats = useSelector(selectAdminStats);
+
     const [categories, setCategories] = useState([]);
     const [form, setForm] = useState({
         nombre: '',
@@ -195,34 +199,12 @@ const AdminPanel = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 6;
 
-    const [stats, setStats] = useState({
-        totalSales: 0.0,
-        totalUsers: 0,
-        totalProducts: 0,
-        totalStock: 0
-    });
-
-
-
-    const fetchStats = async () => {
-        try {
-            const response = await fetch('http://localhost:8081/api/admin/stats', {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setStats(data);
-            }
-        } catch (err) {
-            console.error('Error fetching admin stats:', err.message);
-        }
+    const fetchStats = () => {
+        dispatch(fetchAdminStats());
     };
 
     /**
      * Re-sincroniza inventario (via productsSlice) + stats, y resetea la página.
-     * Reemplaza al viejo fetchProducts local con useState.
      */
     const refreshProducts = () => {
         dispatch(fetchProducts())
@@ -246,19 +228,11 @@ const AdminPanel = () => {
     };
 
     useEffect(() => {
-        if (!token) {
-            navigate('/login');
-            return;
-        }
-        const role = storedRole;
-        if (role !== 'ADMIN') {
-            navigate('/');
-            return;
-        }
+        // AdminRoute garantiza que hay token y rol ADMIN antes de renderizar este componente.
         refreshProducts();
         fetchCategories();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [token, navigate]);
+    }, []);
 
     // Funciones dinámicas para imágenes en el alta
     const handleImageChange = (index, value) => {
@@ -363,13 +337,13 @@ const AdminPanel = () => {
                 </button>
             </header>
 
-            {/* Dashboard de Estadísticas y KPIs */}
+            {/* Dashboard de Estadísticas y KPIs — stats viene de usersSlice (fetchAdminStats) */}
             <div className="admin-kpi-grid">
                 <div className="admin-kpi-card">
                     <div className="kpi-icon">💰</div>
                     <div className="kpi-content">
                         <span className="kpi-label">Facturación Total</span>
-                        <h3 className="kpi-value">${stats.totalSales.toFixed(2)}</h3>
+                        <h3 className="kpi-value">${(stats?.totalSales ?? 0).toFixed(2)}</h3>
                     </div>
                 </div>
                 <div
@@ -384,7 +358,7 @@ const AdminPanel = () => {
                     <div className="kpi-icon">👥</div>
                     <div className="kpi-content">
                         <span className="kpi-label">Clientes Registrados</span>
-                        <h3 className="kpi-value">{stats.totalUsers}</h3>
+                        <h3 className="kpi-value">{stats?.totalUsers ?? 0}</h3>
                         {isAdmin && <span className="kpi-hint">Click para gestionar →</span>}
                     </div>
                 </div>
@@ -392,14 +366,14 @@ const AdminPanel = () => {
                     <div className="kpi-icon">🛍️</div>
                     <div className="kpi-content">
                         <span className="kpi-label">Publicaciones</span>
-                        <h3 className="kpi-value">{stats.totalProducts}</h3>
+                        <h3 className="kpi-value">{stats?.totalProducts ?? 0}</h3>
                     </div>
                 </div>
                 <div className="admin-kpi-card">
                     <div className="kpi-icon">📦</div>
                     <div className="kpi-content">
                         <span className="kpi-label">Stock General</span>
-                        <h3 className="kpi-value">{stats.totalStock} u</h3>
+                        <h3 className="kpi-value">{stats?.totalStock ?? 0} u</h3>
                     </div>
                 </div>
             </div>

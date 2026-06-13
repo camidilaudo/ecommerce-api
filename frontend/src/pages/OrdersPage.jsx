@@ -1,50 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { selectToken } from '../features/auth/authSelectors';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchOrders } from '../features/orders/ordersSlice';
+import {
+    selectOrders,
+    selectOrdersLoading,
+    selectOrdersError,
+} from '../features/orders/ordersSelectors';
 import './OrdersPage.css';
 
 /**
- * OrdersPage - Historial de pedidos y detalle interactivo.
- * Consume de forma real el endpoint GET /api/pedidos de Spring Boot.
+ * OrdersPage — Historial de pedidos via Redux Toolkit.
+ *
+ * Migración:
+ *   - fetch directo GET /api/pedidos → fetchOrders (createAsyncThunk)
+ *   - useState(orders/loading/error) → selectores Redux
+ *
+ * El acceso está protegido por PrivateRoute — no hace falta redirect manual.
+ * selectedOrder sigue siendo estado local: es UI puro (qué modal está abierto).
  */
 const OrdersPage = () => {
     const navigate = useNavigate();
-    // Token desde Redux — NO más localStorage.getItem('token')
-    const token = useSelector(selectToken);
-    const [orders, setOrders] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const dispatch = useDispatch();
+
+    // Datos y estados de carga desde Redux
+    const orders = useSelector(selectOrders);
+    const loading = useSelector(selectOrdersLoading);
+    const error = useSelector(selectOrdersError);
+
+    // Estado de UI local — no pertenece al store
     const [selectedOrder, setSelectedOrder] = useState(null);
 
+    // Carga los pedidos al montar — PrivateRoute garantiza token
     useEffect(() => {
-        if (!token) {
-            navigate('/login');
-            return;
-        }
-
-        const fetchOrders = async () => {
-            try {
-                const response = await fetch('http://localhost:8081/api/pedidos', {
-                    method: 'GET',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (!response.ok) throw new Error('Error al traer pedidos');
-                const data = await response.json();
-                
-                // Ordenar por ID descendente (más nuevos primero)
-                const sorted = (data || []).sort((a, b) => b.id - a.id);
-                setOrders(sorted);
-            } catch (err) {
-                console.error(err.message);
-                setError('No se pudo conectar con el servidor. Verificá que el backend esté corriendo.');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchOrders();
-    }, [navigate]);
+        dispatch(fetchOrders());
+    }, [dispatch]);
 
     // Formatear Fecha y Hora del ISO String retornado por el Backend
     const formatDateTime = (isoString) => {
@@ -86,8 +76,8 @@ const OrdersPage = () => {
             ) : (
                 <div className="orders-list">
                     {orders.map(order => (
-                        <div 
-                            key={order.id} 
+                        <div
+                            key={order.id}
                             className="order-card"
                             onClick={() => setSelectedOrder(order)}
                         >
@@ -109,7 +99,7 @@ const OrdersPage = () => {
                 <div className="modal-backdrop" onClick={() => setSelectedOrder(null)}>
                     <div className="order-detail-modal" onClick={e => e.stopPropagation()}>
                         <button className="modal-close-x" onClick={() => setSelectedOrder(null)}>✕</button>
-                        
+
                         <div className="modal-header">
                             <h3>Detalle de Compra</h3>
                             <div className="modal-meta">
