@@ -2,9 +2,9 @@ import { StrictMode, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { Provider, useDispatch, useSelector } from 'react-redux';
-import { store } from './app/store';
-import { selectIsAuthenticated, selectUsuarioNombre } from './features/auth/authSelectors';
-import { loadFavorites } from './features/favorites/favoritesSlice';
+import { PersistGate } from 'redux-persist/integration/react';
+import { store, persistor } from './app/store';
+import { selectIsAuthenticated } from './features/auth/authSelectors';
 import { fetchCart } from './features/cart/cartThunks';
 import { AccessibilityProvider } from './context/AccessibilityContext';
 import './index.css';
@@ -13,40 +13,26 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 /**
- * AppInitializer — Componente interno que sincroniza el carrito y favoritos
+ * AppInitializer — Componente interno que sincroniza el carrito
  * con el store Redux cuando cambia el estado de autenticación.
  *
- * Se ejecuta DENTRO del Provider de Redux para tener acceso al store.
- * No renderiza nada propio — es un efecto puro.
+ * Se ejecuta DENTRO del Provider de Redux y PersistGate para tener
+ * acceso al store ya hidratado. No renderiza nada propio — es un efecto puro.
+ *
+ * Nota: la carga de favoritos fue eliminada de este componente porque
+ * redux-persist los restaura automáticamente desde localStorage
+ * al inicializar el store (via PersistGate). clearFavorites() en
+ * Navbar.jsx sigue encargándose de limpiarlos al hacer logout.
  */
 const AppInitializer = ({ children }) => {
     const dispatch = useDispatch();
     const isAuthenticated = useSelector(selectIsAuthenticated);
-    const usuarioNombre = useSelector(selectUsuarioNombre);
 
-    // DT-05: recargar carrito al cambiar sesión.
-    // DT-04: fetchCart limpia el carrito local si no hay token.
+    // Recargar carrito desde el backend al cambiar de sesión.
+    // fetchCart limpia el carrito local si no hay token activo.
     useEffect(() => {
         dispatch(fetchCart());
     }, [isAuthenticated, dispatch]);
-
-    // Cargar favoritos del usuario activo desde localStorage.
-    useEffect(() => {
-        const storageKey = isAuthenticated && usuarioNombre
-            ? `favorites_${usuarioNombre}`
-            : 'favorites_guest';
-
-        const stored = localStorage.getItem(storageKey);
-        if (stored) {
-            try {
-                dispatch(loadFavorites(JSON.parse(stored)));
-            } catch {
-                dispatch(loadFavorites([]));
-            }
-        } else {
-            dispatch(loadFavorites([]));
-        }
-    }, [isAuthenticated, usuarioNombre, dispatch]);
 
     return children;
 };
@@ -62,18 +48,24 @@ createRoot(document.getElementById('root')).render(
          *
          * 2. Provider (Redux) — estado de negocio: auth, cart, favorites.
          *
-         * 3. BrowserRouter — enrutamiento con React Router.
+         * 3. PersistGate — bloquea el renderizado hasta que redux-persist
+         *    haya hidratado el store desde localStorage. Garantiza que al
+         *    montar cualquier componente, el estado de auth ya esté disponible.
          *
-         * 4. AppInitializer — efectos de sincronización post-login/logout.
+         * 4. BrowserRouter — enrutamiento con React Router.
+         *
+         * 5. AppInitializer — efectos de sincronización post-login/logout.
          */}
         <AccessibilityProvider>
             <Provider store={store}>
-                <BrowserRouter>
-                    <AppInitializer>
-                        <App />
-                        <ToastContainer position="top-right" autoClose={4000} />
-                    </AppInitializer>
-                </BrowserRouter>
+                <PersistGate loading={null} persistor={persistor}>
+                    <BrowserRouter>
+                        <AppInitializer>
+                            <App />
+                            <ToastContainer position="top-right" autoClose={4000} />
+                        </AppInitializer>
+                    </BrowserRouter>
+                </PersistGate>
             </Provider>
         </AccessibilityProvider>
     </StrictMode>,

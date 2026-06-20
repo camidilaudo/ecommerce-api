@@ -4,6 +4,32 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Content Security Policy
+         - default-src 'self'                          → solo recursos del mismo origen por defecto
+         - script-src  'self'                          → sin CDN ni scripts externos (Vite bundlea todo)
+         - style-src   'self' 'unsafe-inline' https://fonts.googleapis.com
+                                                       → react-toastify + style props + Google Fonts CSS
+         - font-src    'self' https://fonts.gstatic.com → archivos de fuente de Google Fonts
+         - img-src     'self' data: https:             → avatares locales + imágenes de productos externos
+                                                         (Samsung, PlayStation, Xbox, vtexassets, etc.)
+         - connect-src 'self' http://localhost:8081    → API del backend Spring Boot (dev)
+         - object-src  'none'                          → bloquea Flash y plugins obsoletos
+         - base-uri    'self'                          → previene ataques de base-tag injection
+         - form-action 'self'                          → formularios solo al mismo origen
+         Nota: frame-ancestors NO funciona en meta tags, solo en HTTP headers.
+    -->
+    <meta http-equiv="Content-Security-Policy"
+      content="
+        default-src 'self';
+        script-src 'self';
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        font-src 'self' https://fonts.gstatic.com;
+        img-src 'self' data: https:;
+        connect-src 'self' http://localhost:8081;
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+      ">
     <title>ecommerce-front</title>
   </head>
   <body>

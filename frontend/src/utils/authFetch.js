@@ -42,8 +42,8 @@ export const authFetch = async (url, options = {}, thunkAPI) => {
         //   name: 'auth', reducers: { logout(state) { ... } }
         dispatch({ type: 'auth/logout' });
 
-        // Delay de 100ms para garantizar que store.subscribe() en store.js
-        // persista el estado limpio (sin token) en localStorage ANTES del reload.
+        // Delay de 100ms para garantizar que redux-persist
+        // sincronice el estado limpio (sin token) en localStorage ANTES del reload.
         setTimeout(() => {
             window.location.href = '/login';
         }, 100);
