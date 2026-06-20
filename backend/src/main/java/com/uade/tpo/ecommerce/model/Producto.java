@@ -71,7 +71,7 @@ public class Producto {
             name = "producto_imagenes",
             joinColumns = @JoinColumn(name = "producto_id")
     )
-    @Column(name = "imagen")
+    @Column(name = "imagen", columnDefinition = "TEXT")
     @Builder.Default
     private List<String> imagenes = new ArrayList<>();
 

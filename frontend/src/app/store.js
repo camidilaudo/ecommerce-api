@@ -1,4 +1,28 @@
-import { configureStore } from '@reduxjs/toolkit';
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
+import {
+    persistStore,
+    persistReducer,
+    FLUSH,
+    REHYDRATE,
+    PAUSE,
+    PERSIST,
+    PURGE,
+    REGISTER,
+} from 'redux-persist';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CUSTOM STORAGE
+//
+// redux-persist/lib/storage no resuelve su default export correctamente
+// en el contexto ESM de Vite. Se define el adapter manualmente usando
+// window.localStorage directamente para garantizar compatibilidad.
+// ─────────────────────────────────────────────────────────────────────────────
+const storage = {
+    getItem:    (key)        => Promise.resolve(window.localStorage.getItem(key)),
+    setItem:    (key, value) => Promise.resolve(window.localStorage.setItem(key, value)),
+    removeItem: (key)        => Promise.resolve(window.localStorage.removeItem(key)),
+};
+
 import authReducer from '../features/auth/authSlice';
 import cartReducer from '../features/cart/cartSlice';
 import favoritesReducer from '../features/favorites/favoritesSlice';
@@ -8,97 +32,80 @@ import usersReducer from '../features/users/usersSlice';
 import categoriesReducer from '../features/categories/categoriesSlice';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HIDRATACIÓN INICIAL (Tarea 4)
+// CONFIGURACIONES DE PERSISTENCIA
 //
-// Se lee localStorage UNA SOLA VEZ al iniciar la aplicación para construir
-// el estado inicial del store. Después de esto, ningún componente ni reducer
-// debe leer localStorage directamente.
-//
-// Flujo garantizado:
-//   localStorage → preloadedState → store → useSelector → Componente
+// whitelist: solo las propiedades del slice que deben sobrevivir a un F5.
+// Las propiedades de estado efímero (loading, error, profile) quedan fuera
+// intencionalmente: se recalculan al volver a hacer las peticiones al backend.
 // ─────────────────────────────────────────────────────────────────────────────
-const token = localStorage.getItem('token') || null;
 
-const preloadedState = {
-    auth: {
-        token,
-        userRole: localStorage.getItem('userRole') || 'USER',
-        usuarioNombre: localStorage.getItem('usuarioNombre') || '',
-        userAvatar: localStorage.getItem('userAvatar') || null,
-        // isAuthenticated se deriva del token para garantizar coherencia
-        isAuthenticated: !!token,
-    },
-    // cart NO se prehydrata aquí: se recarga desde el backend (fetchCart)
-    // cuando AppInitializer detecta que hay un token activo.
-    // favorites NO se prehydrata aquí: se carga en AppInitializer
-    // una vez que se conoce el usuarioNombre del store.
+/**
+ * authPersistConfig — Persiste los datos esenciales de sesión.
+ *
+ * Incluye:  token, userRole, usuarioNombre, userAvatar, isAuthenticated.
+ * Excluye:  profile (se recarga con fetchProfileThunk en ProfilePage),
+ *           loadingLogin, errorLogin, loadingRegister, errorRegister,
+ *           loadingProfile, errorProfile.
+ */
+const authPersistConfig = {
+    key: 'auth',
+    storage,
+    whitelist: ['token', 'userRole', 'usuarioNombre', 'userAvatar', 'isAuthenticated'],
 };
 
+/**
+ * favoritesPersistConfig — Persiste los ítems favoritos del usuario.
+ *
+ * La limpieza al logout ocurre porque Navbar.jsx despacha clearFavorites()
+ * antes del logout(), lo que vacía items en el store y redux-persist
+ * sincroniza el estado vacío en localStorage automáticamente.
+ */
+const favoritesPersistConfig = {
+    key: 'favorites',
+    storage,
+    whitelist: ['items'],
+};
+
+// cart NO se persiste: la fuente de verdad es el backend Spring Boot.
+// Al cargar la app, AppInitializer despacha fetchCart() que recarga
+// el carrito desde el servidor, evitando una caché desincronizada.
+
+// products, orders, users, categories NO se persisten: son datos de catálogo
+// que se re-fetchean al navegar a cada página.
+
 // ─────────────────────────────────────────────────────────────────────────────
-// STORE PRINCIPAL
+// ROOT REDUCER
+// ─────────────────────────────────────────────────────────────────────────────
+const rootReducer = combineReducers({
+    auth: persistReducer(authPersistConfig, authReducer),
+    cart: cartReducer,
+    favorites: persistReducer(favoritesPersistConfig, favoritesReducer),
+    products: productsReducer,
+    orders: ordersReducer,
+    users: usersReducer,
+    categories: categoriesReducer,
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STORE
 //
-// Preparado para futuras slices: agregar el reducer en el objeto `reducer`.
+// serializableCheck: se ignoran las action types internas de redux-persist
+// para evitar advertencias de "non-serializable value" en consola.
+// Estas acciones (FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER)
+// son parte del ciclo de vida interno de redux-persist, no del negocio.
 // ─────────────────────────────────────────────────────────────────────────────
 export const store = configureStore({
-    reducer: {
-        auth: authReducer,
-        cart: cartReducer,
-        favorites: favoritesReducer,
-        products: productsReducer,
-        orders: ordersReducer,
-        users: usersReducer,
-        categories: categoriesReducer,
-    },
-    preloadedState,
+    reducer: rootReducer,
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({
+            serializableCheck: {
+                ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+            },
+        }),
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// CAPA DE PERSISTENCIA DESACOPLADA (Ajuste #1 del plan)
-//
-// store.subscribe() es un efecto secundario FUERA de los reducers.
-// Se ejecuta cada vez que el store cambia y sincroniza selectivamente
-// el estado de auth con localStorage.
-//
-// Los reducers permanecen completamente puros.
-// ─────────────────────────────────────────────────────────────────────────────
-let previousToken = store.getState().auth.token;
-
-store.subscribe(() => {
-    const { auth, favorites } = store.getState();
-
-    // ── Auth persistence ──────────────────────────────────────────────────
-    if (auth.token) {
-        localStorage.setItem('token', auth.token);
-        localStorage.setItem('userRole', auth.userRole);
-        localStorage.setItem('usuarioNombre', auth.usuarioNombre);
-
-        if (auth.userAvatar) {
-            localStorage.setItem('userAvatar', auth.userAvatar);
-        } else {
-            localStorage.removeItem('userAvatar');
-        }
-    } else {
-        // Logout: eliminar todas las claves de sesión
-        localStorage.removeItem('token');
-        localStorage.removeItem('userRole');
-        localStorage.removeItem('usuarioNombre');
-        localStorage.removeItem('userAvatar');
-    }
-
-    // ── Favorites persistence (por usuario, clave dinámica) ───────────────
-    // Solo persiste si hay un usuario autenticado identificado por nombre.
-    // Esto replica el comportamiento del FavoriteContext original.
-    const storageKey = auth.isAuthenticated && auth.usuarioNombre
-        ? `favorites_${auth.usuarioNombre}`
-        : 'favorites_guest';
-
-    localStorage.setItem(storageKey, JSON.stringify(favorites.items));
-
-    // Si el usuario cerró sesión, también limpiamos la clave de invitado
-    // para evitar que los datos del usuario anterior queden expuestos.
-    if (!auth.token && previousToken) {
-        localStorage.removeItem('favorites_guest');
-    }
-
-    previousToken = auth.token;
-});
+/**
+ * persistor — Controla el ciclo de vida de la persistencia.
+ * Exportado para ser consumido por <PersistGate> en main.jsx.
+ */
+export const persistor = persistStore(store);

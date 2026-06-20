@@ -141,6 +141,7 @@
     font-weight: 700;
     color: var(--color-text);
     margin: 0 0 8px 0;
+    padding-right: 48px; /* Espacio para el botón ✕ (32px ancho + margen) */
 }
 
 .modal-meta {

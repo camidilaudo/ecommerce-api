@@ -20,6 +20,7 @@
     "react-redux": "^9.3.0",
     "react-router-dom": "^7.15.1",
     "react-toastify": "^11.1.0",
+    "redux-persist": "^6.0.0",
     "tailwind-merge": "^2.3.0"
   },
   "devDependencies": {
