@@ -10,9 +10,8 @@
  */
 
 // ── Sesión activa ─────────────────────────────────────────────────────────────
-
-/** Retorna el JWT token actual (null si no autenticado) */
-export const selectToken = (state) => state.auth.token;
+// NOTA: selectToken eliminado — el JWT ahora es una cookie HttpOnly
+// gestionada por el browser, no vive en el state de Redux.
 
 /** Retorna el rol del usuario ('USER' | 'ADMIN') */
 export const selectUserRole = (state) => state.auth.userRole;

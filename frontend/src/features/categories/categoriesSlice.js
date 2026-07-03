@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { authFetch } from '../../utils/authFetch';
 
-const API_BASE = 'http://localhost:8081/api/categorias';
+const API_BASE = '/api/categorias';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helper

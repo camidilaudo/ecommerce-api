@@ -20,7 +20,7 @@ import { authFetch } from '../../utils/authFetch';
  * así los componentes pueden hacer .unwrap().catch(toast.error).
  */
 
-const API_BASE = 'http://localhost:8081/api/productos';
+const API_BASE = '/api/productos';
 
 const extractErrorMessage = async (response, fallback) => {
     const errData = await response.json().catch(() => ({}));

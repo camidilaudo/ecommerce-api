@@ -8,7 +8,7 @@ import { selectCartCount } from '../features/cart/cartSelectors';
 import { selectFavoriteCount } from '../features/favorites/favoritesSelectors';
 
 // Acciones Redux
-import { logout } from '../features/auth/authSlice';
+import { logoutThunk } from '../features/auth/authSlice';
 import { toggleCart, clearCartLocal } from '../features/cart/cartSlice';
 import { clearFavorites } from '../features/favorites/favoritesSlice';
 
@@ -82,7 +82,7 @@ const Navbar = ({ onSearch }) => {
     const handleLogout = () => {
         dispatch(clearCartLocal());
         dispatch(clearFavorites());
-        dispatch(logout());
+        dispatch(logoutThunk()); // Borra cookie HttpOnly en el servidor + limpia Redux
         setIsUserMenuOpen(false);
         toast.success('Sesión cerrada correctamente');
         navigate('/');

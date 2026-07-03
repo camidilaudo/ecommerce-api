@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { authFetch } from '../../utils/authFetch';
 
-const API_BASE = 'http://localhost:8081';
+const API_BASE = '/api';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // THUNKS — Autenticación
@@ -10,21 +10,25 @@ const API_BASE = 'http://localhost:8081';
 /**
  * loginThunk — POST /api/auth/login
  *
- * Migra el fetch directo de LoginPage.jsx a Redux Toolkit.
- * El fulfilled handler setea token, rol, nombre y avatar en el store
- * sin necesidad de hacer dispatch(loginSuccess()) desde el componente.
+ * Envía las credenciales al backend. El servidor responde con los datos
+ * del usuario y setea el JWT como una cookie HttpOnly (no viene en el body).
+ * El fulfilled handler guarda rol, nombre y avatar en el store.
+ *
+ * credentials: 'include' es necesario para que el browser acepte
+ * la cookie Set-Cookie de la respuesta.
  *
  * Payload: { email, password }
- * Fulfills: { token, role, nombre, avatar } (shape del backend Spring Boot)
+ * Fulfills: { role, nombre, avatar, mensaje } (sin token — va en cookie)
  */
 export const loginThunk = createAsyncThunk(
     'auth/login',
     async (credentials, { rejectWithValue }) => {
         try {
-            const response = await fetch(`${API_BASE}/api/auth/login`, {
+            const response = await fetch(`${API_BASE}/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(credentials),
+                credentials: 'include', // Acepta la cookie HttpOnly del Set-Cookie
             });
             if (!response.ok) {
                 const errData = await response.json().catch(() => ({}));
@@ -52,10 +56,11 @@ export const registerThunk = createAsyncThunk(
     'auth/register',
     async (userData, { rejectWithValue }) => {
         try {
-            const response = await fetch(`${API_BASE}/api/auth/register`, {
+            const response = await fetch(`${API_BASE}/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(userData),
+                credentials: 'include',
             });
             if (!response.ok) {
                 const errData = await response.json().catch(() => ({}));
@@ -87,7 +92,7 @@ export const fetchProfileThunk = createAsyncThunk(
         const { rejectWithValue } = thunkAPI;
         try {
             const response = await authFetch(
-                `${API_BASE}/api/usuarios/me`,
+                `${API_BASE}/usuarios/me`,
                 { headers: { 'Content-Type': 'application/json' } },
                 thunkAPI
             );
@@ -116,7 +121,7 @@ export const updateAvatarThunk = createAsyncThunk(
         const { rejectWithValue } = thunkAPI;
         try {
             const response = await authFetch(
-                `${API_BASE}/api/usuarios/me/avatar`,
+                `${API_BASE}/usuarios/me/avatar`,
                 {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
@@ -135,6 +140,28 @@ export const updateAvatarThunk = createAsyncThunk(
     }
 );
 
+/**
+ * logoutThunk — POST /api/auth/logout
+ *
+ * Borra la cookie HttpOnly JWT en el servidor y limpia el estado de Redux.
+ * Se despacha desde Navbar.jsx al hacer logout.
+ */
+export const logoutThunk = createAsyncThunk(
+    'auth/logoutThunk',
+    async (_, { dispatch }) => {
+        try {
+            await fetch(`${API_BASE}/auth/logout`, {
+                method: 'POST',
+                credentials: 'include',
+            });
+        } catch (_) {
+            // Falla silenciosamente — la cookie expirará sola
+        }
+        // Despachar la acción síncrona de logout para limpiar el state
+        dispatch({ type: 'auth/logout' });
+    }
+);
+
 // ─────────────────────────────────────────────────────────────────────────────
 // SLICE
 // ─────────────────────────────────────────────────────────────────────────────
@@ -142,19 +169,23 @@ export const updateAvatarThunk = createAsyncThunk(
 /**
  * authSlice — Estado global de autenticación.
  *
+ * NOTA: El JWT ya NO se almacena en el state de Redux.
+ * Es gestionado como una cookie HttpOnly por el browser (protección XSS).
+ *
  * Los reducers síncronos (loginSuccess, logout, updateAvatar) se mantienen
  * para compatibilidad con código existente.
  *
  * Los thunks (loginThunk, registerThunk, fetchProfileThunk, updateAvatarThunk)
  * gestionan su propio estado de loading/error via extraReducers.
  *
- * La sincronización con localStorage ocurre en store.js via store.subscribe().
+ * La sincronización con localStorage ocurre en store.js via redux-persist
+ * (solo userRole, usuarioNombre, userAvatar, isAuthenticated — sin token).
  */
 const authSlice = createSlice({
     name: 'auth',
     initialState: {
         // ── Sesión activa ──────────────────────────────────────────────────
-        token: null,
+        // NOTA: token ya no vive en Redux — es una cookie HttpOnly
         userRole: 'USER',
         usuarioNombre: '',
         userAvatar: null,
@@ -174,12 +205,11 @@ const authSlice = createSlice({
     reducers: {
         /**
          * loginSuccess — Reducer síncrono mantenido para compatibilidad.
-         * Puede usarse cuando el token llega por un mecanismo externo al thunk.
-         * Payload esperado: { token, userRole, usuarioNombre, userAvatar }
+         * Puede usarse cuando los datos de sesión llegan por un mecanismo externo al thunk.
+         * Payload esperado: { userRole, usuarioNombre, userAvatar }
          */
         loginSuccess(state, action) {
-            const { token, userRole, usuarioNombre, userAvatar } = action.payload;
-            state.token = token;
+            const { userRole, usuarioNombre, userAvatar } = action.payload;
             state.userRole = userRole || 'USER';
             state.usuarioNombre = usuarioNombre || '';
             state.userAvatar = userAvatar || null;
@@ -188,12 +218,11 @@ const authSlice = createSlice({
 
         /**
          * logout — Resetea completamente el estado de autenticación.
-         * La limpieza de localStorage ocurre en store.subscribe().
+         * La cookie JWT se borra desde el servidor via logoutThunk.
          * También se dispara desde authFetch via { type: 'auth/logout' }
          * cuando el servidor responde 401.
          */
         logout(state) {
-            state.token = null;
             state.userRole = 'USER';
             state.usuarioNombre = '';
             state.userAvatar = null;
@@ -224,8 +253,8 @@ const authSlice = createSlice({
                 state.errorLogin = null;
             })
             .addCase(loginThunk.fulfilled, (state, action) => {
-                const { token, role, nombre, avatar } = action.payload;
-                state.token = token;
+                const { role, nombre, avatar } = action.payload;
+                // NOTA: token NO se guarda — va como cookie HttpOnly
                 state.userRole = role || 'USER';
                 state.usuarioNombre = nombre || '';
                 state.userAvatar = avatar || null;

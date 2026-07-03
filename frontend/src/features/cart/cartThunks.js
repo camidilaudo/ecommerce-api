@@ -12,7 +12,7 @@ import { authFetch } from '../../utils/authFetch';
  * así los componentes pueden hacer .unwrap().catch(toast.error).
  */
 
-const API_BASE = 'http://localhost:8081/api/carrito';
+const API_BASE = '/api/carrito';
 
 /**
  * Mapea la estructura del DTO de Backend (CarritoDTO) al formato del store frontend.
@@ -49,10 +49,10 @@ export const fetchCart = createAsyncThunk(
     'cart/fetchCart',
     async (_, thunkAPI) => {
         const { getState, rejectWithValue } = thunkAPI;
-        const token = getState().auth.token;
+        const isAuthenticated = getState().auth.isAuthenticated;
 
         // Sin sesión activa → carrito local vacío
-        if (!token) return [];
+        if (!isAuthenticated) return [];
 
         try {
             const response = await authFetch(API_BASE, {}, thunkAPI);
@@ -79,9 +79,9 @@ export const addToCart = createAsyncThunk(
     'cart/addToCart',
     async ({ product, quantity = 1 }, thunkAPI) => {
         const { getState, rejectWithValue } = thunkAPI;
-        const token = getState().auth.token;
+        const isAuthenticated = getState().auth.isAuthenticated;
 
-        if (!token) {
+        if (!isAuthenticated) {
             return rejectWithValue('Por favor, iniciá sesión para poder agregar productos al carrito.');
         }
 
@@ -116,8 +116,8 @@ export const removeFromCart = createAsyncThunk(
     'cart/removeFromCart',
     async (productId, thunkAPI) => {
         const { getState, rejectWithValue } = thunkAPI;
-        const token = getState().auth.token;
-        if (!token) return rejectWithValue('Sesión no válida.');
+        const isAuthenticated = getState().auth.isAuthenticated;
+        if (!isAuthenticated) return rejectWithValue('Sesión no válida.');
 
         try {
             const response = await authFetch(
@@ -146,8 +146,8 @@ export const clearCart = createAsyncThunk(
     'cart/clearCart',
     async (_, thunkAPI) => {
         const { getState, rejectWithValue } = thunkAPI;
-        const token = getState().auth.token;
-        if (!token) return null;
+        const isAuthenticated = getState().auth.isAuthenticated;
+        if (!isAuthenticated) return null;
 
         try {
             const response = await authFetch(
@@ -179,8 +179,8 @@ export const checkout = createAsyncThunk(
     'cart/checkout',
     async (_, thunkAPI) => {
         const { getState, rejectWithValue } = thunkAPI;
-        const token = getState().auth.token;
-        if (!token) return rejectWithValue('Sesión no válida.');
+        const isAuthenticated = getState().auth.isAuthenticated;
+        if (!isAuthenticated) return rejectWithValue('Sesión no válida.');
 
         try {
             const response = await authFetch(

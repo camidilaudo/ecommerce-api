@@ -5,7 +5,7 @@ import FocusLock from 'react-focus-lock';
 import './AdminPanel.css';
 import { toast } from 'react-toastify';
 import CategoryManager from '../components/CategoryManager';
-import { selectToken, selectUserRole } from '../features/auth/authSelectors';
+import { selectIsAuthenticated, selectUserRole } from '../features/auth/authSelectors';
 import {
     fetchProducts,
     createProduct,
@@ -176,8 +176,8 @@ const AdminPanel = () => {
     usePageTitle('Panel de Administración');
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    // Token y rol desde Redux — NO más useAuth() ni localStorage
-    const token = useSelector(selectToken);
+    // Auth state desde Redux — NO más useAuth() ni localStorage
+    const isAuthenticated = useSelector(selectIsAuthenticated);
     const storedRole = useSelector(selectUserRole);
     const isAdmin = storedRole === 'ADMIN';
 

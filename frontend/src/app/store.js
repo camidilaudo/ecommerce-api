@@ -42,15 +42,16 @@ import categoriesReducer from '../features/categories/categoriesSlice';
 /**
  * authPersistConfig — Persiste los datos esenciales de sesión.
  *
- * Incluye:  token, userRole, usuarioNombre, userAvatar, isAuthenticated.
- * Excluye:  profile (se recarga con fetchProfileThunk en ProfilePage),
+ * Incluye:  userRole, usuarioNombre, userAvatar, isAuthenticated.
+ * Excluye:  token (ahora es una cookie HttpOnly gestionada por el browser),
+ *           profile (se recarga con fetchProfileThunk en ProfilePage),
  *           loadingLogin, errorLogin, loadingRegister, errorRegister,
  *           loadingProfile, errorProfile.
  */
 const authPersistConfig = {
     key: 'auth',
     storage,
-    whitelist: ['token', 'userRole', 'usuarioNombre', 'userAvatar', 'isAuthenticated'],
+    whitelist: ['userRole', 'usuarioNombre', 'userAvatar', 'isAuthenticated'],
 };
 
 /**
